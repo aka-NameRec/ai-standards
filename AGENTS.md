@@ -8,6 +8,8 @@
 - Update the English original and its Russian localized equivalent in the same change set whenever either document changes.
 - If a new maintained documentation file is added under `docs/`, add its Russian localized equivalent in the same task unless the user explicitly approves an exception.
 - Preserve links between English originals and Russian localized equivalents where practical.
+- Use only repository-relative paths in links to repository files inside maintained documentation.
+- Do not use absolute local filesystem paths such as `/home/...` in repository documentation links.
 - Do not create Russian or English equivalents for files under `docs/` whose names contain `-log-`.
 - Treat `docs/*-log-*.md` files as chat exports that must remain in their original language and original form.
 

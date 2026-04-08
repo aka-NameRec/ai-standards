@@ -1,6 +1,6 @@
 # Руководство по применению review-lenses
 
-Англоязычный оригинал: [review-lenses-usage.md](/home/shtirliz/workspace/myself/ai-standards/docs/review-lenses-usage.md)
+Англоязычный оригинал: [review-lenses-usage.md](review-lenses-usage.md)
 
 Это руководство объясняет, как применять возможность `review-lenses` из `ai-standards` в реальных сценариях разработки.
 

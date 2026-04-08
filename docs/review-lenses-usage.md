@@ -1,6 +1,6 @@
 # Review Lenses Usage Guide
 
-Russian localized version: [review-lenses-usage.ru.md](/home/shtirliz/workspace/myself/ai-standards/docs/review-lenses-usage.ru.md)
+Russian localized version: [review-lenses-usage.ru.md](review-lenses-usage.ru.md)
 
 This guide explains how to apply the `review-lenses` feature from `ai-standards` in real development workflows.
 

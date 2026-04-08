@@ -2,7 +2,7 @@
 
 Централизованная инфраструктура инструкций для ИИ-агентов, генерирующая проектные `AGENTS.md`.
 
-Англоязычный оригинал находится в [README.md](/home/shtirliz/workspace/myself/ai-standards/README.md). При изменениях в английской версии эту локализацию нужно обновлять в том же наборе изменений.
+Англоязычный оригинал находится в [README.md](README.md). При изменениях в английской версии эту локализацию нужно обновлять в том же наборе изменений.
 
 ## Структура
 
@@ -169,7 +169,7 @@ Constraints:
 
 `review-lenses` — это опциональная возможность для более жёсткого просмотра и упрощения недавних изменений.
 
-Подробная методика применения, включая режимы `review-only` и `fix`, способы активации, рекомендации для CI и этапы внедрения, находится в [docs/review-lenses-usage.ru.md](/home/shtirliz/workspace/myself/ai-standards/docs/review-lenses-usage.ru.md). Англоязычный оригинал: [docs/review-lenses-usage.md](/home/shtirliz/workspace/myself/ai-standards/docs/review-lenses-usage.md).
+Подробная методика применения, включая режимы `review-only` и `fix`, способы активации, рекомендации для CI и этапы внедрения, находится в [docs/review-lenses-usage.ru.md](docs/review-lenses-usage.ru.md). Англоязычный оригинал: [docs/review-lenses-usage.md](docs/review-lenses-usage.md).
 
 `ai-standards` должен хранить:
 
@@ -187,8 +187,8 @@ Constraints:
 
 Стартовые шаблоны для подключаемых проектов:
 
-- [templates/review-lenses/simplify-review.SKILL.md](/home/shtirliz/workspace/myself/ai-standards/templates/review-lenses/simplify-review.SKILL.md)
-- [templates/review-lenses/simplify-review.cursor.mdc](/home/shtirliz/workspace/myself/ai-standards/templates/review-lenses/simplify-review.cursor.mdc)
+- [templates/review-lenses/simplify-review.SKILL.md](templates/review-lenses/simplify-review.SKILL.md)
+- [templates/review-lenses/simplify-review.cursor.mdc](templates/review-lenses/simplify-review.cursor.mdc)
 
 ## Использование GRACE в проекте
 

@@ -2,7 +2,7 @@
 
 Centralized AI instruction infrastructure for project-specific `AGENTS.md` generation.
 
-Russian localized version: [README.ru.md](/home/shtirliz/workspace/myself/ai-standards/README.ru.md)
+Russian localized version: [README.ru.md](README.ru.md)
 
 ## Layout
 
@@ -186,13 +186,13 @@ Keep vendor internals, undocumented tool behavior, brittle numeric heuristics, a
 
 Detailed operational guidance lives in:
 
-- English guide: [docs/review-lenses-usage.md](/home/shtirliz/workspace/myself/ai-standards/docs/review-lenses-usage.md)
-- Russian guide: [docs/review-lenses-usage.ru.md](/home/shtirliz/workspace/myself/ai-standards/docs/review-lenses-usage.ru.md)
+- English guide: [docs/review-lenses-usage.md](docs/review-lenses-usage.md)
+- Russian guide: [docs/review-lenses-usage.ru.md](docs/review-lenses-usage.ru.md)
 
 Ready-to-copy downstream templates:
 
-- [templates/review-lenses/simplify-review.SKILL.md](/home/shtirliz/workspace/myself/ai-standards/templates/review-lenses/simplify-review.SKILL.md)
-- [templates/review-lenses/simplify-review.cursor.mdc](/home/shtirliz/workspace/myself/ai-standards/templates/review-lenses/simplify-review.cursor.mdc)
+- [templates/review-lenses/simplify-review.SKILL.md](templates/review-lenses/simplify-review.SKILL.md)
+- [templates/review-lenses/simplify-review.cursor.mdc](templates/review-lenses/simplify-review.cursor.mdc)
 
 ## Using GRACE In a Project
 
