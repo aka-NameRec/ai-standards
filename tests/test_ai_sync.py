@@ -77,6 +77,33 @@ def test_java_spring_stack_can_be_rendered(tmp_path: Path) -> None:
     assert "Prefer constructor injection over field injection." in result.content
 
 
+def test_review_lenses_feature_can_be_rendered(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        'version = "2026.03"\n'
+        'fragments = ["core/base", "core/architecture"]\n'
+        'features = ["review-lenses"]\n'
+        'stacks = ["python"]\n'
+        'local_overrides = ["docs/ai/project-rules.md"]\n'
+        "\n"
+        "[metadata]\n"
+        'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    assert "## Multi-Lens Review" in result.content
+    assert "Quality over Efficiency when safety, readability, or correctness is at risk." in result.content
+
+
 def test_written_file_matches_rendered_content(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()

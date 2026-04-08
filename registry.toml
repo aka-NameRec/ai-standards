@@ -2,6 +2,7 @@
 conport = ["tools/conport"]
 design-first-collaboration = ["process/design-first-collaboration"]
 grace = ["knowledge/grace"]
+review-lenses = ["process/review-lenses"]
 
 [stacks]
 python = ["stacks/python"]

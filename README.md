@@ -2,6 +2,8 @@
 
 Centralized AI instruction infrastructure for project-specific `AGENTS.md` generation.
 
+Russian localized version: [README.ru.md](/home/shtirliz/workspace/myself/ai-standards/README.ru.md)
+
 ## Layout
 
 - `fragments/`: reusable instruction fragments grouped by domain.
@@ -24,7 +26,7 @@ uv run python scripts/ai_sync.py check --project-root /path/to/project
 Use three layers:
 
 - `fragments`: direct core rules that should always be rendered.
-- `features`: optional capabilities such as `conport`, `design-first-collaboration`, and `grace`.
+- `features`: optional capabilities such as `conport`, `design-first-collaboration`, `grace`, and `review-lenses`.
 - `stacks`: technology-specific rules such as `python`, `fastapi`, `postgres`, `react`, `vue`, or `java-spring`.
 
 Recommended starting point for a Python/FastAPI project with standard communication and architecture requirements:
@@ -162,6 +164,35 @@ Constraints:
 - Preserve existing behavior unless the imported rules justify a clear improvement.
 - If a source rule conflicts with UMA2 architecture or error-handling rules, reject it unless explicitly approved.
 ```
+
+## Using Review Lenses In a Project
+
+`review-lenses` is an optional feature for aggressive review-and-refactor passes over recent changes.
+
+Use `review-lenses` when a task benefits from an explicit post-implementation review or cleanup pass focused on:
+
+- `Reuse`
+- `Quality`
+- `Efficiency`
+
+`ai-standards` owns the reusable policy:
+
+- when the workflow should be activated
+- the lens model itself
+- conflict priorities between the lenses
+- verification expectations after aggressive cleanup
+
+Keep vendor internals, undocumented tool behavior, brittle numeric heuristics, and framework-specific details out of this shared feature unless they are separately normalized and validated.
+
+Detailed operational guidance lives in:
+
+- English guide: [docs/review-lenses-usage.md](/home/shtirliz/workspace/myself/ai-standards/docs/review-lenses-usage.md)
+- Russian guide: [docs/review-lenses-usage.ru.md](/home/shtirliz/workspace/myself/ai-standards/docs/review-lenses-usage.ru.md)
+
+Ready-to-copy downstream templates:
+
+- [templates/review-lenses/simplify-review.SKILL.md](/home/shtirliz/workspace/myself/ai-standards/templates/review-lenses/simplify-review.SKILL.md)
+- [templates/review-lenses/simplify-review.cursor.mdc](/home/shtirliz/workspace/myself/ai-standards/templates/review-lenses/simplify-review.cursor.mdc)
 
 ## Using GRACE In a Project
 
