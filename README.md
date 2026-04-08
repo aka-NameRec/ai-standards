@@ -17,17 +17,19 @@ Russian localized version: [README.ru.md](README.ru.md)
 uv run python scripts/ai_sync.py init-project --project-root /path/to/project
 uv run python scripts/ai_sync.py render --project-root /path/to/project
 uv run python scripts/ai_sync.py check --project-root /path/to/project
+uv run python scripts/ai_sync.py sync-templates --project-root /path/to/project
 ```
 
 ## Manifest-Only Configuration
 
 `ai-standards` does not use named profiles. Each downstream project declares the exact instruction dependencies it needs in `ai.project.toml`.
 
-Use three layers:
+Use four layers:
 
 - `fragments`: direct core rules that should always be rendered.
 - `features`: optional capabilities such as `conport`, `design-first-collaboration`, `grace`, and `review-lenses`.
 - `stacks`: technology-specific rules such as `python`, `fastapi`, `postgres`, `react`, `vue`, or `java-spring`.
+- `tooling.agents`: optional agent adapters such as `codex` and `cursor` for managed local workflow templates.
 
 Recommended starting point for a Python/FastAPI project with standard communication and architecture requirements:
 
@@ -61,9 +63,14 @@ local_overrides = [
 optional_local_overrides = [
   "docs/ai/private-rules.local.md",
 ]
+
+[tooling]
+agents = ["codex", "cursor"]
 ```
 
 Choose dependencies explicitly. If a rule belongs only to one project, keep it in a local override instead of turning it into a shared fragment.
+
+`tooling.agents` does not change the rendered `AGENTS.md`. It declares which agent-specific companion templates should be kept in sync inside the downstream project.
 
 ## Project-Specific Rules
 
@@ -75,6 +82,8 @@ Recommended layout in a downstream project:
 project/
   ai.project.toml
   AGENTS.md
+  .codex/skills/review-lenses/simplify-review/SKILL.md
+  .cursor/rules/simplify-review.mdc
   docs/ai/project-rules.md
   docs/ai/private-rules.local.md
 ```
@@ -100,6 +109,30 @@ Guidance:
 - Add `docs/ai/private-rules.local.md` to the downstream project's `.gitignore`.
 
 `optional_local_overrides` are skipped if the file does not exist, so local private rules do not block rendering.
+
+## Agent Adapters
+
+`AGENTS.md` remains the shared project-wide source of truth for general instructions.
+
+Some tools also need local workflow adapters for reusable skills or rules. Declare those adapters in `ai.project.toml`:
+
+```toml
+[tooling]
+agents = ["codex", "cursor"]
+```
+
+Supported adapters:
+
+- `codex`: installs managed skill templates under `.codex/skills/`
+- `cursor`: installs managed rule templates under `.cursor/rules/`
+
+Commands:
+
+- `init-project` copies the starter manifest, local override templates, and any managed agent adapters already declared in `ai.project.toml`.
+- `sync-templates` updates managed agent adapters declared in `ai.project.toml`.
+- `render` still renders only `AGENTS.md`.
+
+Managed adapter files include an `ai-standards` marker. `sync-templates` updates only files it manages directly or plain copies of the upstream template, and skips locally customized unmanaged files.
 
 ## Import External Rules
 
@@ -193,6 +226,8 @@ Ready-to-copy downstream templates:
 
 - [templates/review-lenses/simplify-review.SKILL.md](templates/review-lenses/simplify-review.SKILL.md)
 - [templates/review-lenses/simplify-review.cursor.mdc](templates/review-lenses/simplify-review.cursor.mdc)
+
+When a downstream project declares `tooling.agents`, use `sync-templates` to keep these adapter templates aligned with the current repository version instead of copying them manually.
 
 ## Using GRACE In a Project
 

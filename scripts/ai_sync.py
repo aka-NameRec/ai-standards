@@ -10,6 +10,7 @@ import typer
 MANIFEST_FILE_NAME = "ai.project.toml"
 GENERATED_MARKER = "Generated from ai-standards"
 DEFAULT_OUTPUT_NAME = "AGENTS.md"
+MANAGED_TEMPLATE_MARKER_PREFIX = "Managed by ai-standards template:"
 PROJECT_ROOT_OPTION = typer.Option(..., exists=True, file_okay=False, resolve_path=True)
 OUTPUT_NAME_OPTION: object = typer.Option(...)
 
@@ -34,6 +35,7 @@ class Manifest:
     stacks: list[str]
     local_overrides: list[str]
     optional_local_overrides: list[str]
+    agents: list[str]
     metadata: dict[str, str]
 
 
@@ -43,6 +45,37 @@ class RenderResult:
     output_path: Path
     content: str
     fragment_ids: list[str]
+
+
+@dataclass(frozen=True)
+class AgentTemplate:
+    agent: str
+    source_relative_path: str
+    destination_relative_path: str
+
+
+@dataclass(frozen=True)
+class TemplateSyncResult:
+    status: str
+    destination_path: Path
+
+
+AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
+    "codex": (
+        AgentTemplate(
+            agent="codex",
+            source_relative_path="templates/review-lenses/simplify-review.SKILL.md",
+            destination_relative_path=".codex/skills/review-lenses/simplify-review/SKILL.md",
+        ),
+    ),
+    "cursor": (
+        AgentTemplate(
+            agent="cursor",
+            source_relative_path="templates/review-lenses/simplify-review.cursor.mdc",
+            destination_relative_path=".cursor/rules/simplify-review.mdc",
+        ),
+    ),
+}
 
 
 def _repo_root() -> Path:
@@ -69,6 +102,7 @@ def _load_registry(repo_root: Path) -> Registry:
 def _load_manifest(project_root: Path) -> Manifest:
     data = _load_toml(project_root / MANIFEST_FILE_NAME)
     metadata_raw = _expect_optional_table(data, "metadata", "manifest")
+    tooling_raw = _expect_optional_table(data, "tooling", "manifest")
     metadata: dict[str, str] = {}
     for key, value in metadata_raw.items():
         if not isinstance(value, str):
@@ -86,6 +120,7 @@ def _load_manifest(project_root: Path) -> Manifest:
             "optional_local_overrides",
             "manifest",
         ),
+        agents=_expect_supported_agents(tooling_raw, "agents", "manifest.tooling"),
         metadata=metadata,
     )
 
@@ -113,6 +148,16 @@ def _expect_optional_string_list(data: dict[str, object], key: str, context: str
     if not all(isinstance(item, str) and item for item in value):
         raise SyncError(f"Every item in '{key}' in {context} must be a non-empty string")
     return list(value)
+
+
+def _expect_supported_agents(data: dict[str, object], key: str, context: str) -> list[str]:
+    values = _expect_optional_string_list(data, key, context)
+    invalid = sorted({value for value in values if value not in AGENT_TEMPLATES})
+    if invalid:
+        supported = ", ".join(sorted(AGENT_TEMPLATES))
+        invalid_text = ", ".join(invalid)
+        raise SyncError(f"Unknown agent '{invalid_text}' in {context}; supported: {supported}")
+    return values
 
 
 def _expect_optional_table(
@@ -265,6 +310,65 @@ def _copy_template_if_missing(source_path: Path, destination_path: Path) -> bool
     return True
 
 
+def _build_managed_template_content(source_relative_path: str, raw_content: str) -> str:
+    marker_block = (
+        f"<!-- {MANAGED_TEMPLATE_MARKER_PREFIX} {source_relative_path} -->\n"
+        "<!-- Do not edit manually unless you remove this marker. -->\n"
+    )
+    frontmatter_delimiter = "---\n"
+    if raw_content.startswith(frontmatter_delimiter):
+        frontmatter_end = raw_content.find(f"\n{frontmatter_delimiter}", len(frontmatter_delimiter))
+        if frontmatter_end != -1:
+            insertion_index = frontmatter_end + len(f"\n{frontmatter_delimiter}")
+            return (
+                raw_content[:insertion_index]
+                + "\n"
+                + marker_block
+                + "\n"
+                + raw_content[insertion_index:].lstrip("\n")
+            )
+    return marker_block + "\n" + raw_content
+
+
+def _is_managed_template_content(content: str) -> bool:
+    return MANAGED_TEMPLATE_MARKER_PREFIX in content
+
+
+def _sync_agent_template(project_root: Path, template: AgentTemplate) -> TemplateSyncResult:
+    repo_root = _repo_root()
+    source_path = repo_root / template.source_relative_path
+    raw_content = source_path.read_text(encoding="utf-8")
+    managed_content = _build_managed_template_content(template.source_relative_path, raw_content)
+    destination_path = project_root / template.destination_relative_path
+
+    if not destination_path.exists():
+        destination_path.parent.mkdir(parents=True, exist_ok=True)
+        destination_path.write_text(managed_content, encoding="utf-8")
+        return TemplateSyncResult(status="created", destination_path=destination_path)
+
+    existing_content = destination_path.read_text(encoding="utf-8")
+    if existing_content == managed_content:
+        return TemplateSyncResult(status="up-to-date", destination_path=destination_path)
+
+    if (
+        _is_managed_template_content(existing_content)
+        or existing_content == raw_content
+    ):
+        destination_path.write_text(managed_content, encoding="utf-8")
+        return TemplateSyncResult(status="updated", destination_path=destination_path)
+
+    return TemplateSyncResult(status="skipped-unmanaged", destination_path=destination_path)
+
+
+def sync_project_templates(project_root: Path) -> list[TemplateSyncResult]:
+    manifest = _load_manifest(project_root)
+    results: list[TemplateSyncResult] = []
+    for agent in manifest.agents:
+        for template in AGENT_TEMPLATES[agent]:
+            results.append(_sync_agent_template(project_root, template))
+    return results
+
+
 @app.command()
 def render(
     project_root: Annotated[Path, PROJECT_ROOT_OPTION],
@@ -335,12 +439,34 @@ def init_project(
     if grace_map_created:
         created_paths.append(project_root / "docs" / "ai" / "grace-map.md")
 
-    if not created_paths:
+    template_results: list[TemplateSyncResult] = []
+    manifest_path = project_root / MANIFEST_FILE_NAME
+    if manifest_path.exists():
+        template_results = sync_project_templates(project_root)
+
+    if not created_paths and not template_results:
         typer.echo("No files created. Project is already initialized.")
         return
 
     for path in created_paths:
         typer.echo(f"Created {path}")
+    for result in template_results:
+        typer.echo(f"{result.status.capitalize()} {result.destination_path}")
+
+
+@app.command("sync-templates")
+def sync_templates(
+    project_root: Annotated[Path, PROJECT_ROOT_OPTION],
+) -> None:
+    """Sync agent-specific managed templates declared in ai.project.toml."""
+
+    results = sync_project_templates(project_root)
+    if not results:
+        typer.echo("No agent templates configured in ai.project.toml.")
+        return
+
+    for result in results:
+        typer.echo(f"{result.status.capitalize()} {result.destination_path}")
 
 
 def main() -> None:

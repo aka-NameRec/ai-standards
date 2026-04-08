@@ -22,6 +22,9 @@ optional_local_overrides = [
   "docs/ai/private-rules.local.md",
 ]
 
+[tooling]
+agents = []
+
 [metadata]
 project_name = "replace-me"
 notes = "Project-specific AI configuration using manifest-only dependencies."

@@ -118,7 +118,7 @@ CI should report, not silently rewrite code.
 It becomes active only when one of the following mechanisms makes it active in the current tool:
 
 - a rendered `AGENTS.md` includes the `review-lenses` feature
-- a local skill or rule implements the workflow
+- a local managed or custom skill/rule adapter implements the workflow
 - the current chat prompt explicitly asks for a review-lenses pass
 
 In practice, activation should be considered explicit unless the tool is configured to auto-attach the workflow.
@@ -130,7 +130,7 @@ In practice, activation should be considered explicit unless the tool is configu
 For Codex, the usual pattern is:
 
 1. Include `review-lenses` in the project standards so the policy is present in generated instructions.
-2. Add a reusable skill or equivalent local workflow artifact if your Codex setup supports it.
+2. Declare `codex` in `[tooling].agents` or add an equivalent local workflow artifact if your setup uses a custom layout.
 3. Trigger it with an explicit chat request.
 
 Typical prompts:
@@ -150,7 +150,7 @@ Operational guidance:
 For Cursor, the usual pattern is:
 
 1. Include `review-lenses` in generated project instructions.
-2. Add a project rule in `.cursor/rules/`, for example `simplify-review.mdc`.
+2. Declare `cursor` in `[tooling].agents` or add a project rule in `.cursor/rules/`, for example `simplify-review.mdc`.
 3. Choose whether the rule is manual or more automatic based on its type and scope.
 
 Typical prompts:
@@ -246,7 +246,7 @@ Recommended policy:
 
 ### Phase 2
 
-- add local tool artifacts such as Codex skills or Cursor rules
+- add managed or custom local tool artifacts such as Codex skills or Cursor rules
 - standardize prompt wording inside the team
 - use `review-only` on selected PRs
 

@@ -17,17 +17,19 @@
 uv run python scripts/ai_sync.py init-project --project-root /path/to/project
 uv run python scripts/ai_sync.py render --project-root /path/to/project
 uv run python scripts/ai_sync.py check --project-root /path/to/project
+uv run python scripts/ai_sync.py sync-templates --project-root /path/to/project
 ```
 
 ## Конфигурация только через манифест
 
 `ai-standards` не использует именованные профили. Каждый подключаемый проект явно объявляет свои зависимости инструкций в `ai.project.toml`.
 
-Используются три слоя:
+Используются четыре слоя:
 
 - `fragments`: прямые базовые правила, которые должны включаться всегда.
 - `features`: опциональные возможности вроде `conport`, `design-first-collaboration`, `grace` и `review-lenses`.
 - `stacks`: правила, зависящие от технологии, например `python`, `fastapi`, `postgres`, `react`, `vue` или `java-spring`.
+- `tooling.agents`: опциональные agent adapters вроде `codex` и `cursor` для управляемых локальных workflow templates.
 
 Рекомендуемая стартовая точка для Python/FastAPI проекта со стандартными требованиями к коммуникации и архитектуре:
 
@@ -61,9 +63,14 @@ local_overrides = [
 optional_local_overrides = [
   "docs/ai/private-rules.local.md",
 ]
+
+[tooling]
+agents = ["codex", "cursor"]
 ```
 
 Выбирайте зависимости явно. Если правило нужно только одному проекту, держите его в локальном дополнении, а не превращайте в общий фрагмент.
+
+`tooling.agents` не меняет содержимое сгенерированного `AGENTS.md`. Этот раздел объявляет, какие tool-specific companion templates нужно держать синхронизированными внутри подключаемого проекта.
 
 ## Правила, специфичные для проекта
 
@@ -75,6 +82,8 @@ optional_local_overrides = [
 project/
   ai.project.toml
   AGENTS.md
+  .codex/skills/review-lenses/simplify-review/SKILL.md
+  .cursor/rules/simplify-review.mdc
   docs/ai/project-rules.md
   docs/ai/private-rules.local.md
 ```
@@ -100,6 +109,30 @@ optional_local_overrides = [
 - Добавьте `docs/ai/private-rules.local.md` в `.gitignore` подключаемого проекта.
 
 `optional_local_overrides` пропускаются, если файл отсутствует, поэтому локальные приватные правила не блокируют сборку.
+
+## Agent Adapters
+
+`AGENTS.md` остаётся общим project-wide источником истины для основных инструкций.
+
+Некоторым инструментам также нужны локальные adapters для навыков или правил. Объявляйте их в `ai.project.toml`:
+
+```toml
+[tooling]
+agents = ["codex", "cursor"]
+```
+
+Поддерживаемые adapters:
+
+- `codex`: раскладывает управляемые skill templates под `.codex/skills/`
+- `cursor`: раскладывает управляемые rule templates под `.cursor/rules/`
+
+Команды:
+
+- `init-project` копирует стартовый manifest, локальные шаблоны overrides и все managed agent adapters, уже объявленные в `ai.project.toml`.
+- `sync-templates` обновляет managed agent adapters, объявленные в `ai.project.toml`.
+- `render` по-прежнему генерирует только `AGENTS.md`.
+
+Управляемые adapter files содержат marker от `ai-standards`. `sync-templates` обновляет только те файлы, которыми управляет напрямую, или простые копии upstream template, и пропускает локально изменённые unmanaged files.
 
 ## Заимствование внешних правил
 
@@ -189,6 +222,8 @@ Constraints:
 
 - [templates/review-lenses/simplify-review.SKILL.md](templates/review-lenses/simplify-review.SKILL.md)
 - [templates/review-lenses/simplify-review.cursor.mdc](templates/review-lenses/simplify-review.cursor.mdc)
+
+Если подключаемый проект объявляет `tooling.agents`, используйте `sync-templates`, чтобы держать эти adapter templates синхронизированными с текущей версией репозитория вместо ручного копирования.
 
 ## Использование GRACE в проекте
 
