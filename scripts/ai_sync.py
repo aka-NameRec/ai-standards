@@ -11,7 +11,7 @@ MANIFEST_FILE_NAME = "ai.project.toml"
 GENERATED_MARKER = "Generated from ai-standards"
 DEFAULT_OUTPUT_NAME = "AGENTS.md"
 PROJECT_ROOT_OPTION = typer.Option(..., exists=True, file_okay=False, resolve_path=True)
-OUTPUT_NAME_OPTION = typer.Option(DEFAULT_OUTPUT_NAME)
+OUTPUT_NAME_OPTION: object = typer.Option(...)
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
 
@@ -268,7 +268,7 @@ def _copy_template_if_missing(source_path: Path, destination_path: Path) -> bool
 @app.command()
 def render(
     project_root: Annotated[Path, PROJECT_ROOT_OPTION],
-    output_name: Annotated[str, OUTPUT_NAME_OPTION],
+    output_name: Annotated[str, OUTPUT_NAME_OPTION] = DEFAULT_OUTPUT_NAME,
 ) -> None:
     """Render AGENTS.md for a downstream project."""
 
@@ -280,7 +280,7 @@ def render(
 @app.command()
 def update(
     project_root: Annotated[Path, PROJECT_ROOT_OPTION],
-    output_name: Annotated[str, OUTPUT_NAME_OPTION],
+    output_name: Annotated[str, OUTPUT_NAME_OPTION] = DEFAULT_OUTPUT_NAME,
 ) -> None:
     """Alias for render, intended for explicit standards updates."""
 
@@ -292,7 +292,7 @@ def update(
 @app.command()
 def check(
     project_root: Annotated[Path, PROJECT_ROOT_OPTION],
-    output_name: Annotated[str, OUTPUT_NAME_OPTION],
+    output_name: Annotated[str, OUTPUT_NAME_OPTION] = DEFAULT_OUTPUT_NAME,
 ) -> None:
     """Check that the generated file matches the current manifest and standards."""
 
