@@ -75,7 +75,7 @@ features = [
 - `design-first-collaboration` defines how to surface intent, boundaries, non-goals, and tradeoffs.
 - `reasoning-hygiene` improves the quality of analysis within that flow.
 - `conport` stores durable lessons and project memory after significant work.
-- `grace` remains the heavier workflow for tasks that need formal planning, verification artifacts, or multi-agent execution.
+- `structured-artifacts` adds lightweight Git-reviewable plans, contracts, and decision records when the task needs more explicit structure.
 
 ## Practical Prompting Guidance
 

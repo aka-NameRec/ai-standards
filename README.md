@@ -10,7 +10,7 @@
 - [Import External Rules](#import-external-rules)
 - [Using Reasoning Hygiene In a Project](#using-reasoning-hygiene-in-a-project)
 - [Using Review Lenses In a Project](#using-review-lenses-in-a-project)
-- [Using GRACE In a Project](#using-grace-in-a-project)
+- [Using Structured Artifacts In a Project](#using-structured-artifacts-in-a-project)
 - [Project Flow](#project-flow)
 - [Versioning](#versioning)
 - [Current Stack Fragments](#current-stack-fragments)
@@ -42,11 +42,11 @@ uv run python scripts/ai_sync.py sync-templates --project-root /path/to/project
 Use four layers:
 
 - `fragments`: direct core rules that should always be rendered.
-- `features`: optional capabilities such as `conport`, `design-first-collaboration`, `grace`, `reasoning-hygiene`, and `review-lenses`.
+- `features`: optional capabilities such as `conport`, `design-first-collaboration`, `reasoning-hygiene`, `review-lenses`, and `structured-artifacts`.
 - `stacks`: technology-specific rules such as `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `vue`, or `java-spring`.
 - `tooling.agents`: optional agent adapters such as `codex` and `cursor` for managed local workflow templates.
 
-Recommended starting point for a Python/FastAPI project with standard communication and architecture requirements:
+Recommended starting point for a Python/FastAPI project with standard communication, planning, and architecture requirements:
 
 ```toml
 version = "2026.03"
@@ -62,8 +62,8 @@ fragments = [
 features = [
   "conport",
   "design-first-collaboration",
-  "grace",
   "reasoning-hygiene",
+  "structured-artifacts",
 ]
 
 stacks = [
@@ -223,7 +223,7 @@ Source:
 Target:
 - Add or update the most appropriate fragment under fragments/
 - Update registry.toml if a new stack/feature must be registered
-- Preserve UMA2 core constraints, design-first-collaboration, and GRACE
+- Preserve UMA2 core constraints, design-first-collaboration, reasoning-hygiene, and structured-artifacts
 - Do not import project-specific, vague, redundant, or conflicting rules
 
 Required workflow:
@@ -255,8 +255,6 @@ Constraints:
 - If a source rule conflicts with UMA2 architecture or error-handling rules, reject it unless explicitly approved.
 ```
 
-## Using Review Lenses In a Project
-
 ## Using Reasoning Hygiene In a Project
 
 `reasoning-hygiene` is an optional feature for improving analysis quality on complex or ambiguous tasks without relying on model-specific prompt tricks.
@@ -272,7 +270,7 @@ Use `reasoning-hygiene` when a project benefits from reusable rules for:
 
 - which reasoning behaviors are worth standardizing
 - which prompt patterns are too brittle or model-specific to normalize
-- how this feature complements `design-first-collaboration`, `conport`, and `grace`
+- how this feature complements `design-first-collaboration`, `conport`, and `structured-artifacts`
 
 Detailed operational guidance lives in:
 
@@ -312,108 +310,30 @@ Ready-to-copy downstream templates:
 
 When a downstream project declares `tooling.agents`, use `sync-templates` to keep these adapter templates aligned with the current repository version instead of copying them manually.
 
-## Using GRACE In a Project
+## Using Structured Artifacts In a Project
 
-GRACE is integrated into `ai-standards` as policy and activation guidance, not as a local copy of the full upstream methodology.
+`structured-artifacts` is an optional feature for lightweight planning and boundary-setting artifacts that stay readable in Git and code review.
 
-What `ai-standards` owns:
+Use `structured-artifacts` when a project benefits from reusable rules for:
 
-- when GRACE should be activated
-- how a project declares that it uses GRACE
-- how GRACE fits together with `design-first-collaboration`, architecture rules, and local overrides
+- change planning before non-trivial implementation
+- explicit module boundaries and invariants for major or risky areas
+- Git-tracked decision records for durable design choices
+- optional module maps for orchestration-heavy or integration-heavy flows
 
-What remains upstream:
+This feature intentionally rejects XML-heavy planning, pseudo-XML knowledge overlays, and mandatory machine-oriented code graphs as shared standards.
 
-- the GRACE skills from [`osovv/grace-marketplace`](https://github.com/osovv/grace-marketplace)
-- the upstream command workflow
-- the upstream XML artifacts and templates
+Detailed operational guidance lives in:
 
-### GRACE Activation Conditions
+- English guide: [docs/structured-artifacts-usage.md](docs/structured-artifacts-usage.md)
+- Russian guide: [docs/structured-artifacts-usage.ru.md](docs/structured-artifacts-usage.ru.md)
 
-The agent should switch from normal design-first execution into GRACE flow when one or more of these signals are present:
+Ready-to-copy downstream templates:
 
-- a new subsystem or major module group
-- a cross-module refactor
-- contract design across services or layers
-- a migration with compatibility or rollout risk
-- a task that requires explicit verification planning
-- a task that benefits from multi-agent execution
-- a poorly mapped codebase area where durable structured knowledge is needed
-
-Small and local low-risk changes can stay on the normal path without full GRACE bootstrapping.
-
-### Developer Flow
-
-1. Add the `grace` feature in `ai.project.toml`.
-2. Render `AGENTS.md` so the project instructions explicitly mention GRACE.
-3. Install or update the GRACE skills from `grace-marketplace`.
-4. Bootstrap GRACE artifacts in the project.
-5. Use the GRACE planning, verification, and execution flow for qualifying tasks.
-
-Suggested GRACE skill installation commands, based on the upstream README:
-
-```text
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-init
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-plan
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-execute
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-multiagent-execute
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-setup-subagents
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-fix
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-refresh
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-status
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-ask
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-explainer
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-verification
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-reviewer
-```
-
-Suggested runtime flow, also based on the upstream README:
-
-1. `/grace-init`
-2. Fill `docs/requirements.xml` and `docs/technology.xml`
-3. `/grace-plan`
-4. `/grace-verification`
-5. `/grace-execute` or `/grace-multiagent-execute`
-
-The upstream GRACE repository describes these core artifacts:
-
-- `docs/requirements.xml`
-- `docs/technology.xml`
-- `docs/development-plan.xml`
-- `docs/verification-plan.xml`
-- `docs/knowledge-graph.xml`
-
-### Standard Prompt For Installing Or Updating GRACE
-
-Copy this prompt when you want an agent to prepare or refresh GRACE integration in a downstream project:
-
-```text
-You are integrating GRACE into a project that already uses ~/workspace/ai-standards.
-
-Goals:
-- Ensure the project manifest enables the `grace` feature
-- Install or update GRACE skills from https://github.com/osovv/grace-marketplace
-- Align the project workflow with GRACE activation conditions
-- Do not duplicate the full GRACE methodology inside ai-standards
-
-Required workflow:
-1. Inspect the current ai.project.toml and AGENTS.md.
-2. Ensure the `grace` feature is enabled.
-3. Check whether GRACE skills are already installed.
-4. If missing or outdated, install or refresh the GRACE skills from grace-marketplace.
-5. Explain which task categories should trigger GRACE usage in this project.
-6. If the project has not been bootstrapped for GRACE, guide or perform:
-   - /grace-init
-   - completion of requirements.xml and technology.xml
-   - /grace-plan
-   - /grace-verification
-7. Report the resulting GRACE-ready state and any missing prerequisites.
-
-Constraints:
-- Treat grace-marketplace as the source of truth for GRACE skills and artifacts.
-- Keep ai-standards responsible only for policy, activation, and integration guidance.
-- Do not copy upstream GRACE skill contents into ai-standards unless a deliberate normalization task was explicitly requested.
-```
+- [templates/change-plan.md](templates/change-plan.md)
+- [templates/module-contract.md](templates/module-contract.md)
+- [templates/decision-record.md](templates/decision-record.md)
+- [templates/module-map.md](templates/module-map.md)
 
 ## Project Flow
 

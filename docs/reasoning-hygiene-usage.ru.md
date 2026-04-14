@@ -75,7 +75,7 @@ features = [
 - `design-first-collaboration` определяет, как выносить наружу intent, boundaries, non-goals и tradeoffs.
 - `reasoning-hygiene` повышает качество анализа внутри этого потока.
 - `conport` хранит устойчивые lessons и память проекта после значимой работы.
-- `grace` остаётся более тяжёлым workflow для задач, которым нужны формальные планы, verification artifacts или multi-agent execution.
+- `structured-artifacts` добавляет лёгкие Git-reviewable планы, контракты и decision records, когда задаче нужна более явная структура.
 
 ## Практические рекомендации по постановке запросов
 

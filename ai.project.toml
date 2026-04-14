@@ -1,4 +1,5 @@
 version = "2026.03"
+
 fragments = [
   "core/base",
   "core/git-workflow",
@@ -6,19 +7,22 @@ fragments = [
   "core/error-handling",
   "core/python",
 ]
+
 features = [
   "conport",
   "design-first-collaboration",
   "reasoning-hygiene",
   "structured-artifacts",
 ]
+
 stacks = [
   "python",
-  "fastapi",
 ]
+
 local_overrides = [
   "docs/ai/project-rules.md",
 ]
+
 optional_local_overrides = [
   "docs/ai/private-rules.local.md",
 ]
@@ -27,5 +31,5 @@ optional_local_overrides = [
 agents = []
 
 [metadata]
-project_name = "replace-me"
-notes = "Project-specific AI configuration using manifest-only dependencies."
+project_name = "ai-standards"
+notes = "Self-hosted ai-standards manifest for generating repository AGENTS.md."

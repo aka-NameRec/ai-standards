@@ -10,7 +10,7 @@
 - [Заимствование внешних правил](#заимствование-внешних-правил)
 - [Использование Reasoning Hygiene в проекте](#использование-reasoning-hygiene-в-проекте)
 - [Использование Review Lenses в проекте](#использование-review-lenses-в-проекте)
-- [Использование GRACE в проекте](#использование-grace-в-проекте)
+- [Использование Structured Artifacts в проекте](#использование-structured-artifacts-в-проекте)
 - [Порядок работы с проектом](#порядок-работы-с-проектом)
 - [Версионирование](#версионирование)
 - [Текущие фрагменты стеков](#текущие-фрагменты-стеков)
@@ -42,11 +42,11 @@ uv run python scripts/ai_sync.py sync-templates --project-root /path/to/project
 Используются четыре слоя:
 
 - `fragments`: прямые базовые правила, которые должны включаться всегда.
-- `features`: опциональные возможности вроде `conport`, `design-first-collaboration`, `grace`, `reasoning-hygiene` и `review-lenses`.
+- `features`: опциональные возможности вроде `conport`, `design-first-collaboration`, `reasoning-hygiene`, `review-lenses` и `structured-artifacts`.
 - `stacks`: правила, зависящие от технологии, например `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `vue` или `java-spring`.
 - `tooling.agents`: опциональные agent adapters вроде `codex` и `cursor` для управляемых локальных workflow templates.
 
-Рекомендуемая стартовая точка для Python/FastAPI проекта со стандартными требованиями к коммуникации и архитектуре:
+Рекомендуемая стартовая точка для Python/FastAPI проекта со стандартными требованиями к коммуникации, планированию и архитектуре:
 
 ```toml
 version = "2026.03"
@@ -62,8 +62,8 @@ fragments = [
 features = [
   "conport",
   "design-first-collaboration",
-  "grace",
   "reasoning-hygiene",
+  "structured-artifacts",
 ]
 
 stacks = [
@@ -223,7 +223,7 @@ Source:
 Target:
 - Add or update the most appropriate fragment under fragments/
 - Update registry.toml if a new stack/feature must be registered
-- Preserve UMA2 core constraints, design-first-collaboration, and GRACE
+- Preserve UMA2 core constraints, design-first-collaboration, reasoning-hygiene, and structured-artifacts
 - Do not import project-specific, vague, redundant, or conflicting rules
 
 Required workflow:
@@ -261,16 +261,16 @@ Constraints:
 
 Используйте `reasoning-hygiene`, когда проекту полезны переиспользуемые правила для:
 
-- явного пошагового разложения нетривиальных задач;
-- выведения наружу assumptions, edge cases и verification points;
-- self-review в виде пробелов, рисков и недостающих подтверждений;
-- task-specific ролей, которые добавляют реальные ограничения вместо generic persona fluff.
+- явного пошагового разложения нетривиальных задач
+- выведения наружу assumptions, edge cases и verification points
+- self-review в виде пробелов, рисков и недостающих подтверждений
+- task-specific ролей, которые добавляют реальные ограничения вместо generic persona fluff
 
 `ai-standards` должен хранить устойчивую policy:
 
-- какие практики рассуждения вообще стоит стандартизировать;
-- какие prompt-паттерны слишком хрупкие или model-specific для нормализации;
-- как эта возможность дополняет `design-first-collaboration`, `conport` и `grace`.
+- какие практики рассуждения вообще стоит стандартизировать
+- какие prompt-паттерны слишком хрупкие или model-specific для нормализации
+- как эта возможность дополняет `design-first-collaboration`, `conport` и `structured-artifacts`
 
 Подробная методика применения находится в:
 
@@ -287,17 +287,17 @@ Constraints:
 
 `ai-standards` должен хранить:
 
-- когда уместен проход упрощения по нескольким ракурсам;
-- переиспользуемую модель ракурсов: `Reuse`, `Quality` и `Efficiency`;
-- приоритеты при конфликте между этими ракурсами;
-- требования к проверке после агрессивной очистки.
+- когда уместен проход упрощения по нескольким ракурсам
+- переиспользуемую модель ракурсов: `Reuse`, `Quality` и `Efficiency`
+- приоритеты при конфликте между этими ракурсами
+- требования к проверке после агрессивной очистки
 
 Что не стоит переносить в shared fragments без нормализации:
 
-- внутренние детали конкретных вендоров;
-- недокументированные утверждения о закрытых инструментах;
-- эвристики, привязанные к конкретному фреймворку, которым место в стековых фрагментах;
-- хрупкие числовые пороги, не подтверждённые на нескольких проектах.
+- внутренние детали конкретных вендоров
+- недокументированные утверждения о закрытых инструментах
+- эвристики, привязанные к конкретному фреймворку, которым место в стековых фрагментах
+- хрупкие числовые пороги, не подтверждённые на нескольких проектах
 
 Стартовые шаблоны для подключаемых проектов:
 
@@ -306,76 +306,30 @@ Constraints:
 
 Если подключаемый проект объявляет `tooling.agents`, используйте `sync-templates`, чтобы держать эти adapter templates синхронизированными с текущей версией репозитория вместо ручного копирования.
 
-## Использование GRACE в проекте
+## Использование Structured Artifacts в проекте
 
-`ai-standards` интегрирует GRACE как правило и руководство по активации, а не как локальную копию всей исходной методологии.
+`structured-artifacts` — это опциональная возможность для лёгких артефактов планирования и фиксации границ, которые остаются читаемыми в Git и на code review.
 
-Что принадлежит `ai-standards`:
+Используйте `structured-artifacts`, когда проекту полезны переиспользуемые правила для:
 
-- когда должен активироваться GRACE;
-- как проект объявляет, что он использует GRACE;
-- как GRACE сочетается с `design-first-collaboration`, архитектурными правилами и локальными дополнениями.
+- планирования нетривиальных изменений до реализации
+- явных границ модуля и инвариантов для крупных или рискованных областей
+- Git-tracked decision records для устойчивых проектных решений
+- optional module maps для orchestration-heavy или integration-heavy потоков
 
-Что остаётся upstream:
+Эта возможность сознательно отвергает XML-heavy planning, pseudo-XML knowledge overlays и обязательные machine-oriented code graphs как shared standards.
 
-- навыки GRACE из [`osovv/grace-marketplace`](https://github.com/osovv/grace-marketplace)
-- исходный командный процесс
-- исходные XML-артефакты и шаблоны
+Подробная методика применения находится в:
 
-### Условия активации GRACE
+- английском руководстве: [docs/structured-artifacts-usage.md](docs/structured-artifacts-usage.md)
+- русском руководстве: [docs/structured-artifacts-usage.ru.md](docs/structured-artifacts-usage.ru.md)
 
-Агент должен переключаться с обычного design-first execution на GRACE flow, когда присутствует один или несколько сигналов:
+Стартовые шаблоны для подключаемых проектов:
 
-- новая подсистема или крупная группа модулей
-- межмодульный рефакторинг
-- проектирование контрактов между сервисами или слоями
-- миграция с риском совместимости или развёртывания
-- задача, требующая явного плана проверки
-- задача, выигрывающая от работы несколькими агентами
-- плохо изученная область кодовой базы, где нужны устойчивые структурированные знания
-
-Небольшие и локальные низкорисковые изменения могут оставаться на обычном пути без полного запуска GRACE.
-
-### Порядок работы для разработчика
-
-1. Добавить feature `grace` в `ai.project.toml`.
-2. Выполнить сборку `AGENTS.md`, чтобы инструкции проекта явно упоминали GRACE.
-3. Установить или обновить навыки GRACE из `grace-marketplace`.
-4. Подготовить артефакты GRACE в проекте.
-5. Использовать процессы планирования, проверки и исполнения GRACE для подходящих задач.
-
-Рекомендуемые команды установки навыков GRACE, основанные на исходном README:
-
-```text
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-init
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-plan
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-execute
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-multiagent-execute
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-setup-subagents
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-fix
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-refresh
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-status
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-ask
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-explainer
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-verification
-$skill-installer install https://github.com/osovv/grace-marketplace/tree/main/skills/grace/grace-reviewer
-```
-
-Предлагаемый рабочий порядок:
-
-1. `/grace-init`
-2. Заполнить `docs/requirements.xml` и `docs/technology.xml`
-3. `/grace-plan`
-4. `/grace-verification`
-5. `/grace-execute` или `/grace-multiagent-execute`
-
-Исходный репозиторий GRACE описывает следующие основные артефакты:
-
-- `docs/requirements.xml`
-- `docs/technology.xml`
-- `docs/development-plan.xml`
-- `docs/verification-plan.xml`
-- `docs/knowledge-graph.xml`
+- [templates/change-plan.md](templates/change-plan.md)
+- [templates/module-contract.md](templates/module-contract.md)
+- [templates/decision-record.md](templates/decision-record.md)
+- [templates/module-map.md](templates/module-map.md)
 
 ## Порядок работы с проектом
 

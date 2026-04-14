@@ -432,13 +432,6 @@ def init_project(
     if project_rules_created:
         created_paths.append(project_root / "docs" / "ai" / "project-rules.md")
 
-    grace_map_created = _copy_template_if_missing(
-        repo_root / "templates" / "grace_map.md",
-        project_root / "docs" / "ai" / "grace-map.md",
-    )
-    if grace_map_created:
-        created_paths.append(project_root / "docs" / "ai" / "grace-map.md")
-
     template_results: list[TemplateSyncResult] = []
     manifest_path = project_root / MANIFEST_FILE_NAME
     if manifest_path.exists():

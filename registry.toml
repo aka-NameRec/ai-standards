@@ -1,9 +1,9 @@
 [features]
 conport = ["tools/conport"]
 design-first-collaboration = ["process/design-first-collaboration"]
-grace = ["knowledge/grace"]
 reasoning-hygiene = ["process/reasoning-hygiene"]
 review-lenses = ["process/review-lenses"]
+structured-artifacts = ["process/structured-artifacts"]
 
 [stacks]
 python = ["stacks/python"]

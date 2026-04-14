@@ -28,7 +28,7 @@ def test_render_contains_expected_markers(tmp_path: Path) -> None:
         '  "core/error-handling",\n'
         '  "core/python",\n'
         ']\n'
-        'features = ["conport", "design-first-collaboration", "grace"]\n'
+        'features = ["conport", "design-first-collaboration", "structured-artifacts"]\n'
         'stacks = ["python", "fastapi", "vue"]\n'
         'local_overrides = ["docs/ai/project-rules.md"]\n'
         'optional_local_overrides = ["docs/ai/private-rules.local.md"]\n'
@@ -50,7 +50,7 @@ def test_render_contains_expected_markers(tmp_path: Path) -> None:
 
     assert "Generated from ai-standards@2026.03" in result.content
     assert "## Design-First Collaboration" in result.content
-    assert "## GRACE Knowledge Structuring" in result.content
+    assert "## Lightweight Structured Artifacts" in result.content
     assert "## FastAPI Stack" in result.content
     assert "## Vue Stack" in result.content
     assert "Demo override." in result.content
@@ -141,6 +141,36 @@ def test_reasoning_hygiene_feature_can_be_rendered(tmp_path: Path) -> None:
     assert (
         "Reject prompt tricks that rely on incentives, emotional pressure, or challenge language"
         in result.content
+    )
+
+
+def test_structured_artifacts_feature_can_be_rendered(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        'version = "2026.03"\n'
+        'fragments = ["core/base", "core/architecture"]\n'
+        'features = ["structured-artifacts"]\n'
+        'stacks = ["python"]\n'
+        'local_overrides = ["docs/ai/project-rules.md"]\n'
+        "\n"
+        "[metadata]\n"
+        'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    assert "## Lightweight Structured Artifacts" in result.content
+    assert (
+        "Create `MODULE_CONTRACT.md` only for major, risky, shared, or "
+        "architecturally non-obvious modules." in result.content
     )
 
 
