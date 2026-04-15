@@ -2,4 +2,16 @@
 - Respect repository-local tooling and module layout.
 - Favor explicit domain models and typed interfaces.
 - Keep application wiring separate from business logic.
-
+- Add explicit types at public module boundaries such as exported functions, service interfaces, repositories, adapters, and shared utilities.
+- For function parameters, prefer the widest interface the implementation truly supports, such as `Iterable`, `Sequence`, or `Mapping`; for return values, prefer the concrete type you actually return.
+- Avoid `Any` as a convenience shortcut; use `object` when any value is accepted, and use `Any` only as an intentional escape hatch.
+- Keep structured data explicit across module boundaries; do not pass loose dictionaries when the shape is stable and meaningful.
+- Parse and validate untrusted input at the application boundary before it reaches business logic.
+- Prefer `pathlib.Path` over stringly-typed path handling in application code.
+- Use context managers for resources with lifetimes, including files, database sessions, locks, and network clients.
+- Raise exceptions with actionable context instead of returning sentinel values that hide failure.
+- Keep side effects at the edges; prefer pure, testable functions for transformations and business rules.
+- Prefer logging for application and library diagnostics; reserve `print` for deliberate CLI output and simple scripts.
+- Prefer composition over inheritance; use inheritance only when the subtype relationship is stable and behaviorally clear.
+- Keep framework-specific conventions in framework fragments such as Django, FastAPI, and SQLAlchemy, not in the shared Python rules.
+- For libraries and reusable packages, treat typed public interfaces as part of the compatibility contract.

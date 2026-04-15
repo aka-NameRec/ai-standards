@@ -1,8 +1,4 @@
 ## Python Preferences
-- Use type hints for parameters and return values.
+- Use type hints for public and shared module boundaries; add local annotations when they improve clarity or checker feedback.
 - Prefer dataclasses or typed models over loose dictionaries for structured data.
-- Prefer `match` over long `if` / `elif` chains when it improves readability.
-- Prefer Typer for CLI entrypoints.
-- Prefer plumbum when Python code must execute OS commands.
-- When project tooling exists, prefer `uv run ruff check`, `uv run mypy`, and `uv run pytest` after code changes.
-
+- Use `match` for closed variants, tagged states, and structural patterns when it makes the decision logic clearer.

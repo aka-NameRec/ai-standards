@@ -64,12 +64,9 @@
 - Use exception chaining when translating low-level failures.
 - Use `Optional[T]` only for legitimate absence of a value, not for error signaling.
 ## Python Preferences
-- Use type hints for parameters and return values.
+- Use type hints for public and shared module boundaries; add local annotations when they improve clarity or checker feedback.
 - Prefer dataclasses or typed models over loose dictionaries for structured data.
-- Prefer `match` over long `if` / `elif` chains when it improves readability.
-- Prefer Typer for CLI entrypoints.
-- Prefer plumbum when Python code must execute OS commands.
-- When project tooling exists, prefer `uv run ruff check`, `uv run mypy`, and `uv run pytest` after code changes.
+- Use `match` for closed variants, tagged states, and structural patterns when it makes the decision logic clearer.
 ## ConPort Usage
 - At the start of each task or session, load relevant ConPort context when the MCP server is available.
 - Use ConPort for durable project memory: decisions, progress, glossary terms, and active context.
@@ -141,6 +138,19 @@ Source provenance:
 - Respect repository-local tooling and module layout.
 - Favor explicit domain models and typed interfaces.
 - Keep application wiring separate from business logic.
+- Add explicit types at public module boundaries such as exported functions, service interfaces, repositories, adapters, and shared utilities.
+- For function parameters, prefer the widest interface the implementation truly supports, such as `Iterable`, `Sequence`, or `Mapping`; for return values, prefer the concrete type you actually return.
+- Avoid `Any` as a convenience shortcut; use `object` when any value is accepted, and use `Any` only as an intentional escape hatch.
+- Keep structured data explicit across module boundaries; do not pass loose dictionaries when the shape is stable and meaningful.
+- Parse and validate untrusted input at the application boundary before it reaches business logic.
+- Prefer `pathlib.Path` over stringly-typed path handling in application code.
+- Use context managers for resources with lifetimes, including files, database sessions, locks, and network clients.
+- Raise exceptions with actionable context instead of returning sentinel values that hide failure.
+- Keep side effects at the edges; prefer pure, testable functions for transformations and business rules.
+- Prefer logging for application and library diagnostics; reserve `print` for deliberate CLI output and simple scripts.
+- Prefer composition over inheritance; use inheritance only when the subtype relationship is stable and behaviorally clear.
+- Keep framework-specific conventions in framework fragments such as Django, FastAPI, and SQLAlchemy, not in the shared Python rules.
+- For libraries and reusable packages, treat typed public interfaces as part of the compatibility contract.
 # Project-Specific AI Rules
 
 Russian localized version: [project-rules.ru.md](project-rules.ru.md)

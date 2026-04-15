@@ -147,6 +147,41 @@ def test_typescript_stack_can_be_rendered(tmp_path: Path) -> None:
     assert "## React Stack" in result.content
 
 
+def test_python_stack_and_core_preferences_render_updated_guidance(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base", "core/error-handling", "core/python"]\n'
+        + 'features = ["conport"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    assert "## Python Preferences" in result.content
+    assert "Use type hints for public and shared module boundaries" in result.content
+    assert (
+        "Use `match` for closed variants, tagged states, and structural patterns"
+        in result.content
+    )
+    assert "## Python Stack" in result.content
+    assert "Avoid `Any` as a convenience shortcut" in result.content
+    assert "Prefer `pathlib.Path` over stringly-typed path handling" in result.content
+    assert "Prefer logging for application and library diagnostics" in result.content
+
+
 def test_review_lenses_feature_can_be_rendered(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()
