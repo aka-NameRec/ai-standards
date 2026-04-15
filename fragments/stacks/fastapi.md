@@ -2,4 +2,15 @@
 - Keep FastAPI endpoints thin and delegate business logic into services.
 - Validate request and response contracts at the boundary layer.
 - Keep dependency injection focused on wiring, not business rules.
-
+- Use explicit response contracts via `response_model` or return typing for externally visible endpoints.
+- Keep path operations focused on parsing input, calling the use case, and mapping the result to the response schema.
+- Use dependencies for wiring authentication, settings, sessions, and request-scoped resources; do not hide business workflows inside dependency graphs.
+- Use dependencies with `yield` for resources that require deterministic cleanup.
+- Use `lifespan` for application startup and shutdown resources instead of import-time side effects.
+- Choose `def` or `async def` based on the actual I/O model of the called code; do not mark handlers `async` by default when the stack underneath is synchronous.
+- Keep Pydantic models explicit at API boundaries; use stricter validation where silent coercion would hide client or integration errors.
+- Raise `HTTPException` at the HTTP boundary; keep domain and service layers framework-agnostic.
+- Use `BackgroundTasks` only for small in-process follow-up work; use a real task queue for heavy or retry-sensitive jobs.
+- Keep security dependencies explicit and based on FastAPI's security utilities instead of ad hoc header parsing.
+- Keep OpenAPI-facing contracts stable and intentional; avoid undocumented response shapes and exception payload drift.
+- Prefer one request-scoped unit of work per request; do not share mutable sessions or clients globally unless they are designed for it.

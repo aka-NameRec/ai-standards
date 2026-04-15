@@ -58,7 +58,6 @@ fragments = [
   "core/git-workflow",
   "core/architecture",
   "core/error-handling",
-  "core/python",
 ]
 
 features = [
