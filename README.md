@@ -120,10 +120,11 @@ stacks = [
 stacks = [
   "python",
   "django",
+  "django-hacksoft-style",
   "django-service-layer",
   "django-naming",
   "django-drf",
-  "django-save-lifecycle",
+  "django-save-orchestration",
   "postgres",
 ]
 ```
@@ -133,8 +134,9 @@ stacks = [
 stacks = [
   "python",
   "django",
+  "django-hacksoft-style",
   "django-service-layer",
-  "django-save-lifecycle",
+  "django-save-orchestration",
   "postgres",
 ]
 ```
@@ -386,10 +388,11 @@ For this repository's release workflow:
 - `fastapi`
 - `sqlalchemy`
 - `django`
+- `django-hacksoft-style`
 - `django-service-layer`
 - `django-naming`
 - `django-drf`
-- `django-save-lifecycle`
+- `django-save-orchestration`
 - `react`
 - `postgres`
 - `vue`

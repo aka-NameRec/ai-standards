@@ -241,6 +241,37 @@ def test_django_drf_stack_renders_softened_guidance(tmp_path: Path) -> None:
     assert "Validate incoming data at the API boundary" in result.content
 
 
+def test_django_hacksoft_style_and_save_orchestration_render(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base", "core/error-handling"]\n'
+        + 'features = ["conport"]\n'
+        + 'stacks = ["django", "django-hacksoft-style", "django-save-orchestration"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    assert "## Django HackSoft Style" in result.content
+    assert "This fragment is an opt-in architectural style" in result.content
+    assert "Place write workflows in services" in result.content
+    assert "## Django Save Orchestration" in result.content
+    assert "perform_create()` and `perform_update()` may delegate" in result.content
+    assert "schedule it with `transaction.on_commit`" in result.content
+
+
 def test_review_lenses_feature_can_be_rendered(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()

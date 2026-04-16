@@ -120,10 +120,11 @@ stacks = [
 stacks = [
   "python",
   "django",
+  "django-hacksoft-style",
   "django-service-layer",
   "django-naming",
   "django-drf",
-  "django-save-lifecycle",
+  "django-save-orchestration",
   "postgres",
 ]
 ```
@@ -133,8 +134,9 @@ stacks = [
 stacks = [
   "python",
   "django",
+  "django-hacksoft-style",
   "django-service-layer",
-  "django-save-lifecycle",
+  "django-save-orchestration",
   "postgres",
 ]
 ```
@@ -381,10 +383,11 @@ project_release_date = "YYYY-MM-DD"
 - `fastapi`
 - `sqlalchemy`
 - `django`
+- `django-hacksoft-style`
 - `django-service-layer`
 - `django-naming`
 - `django-drf`
-- `django-save-lifecycle`
+- `django-save-orchestration`
 - `react`
 - `postgres`
 - `vue`
