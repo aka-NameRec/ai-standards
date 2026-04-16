@@ -321,10 +321,11 @@ def _echo_preview(proposal: ProposedRelease) -> None:
     typer.echo(f"Proposed release date: {proposal.next_release_date}")
 
 
+@app.command()
 def preview(
-    part: Annotated[str, typer.Option("minor")] = "minor",
-    version: Annotated[str | None, typer.Option(None)] = None,
-    release_date: Annotated[str | None, typer.Option(None)] = None,
+    part: Annotated[str, typer.Option("--part")] = "minor",
+    version: Annotated[str | None, typer.Option("--version")] = None,
+    release_date: Annotated[str | None, typer.Option("--release-date")] = None,
 ) -> None:
     """Preview the next release version."""
 
@@ -339,9 +340,9 @@ def preview(
 
 @app.command()
 def save(
-    part: Annotated[str, typer.Option("minor")] = "minor",
-    version: Annotated[str | None, typer.Option(None)] = None,
-    release_date: Annotated[str | None, typer.Option(None)] = None,
+    part: Annotated[str, typer.Option("--part")] = "minor",
+    version: Annotated[str | None, typer.Option("--version")] = None,
+    release_date: Annotated[str | None, typer.Option("--release-date")] = None,
 ) -> None:
     """Save release metadata into repository files on a clean worktree."""
 

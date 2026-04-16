@@ -3,7 +3,15 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from scripts.bump_version import VersioningError, bump_version, create_tag, save_release
+from typer.testing import CliRunner
+
+from scripts.bump_version import (
+    VersioningError,
+    app,
+    bump_version,
+    create_tag,
+    save_release,
+)
 
 
 def _run_git(repo_root: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -14,6 +22,9 @@ def _run_git(repo_root: Path, *args: str) -> subprocess.CompletedProcess[str]:
         text=True,
         check=False,
     )
+
+
+runner = CliRunner()
 
 
 def _init_demo_repo(tmp_path: Path) -> Path:
@@ -136,6 +147,20 @@ def test_save_release_requires_clean_worktree(tmp_path: Path) -> None:
         assert "clean git worktree" in str(error)
     else:
         raise AssertionError("Expected save_release to reject a dirty worktree")
+
+
+def test_save_command_runs_via_typer_cli(tmp_path: Path, monkeypatch) -> None:
+    repo_root = _init_demo_repo(tmp_path)
+    monkeypatch.setattr("scripts.bump_version._repo_root", lambda: repo_root)
+
+    result = runner.invoke(
+        app,
+        ["save", "--version", "1.1.0", "--release-date", "2026-04-16"],
+    )
+
+    assert result.exit_code == 0
+    assert "Saved version: 1.1.0" in result.stdout
+    assert 'version = "1.1.0"' in (repo_root / "pyproject.toml").read_text(encoding="utf-8")
 
 
 def test_create_tag_requires_main_branch(tmp_path: Path) -> None:
