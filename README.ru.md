@@ -267,6 +267,26 @@ agents = ["codex", "cursor"]
 - `codex`: раскладывает управляемые skill templates под `.codex/skills/`
 - `cursor`: раскладывает управляемые rule templates под `.cursor/rules/`
 
+Опциональный режим усиления Cursor для более предсказуемого подхвата правил в single-project и multi-project корнях:
+
+```toml
+[tooling]
+agents = ["cursor"]
+
+[tooling.cursor]
+deploy_project_preflight = true
+deploy_workspace_router = true
+workspace_root = ".."
+project_slug = "my-project"
+```
+
+Что раскладывается при включении:
+
+- `.cursor/rules/00-project-preflight.mdc` в корне проекта (`alwaysApply: true`)
+- `<workspace_root>/.cursor/rules/10-ai-standards-project-<slug>.mdc` для роутинга в multi-project (`alwaysApply: true`)
+
+Используйте эту опцию только когда `workspace_root` указывает на родительский каталог, внутри которого лежит корень проекта.
+
 Команды:
 
 - `init-project` копирует стартовый manifest, локальные шаблоны overrides и все managed agent adapters, уже объявленные в `ai.project.toml`.

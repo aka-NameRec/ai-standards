@@ -27,6 +27,14 @@ optional_local_overrides = [
 [tooling]
 agents = []
 
+[tooling.cursor]
+deploy_project_preflight = false
+deploy_workspace_router = false
+# workspace_root is resolved relative to project_root.
+workspace_root = "."
+# Optional stable slug for workspace router filename.
+project_slug = "replace-me"
+
 [metadata]
 project_name = "replace-me"
 notes = "Project-specific AI configuration using manifest-only dependencies."

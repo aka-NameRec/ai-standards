@@ -1,0 +1,19 @@
+---
+description: Route multi-project chats to {{PROJECT_SLUG}} scope when relevant.
+globs:
+alwaysApply: true
+---
+
+# Workspace Router: {{PROJECT_SLUG}}
+
+This workspace rule maps one project scope in a multi-project root.
+
+- Project slug: `{{PROJECT_SLUG}}`
+- Relative path from workspace root: `{{PROJECT_RELATIVE_PATH}}`
+
+Routing policy:
+
+1. If the user explicitly references this slug or files under this path, treat this project as active scope.
+2. If the request is ambiguous across multiple sibling projects, ask for explicit scope before editing.
+3. Once scope is confirmed, read and apply `{{PROJECT_RELATIVE_PATH}}/AGENTS.md` and local project rules.
+4. Do not assume cross-project edits unless the user explicitly asks for them.

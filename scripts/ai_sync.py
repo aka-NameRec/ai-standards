@@ -38,6 +38,7 @@ class Manifest:
     local_overrides: list[str]
     optional_local_overrides: list[str]
     agents: list[str]
+    cursor: CursorTooling
     metadata: dict[str, str]
 
 
@@ -68,6 +69,14 @@ class ReleaseMetadata:
     release_date: str
 
 
+@dataclass(frozen=True)
+class CursorTooling:
+    deploy_project_preflight: bool
+    deploy_workspace_router: bool
+    workspace_root: str | None
+    project_slug: str | None
+
+
 AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
     "codex": (
         AgentTemplate(
@@ -84,6 +93,8 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
     ),
 }
+CURSOR_PROJECT_PREFLIGHT_TEMPLATE = "templates/cursor/project-preflight.cursor.mdc"
+CURSOR_WORKSPACE_ROUTER_TEMPLATE = "templates/cursor/workspace-router.cursor.mdc"
 
 
 def _repo_root() -> Path:
@@ -126,6 +137,7 @@ def _load_manifest(project_root: Path) -> Manifest:
     data = _load_toml(project_root / MANIFEST_FILE_NAME)
     metadata_raw = _expect_optional_table(data, "metadata", "manifest")
     tooling_raw = _expect_optional_table(data, "tooling", "manifest")
+    cursor_raw = _expect_optional_table(tooling_raw, "cursor", "manifest.tooling")
     metadata: dict[str, str] = {}
     for key, value in metadata_raw.items():
         if not isinstance(value, str):
@@ -155,7 +167,26 @@ def _load_manifest(project_root: Path) -> Manifest:
             "manifest",
         ),
         agents=_expect_supported_agents(tooling_raw, "agents", "manifest.tooling"),
+        cursor=_load_cursor_tooling(cursor_raw),
         metadata=metadata,
+    )
+
+
+def _load_cursor_tooling(data: dict[str, object]) -> CursorTooling:
+    context = "manifest.tooling.cursor"
+    return CursorTooling(
+        deploy_project_preflight=_expect_optional_bool(
+            data,
+            "deploy_project_preflight",
+            context,
+        ),
+        deploy_workspace_router=_expect_optional_bool(
+            data,
+            "deploy_workspace_router",
+            context,
+        ),
+        workspace_root=_expect_optional_string(data, "workspace_root", context),
+        project_slug=_expect_optional_string(data, "project_slug", context),
     )
 
 
@@ -172,6 +203,15 @@ def _expect_optional_string(data: dict[str, object], key: str, context: str) -> 
         return None
     if not isinstance(value, str) or not value:
         raise SyncError(f"Expected non-empty string '{key}' in {context}")
+    return value
+
+
+def _expect_optional_bool(data: dict[str, object], key: str, context: str) -> bool:
+    value = data.get(key)
+    if value is None:
+        return False
+    if not isinstance(value, bool):
+        raise SyncError(f"Expected boolean '{key}' in {context}")
     return value
 
 
@@ -413,8 +453,20 @@ def _sync_agent_template(project_root: Path, template: AgentTemplate) -> Templat
     repo_root = _repo_root()
     source_path = repo_root / template.source_relative_path
     raw_content = source_path.read_text(encoding="utf-8")
-    managed_content = _build_managed_template_content(template.source_relative_path, raw_content)
     destination_path = project_root / template.destination_relative_path
+    return _sync_template_content(
+        destination_path=destination_path,
+        source_relative_path=template.source_relative_path,
+        raw_content=raw_content,
+    )
+
+
+def _sync_template_content(
+    destination_path: Path,
+    source_relative_path: str,
+    raw_content: str,
+) -> TemplateSyncResult:
+    managed_content = _build_managed_template_content(source_relative_path, raw_content)
 
     if not destination_path.exists():
         destination_path.parent.mkdir(parents=True, exist_ok=True)
@@ -425,14 +477,64 @@ def _sync_agent_template(project_root: Path, template: AgentTemplate) -> Templat
     if existing_content == managed_content:
         return TemplateSyncResult(status="up-to-date", destination_path=destination_path)
 
-    if (
-        _is_managed_template_content(existing_content)
-        or existing_content == raw_content
-    ):
+    if _is_managed_template_content(existing_content) or existing_content == raw_content:
         destination_path.write_text(managed_content, encoding="utf-8")
         return TemplateSyncResult(status="updated", destination_path=destination_path)
 
     return TemplateSyncResult(status="skipped-unmanaged", destination_path=destination_path)
+
+
+def _sync_cursor_project_preflight(project_root: Path) -> TemplateSyncResult:
+    repo_root = _repo_root()
+    source_relative_path = CURSOR_PROJECT_PREFLIGHT_TEMPLATE
+    raw_content = (repo_root / source_relative_path).read_text(encoding="utf-8")
+    destination_path = project_root / ".cursor/rules/00-project-preflight.mdc"
+    return _sync_template_content(destination_path, source_relative_path, raw_content)
+
+
+def _normalize_project_slug(raw_slug: str) -> str:
+    normalized_chars = [
+        char.lower() if char.isalnum() else "-" for char in raw_slug.strip()
+    ]
+    normalized = "".join(normalized_chars).strip("-")
+    while "--" in normalized:
+        normalized = normalized.replace("--", "-")
+    if not normalized:
+        raise SyncError("Cursor workspace router requires a non-empty project_slug")
+    return normalized
+
+
+def _sync_cursor_workspace_router(project_root: Path, cursor: CursorTooling) -> TemplateSyncResult:
+    if not cursor.workspace_root:
+        raise SyncError(
+            "manifest.tooling.cursor.workspace_root is required when "
+            "deploy_workspace_router=true"
+        )
+
+    workspace_root = (project_root / cursor.workspace_root).resolve()
+    project_slug = _normalize_project_slug(cursor.project_slug or project_root.name)
+    try:
+        project_relative_path = project_root.resolve().relative_to(workspace_root)
+    except ValueError as error:
+        raise SyncError(
+            "Project root must be inside tooling.cursor.workspace_root when "
+            "deploy_workspace_router=true"
+        ) from error
+
+    repo_root = _repo_root()
+    source_relative_path = CURSOR_WORKSPACE_ROUTER_TEMPLATE
+    raw_content = (repo_root / source_relative_path).read_text(encoding="utf-8")
+    rendered_content = (
+        raw_content
+        .replace("{{PROJECT_SLUG}}", project_slug)
+        .replace("{{PROJECT_RELATIVE_PATH}}", project_relative_path.as_posix())
+    )
+    destination_path = (
+        workspace_root
+        / ".cursor/rules"
+        / f"10-ai-standards-project-{project_slug}.mdc"
+    )
+    return _sync_template_content(destination_path, source_relative_path, rendered_content)
 
 
 def sync_project_templates(project_root: Path) -> list[TemplateSyncResult]:
@@ -441,6 +543,10 @@ def sync_project_templates(project_root: Path) -> list[TemplateSyncResult]:
     for agent in manifest.agents:
         for template in AGENT_TEMPLATES[agent]:
             results.append(_sync_agent_template(project_root, template))
+    if "cursor" in manifest.agents and manifest.cursor.deploy_project_preflight:
+        results.append(_sync_cursor_project_preflight(project_root))
+    if "cursor" in manifest.agents and manifest.cursor.deploy_workspace_router:
+        results.append(_sync_cursor_workspace_router(project_root, manifest.cursor))
     return results
 
 

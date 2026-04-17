@@ -267,6 +267,26 @@ Supported adapters:
 - `codex`: installs managed skill templates under `.codex/skills/`
 - `cursor`: installs managed rule templates under `.cursor/rules/`
 
+Optional Cursor hardening for predictable rule pickup in single-project and multi-project roots:
+
+```toml
+[tooling]
+agents = ["cursor"]
+
+[tooling.cursor]
+deploy_project_preflight = true
+deploy_workspace_router = true
+workspace_root = ".."
+project_slug = "my-project"
+```
+
+What it deploys when enabled:
+
+- `.cursor/rules/00-project-preflight.mdc` inside the project root (`alwaysApply: true`)
+- `<workspace_root>/.cursor/rules/10-ai-standards-project-<slug>.mdc` for multi-project routing (`alwaysApply: true`)
+
+Use this only when `workspace_root` is a parent directory that contains the project root.
+
 Commands:
 
 - `init-project` copies the starter manifest, local override templates, and any managed agent adapters already declared in `ai.project.toml`.
