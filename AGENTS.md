@@ -210,3 +210,4 @@ Russian localized version: [project-rules.ru.md](project-rules.ru.md)
 - `scripts/bump_version.py save` is allowed only on a clean git worktree.
 - `scripts/bump_version.py tag` is allowed only on a clean git worktree and only from the `main` branch.
 - Release tagging remains a separate step from version saving and from git commits.
+- If a merged change set updates the repository release version, create and push the corresponding annotated release tag as the required follow-up step.

@@ -37,3 +37,4 @@
 - `scripts/bump_version.py save` разрешён только на чистом git worktree.
 - `scripts/bump_version.py tag` разрешён только на чистом git worktree и только из ветки `main`.
 - Создание релизного тега остаётся отдельным шагом по отношению к сохранению версии и git commit.
+- Если merged change set меняет release version репозитория, соответствующий annotated release tag должен быть создан и запушен как обязательный follow-up шаг.
