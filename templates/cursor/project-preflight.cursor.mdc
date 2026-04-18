@@ -1,0 +1,16 @@
+---
+description: Ensure project rules are loaded before edits.
+globs:
+alwaysApply: true
+---
+
+# Cursor Project Preflight
+
+Before making code changes:
+
+1. Confirm the active project scope from user request or referenced files.
+2. Read and apply the nearest `AGENTS.md` for that scope.
+3. Read and apply `docs/ai/project-rules.md` when it exists.
+4. If the request can target multiple sibling projects, ask which one is in scope before editing.
+
+When the target project is already explicit, continue without extra prompts.

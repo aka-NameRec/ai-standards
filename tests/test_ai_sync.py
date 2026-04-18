@@ -847,3 +847,115 @@ def test_unknown_agent_in_manifest_raises_sync_error(tmp_path: Path) -> None:
         assert "Unknown agent" in str(error)
     else:
         raise AssertionError("Expected SyncError for unsupported agent")
+
+
+def test_sync_project_templates_can_deploy_cursor_project_preflight(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base", "core/architecture"]\n'
+        + 'features = ["review-lenses"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + 'agents = ["cursor"]\n'
+        + "\n"
+        + "[tooling.cursor]\n"
+        + "deploy_project_preflight = true\n"
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    results = sync_project_templates(project_root)
+
+    assert [result.status for result in results] == ["created", "created"]
+    preflight_rule = project_root / ".cursor/rules/00-project-preflight.mdc"
+    assert preflight_rule.exists()
+    assert "alwaysApply: true" in preflight_rule.read_text(encoding="utf-8")
+
+
+def test_sync_project_templates_can_deploy_workspace_router(tmp_path: Path) -> None:
+    workspace_root = tmp_path / "workspace"
+    project_root = workspace_root / "demo-project"
+    project_root.mkdir(parents=True)
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base", "core/architecture"]\n'
+        + 'features = ["review-lenses"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + 'agents = ["cursor"]\n'
+        + "\n"
+        + "[tooling.cursor]\n"
+        + "deploy_workspace_router = true\n"
+        + 'workspace_root = ".."\n'
+        + 'project_slug = "demo-project"\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    results = sync_project_templates(project_root)
+
+    assert [result.status for result in results] == ["created", "created"]
+    workspace_router = (
+        workspace_root / ".cursor/rules/10-ai-standards-project-demo-project.mdc"
+    )
+    assert workspace_router.exists()
+    router_content = workspace_router.read_text(encoding="utf-8")
+    assert "Project slug: `demo-project`" in router_content
+    assert "demo-project/AGENTS.md" in router_content
+
+
+def test_workspace_router_requires_workspace_root(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base", "core/architecture"]\n'
+        + 'features = ["review-lenses"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + 'agents = ["cursor"]\n'
+        + "\n"
+        + "[tooling.cursor]\n"
+        + "deploy_workspace_router = true\n"
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    try:
+        sync_project_templates(project_root)
+    except SyncError as error:
+        assert "workspace_root is required" in str(error)
+    else:
+        raise AssertionError("Expected SyncError for missing workspace_root")
