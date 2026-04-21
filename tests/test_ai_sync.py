@@ -698,6 +698,19 @@ def test_init_project_seeds_current_ai_standards_version(tmp_path: Path) -> None
     assert 'project_version = "replace-me"' in manifest
 
 
+def test_ai_sync_console_script_resolves_help(tmp_path: Path) -> None:
+    result = subprocess.run(
+        ["uv", "run", "ai-sync", "--help"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "Usage: ai-sync" in result.stdout
+
+
 def test_missing_optional_override_does_not_fail(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()

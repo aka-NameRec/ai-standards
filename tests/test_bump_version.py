@@ -43,6 +43,7 @@ def _init_demo_repo(tmp_path: Path) -> Path:
             "\n"
             "[project.scripts]\n"
             'bump-version = "scripts.bump_version:main"\n'
+            'ai-sync = "scripts.ai_sync:main"\n'
             "\n"
             "[build-system]\n"
             'requires = ["setuptools>=68", "wheel"]\n'

@@ -9,6 +9,7 @@ dependencies = [
 
 [project.scripts]
 bump-version = "scripts.bump_version:main"
+ai-sync = "scripts.ai_sync:main"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

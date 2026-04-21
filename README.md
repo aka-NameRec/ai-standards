@@ -24,16 +24,16 @@ Russian localized version: [README.ru.md](README.ru.md)
 
 - `fragments/`: reusable instruction fragments grouped by domain.
 - `templates/`: starter files copied into downstream projects.
-- `scripts/ai_sync.py`: CLI that renders and validates `AGENTS.md`.
+- `ai-sync`: CLI that renders and validates `AGENTS.md`.
 - `registry.toml`: maps feature and stack names to fragment paths.
 
 ## Quick Start
 
 ```bash
-uv run python scripts/ai_sync.py init-project --project-root /path/to/project
-uv run python scripts/ai_sync.py render --project-root /path/to/project
-uv run python scripts/ai_sync.py check --project-root /path/to/project
-uv run python scripts/ai_sync.py sync-templates --project-root /path/to/project
+uv run ai-sync init-project --project-root /path/to/project
+uv run ai-sync render --project-root /path/to/project
+uv run ai-sync check --project-root /path/to/project
+uv run ai-sync sync-templates --project-root /path/to/project
 ```
 
 ## Manifest-Only Configuration

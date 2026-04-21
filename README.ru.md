@@ -24,16 +24,16 @@
 
 - `fragments/`: переиспользуемые фрагменты инструкций, сгруппированные по доменам.
 - `templates/`: стартовые файлы, которые копируются в подключаемые проекты.
-- `scripts/ai_sync.py`: консольный инструмент, который собирает и проверяет `AGENTS.md`.
+- `ai-sync`: консольный инструмент, который собирает и проверяет `AGENTS.md`.
 - `registry.toml`: сопоставляет имена возможностей и стеков с путями к фрагментам.
 
 ## Быстрый старт
 
 ```bash
-uv run python scripts/ai_sync.py init-project --project-root /path/to/project
-uv run python scripts/ai_sync.py render --project-root /path/to/project
-uv run python scripts/ai_sync.py check --project-root /path/to/project
-uv run python scripts/ai_sync.py sync-templates --project-root /path/to/project
+uv run ai-sync init-project --project-root /path/to/project
+uv run ai-sync render --project-root /path/to/project
+uv run ai-sync check --project-root /path/to/project
+uv run ai-sync sync-templates --project-root /path/to/project
 ```
 
 ## Конфигурация только через манифест
