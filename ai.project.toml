@@ -15,6 +15,7 @@ features = [
   "reasoning-hygiene",
   "autonomy-boundaries",
   "structured-artifacts",
+  "session-hygiene",
   "agent-usage-hygiene",
 ]
 

@@ -12,6 +12,7 @@
 - [Using Autonomy Boundaries In a Project](#using-autonomy-boundaries-in-a-project)
 - [Using Review Lenses In a Project](#using-review-lenses-in-a-project)
 - [Using Structured Artifacts In a Project](#using-structured-artifacts-in-a-project)
+- [Using Session Hygiene In a Project](#using-session-hygiene-in-a-project)
 - [Using Agent Usage Hygiene In a Project](#using-agent-usage-hygiene-in-a-project)
 - [Project Flow](#project-flow)
 - [Versioning](#versioning)
@@ -44,7 +45,7 @@ uv run ai-sync sync-templates --project-root /path/to/project
 Use four layers:
 
 - `fragments`: direct core rules that should always be rendered.
-- `features`: optional capabilities such as `conport`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `structured-artifacts`, and `agent-usage-hygiene`.
+- `features`: optional capabilities such as `conport`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
 - `stacks`: technology-specific or architecture-specific rules such as `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring`, or `spring-data-jpa`.
 - `tooling.agents`: optional agent adapters such as `codex` and `cursor` for managed local workflow templates.
 
@@ -68,6 +69,7 @@ features = [
   "reasoning-hygiene",
   "autonomy-boundaries",
   "structured-artifacts",
+  "session-hygiene",
   "agent-usage-hygiene",
 ]
 
@@ -445,6 +447,29 @@ Ready-to-copy downstream templates:
 - [templates/module-contract.md](templates/module-contract.md)
 - [templates/decision-record.md](templates/decision-record.md)
 - [templates/module-map.md](templates/module-map.md)
+
+## Using Session Hygiene In a Project
+
+`session-hygiene` is an optional feature for reducing context drift and goal substitution risks in long chat sessions.
+
+Use `session-hygiene` when a project benefits from reusable rules for:
+
+- warning the user when a thread becomes risky to continue
+- producing compact handoff summaries before continuing long sessions
+- starting a fresh chat when the work changes phase or the context stops being compactly reviewable
+- reloading project rules, active context, and task artifacts at phase boundaries
+
+`ai-standards` owns the reusable policy:
+
+- critical constraints should not live only in transient chat memory
+- handoff summaries should separate confirmed state from assumptions
+- fresh chats are preferred when long-session context becomes harder to trust than explicit artifacts
+- shared defaults should avoid brittle message-count or token-count thresholds
+
+Detailed operational guidance lives in:
+
+- English guide: [docs/session-hygiene-usage.md](docs/session-hygiene-usage.md)
+- Russian guide: [docs/session-hygiene-usage.ru.md](docs/session-hygiene-usage.ru.md)
 
 ## Using Agent Usage Hygiene In a Project
 

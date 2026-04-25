@@ -665,6 +665,36 @@ def test_agent_usage_hygiene_feature_can_be_rendered(tmp_path: Path) -> None:
     )
 
 
+def test_session_hygiene_feature_can_be_rendered(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK +
+        'fragments = ["core/base", "core/architecture"]\n'
+        'features = ["session-hygiene"]\n'
+        'stacks = ["python"]\n'
+        'local_overrides = ["docs/ai/project-rules.md"]\n'
+        "\n"
+        "[metadata]\n"
+        'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    assert "## Session Hygiene" in result.content
+    assert (
+        "Warn the user when a long thread increases the risk of context drift"
+        in result.content
+    )
+
+
 def test_written_file_matches_rendered_content(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()

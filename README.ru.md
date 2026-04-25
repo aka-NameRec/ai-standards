@@ -12,6 +12,7 @@
 - [Использование Autonomy Boundaries в проекте](#использование-autonomy-boundaries-в-проекте)
 - [Использование Review Lenses в проекте](#использование-review-lenses-в-проекте)
 - [Использование Structured Artifacts в проекте](#использование-structured-artifacts-в-проекте)
+- [Использование Session Hygiene в проекте](#использование-session-hygiene-в-проекте)
 - [Использование Agent Usage Hygiene в проекте](#использование-agent-usage-hygiene-в-проекте)
 - [Порядок работы с проектом](#порядок-работы-с-проектом)
 - [Версионирование](#версионирование)
@@ -44,7 +45,7 @@ uv run ai-sync sync-templates --project-root /path/to/project
 Используются четыре слоя:
 
 - `fragments`: прямые базовые правила, которые должны включаться всегда.
-- `features`: опциональные возможности вроде `conport`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `structured-artifacts` и `agent-usage-hygiene`.
+- `features`: опциональные возможности вроде `conport`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `structured-artifacts`, `session-hygiene` и `agent-usage-hygiene`.
 - `stacks`: правила, зависящие от технологии или архитектурного стиля, например `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring` или `spring-data-jpa`.
 - `tooling.agents`: опциональные agent adapters вроде `codex` и `cursor` для управляемых локальных workflow templates.
 
@@ -68,6 +69,7 @@ features = [
   "reasoning-hygiene",
   "autonomy-boundaries",
   "structured-artifacts",
+  "session-hygiene",
   "agent-usage-hygiene",
 ]
 
@@ -441,6 +443,29 @@ Constraints:
 - [templates/module-contract.md](templates/module-contract.md)
 - [templates/decision-record.md](templates/decision-record.md)
 - [templates/module-map.md](templates/module-map.md)
+
+## Использование Session Hygiene в проекте
+
+`session-hygiene` — это опциональная возможность для снижения рисков context drift и goal substitution в длинных chat sessions.
+
+Используйте `session-hygiene`, когда проекту полезны переиспользуемые правила для:
+
+- предупреждения пользователя, когда продолжать thread становится рискованно
+- подготовки компактных handoff summaries перед продолжением длинных сессий
+- начала нового чата, когда работа меняет фазу или контекст перестаёт быть компактно reviewable
+- повторной загрузки project rules, active context и task artifacts на границах фаз
+
+`ai-standards` должен хранить переиспользуемую policy:
+
+- critical constraints не должны жить только в transient chat memory
+- handoff summaries должны отделять confirmed state от assumptions
+- fresh chats предпочтительны, когда long-session context становится менее надёжным, чем explicit artifacts
+- shared defaults не должны продвигать хрупкие message-count или token-count thresholds
+
+Подробная методика применения находится в:
+
+- английском руководстве: [docs/session-hygiene-usage.md](docs/session-hygiene-usage.md)
+- русском руководстве: [docs/session-hygiene-usage.ru.md](docs/session-hygiene-usage.ru.md)
 
 ## Использование Agent Usage Hygiene в проекте
 

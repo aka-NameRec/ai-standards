@@ -5,6 +5,7 @@ reasoning-hygiene = ["process/reasoning-hygiene"]
 autonomy-boundaries = ["process/autonomy-boundaries"]
 review-lenses = ["process/review-lenses"]
 structured-artifacts = ["process/structured-artifacts"]
+session-hygiene = ["process/session-hygiene"]
 agent-usage-hygiene = ["process/agent-usage-hygiene"]
 
 [stacks]
