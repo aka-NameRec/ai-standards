@@ -33,6 +33,8 @@ The feature standardizes these artifacts:
 
 All four are plain Markdown templates intended to be short, reviewable, and locally adaptable.
 
+The feature also works well with a Markdown retrieval layer such as Basic Memory, as long as canonical documentation and agent working memory remain distinct.
+
 ## What The Feature Explicitly Rejects
 
 Do not treat the following as shared defaults:
@@ -122,8 +124,39 @@ Bad module boundaries usually look like:
 
 - `design-first-collaboration` defines when intent, boundaries, and non-goals should be made explicit.
 - `reasoning-hygiene` improves the quality of analysis behind those artifacts.
-- `conport` stores active context, progress, and evolving project memory.
+- `basic-memory` can index canonical documentation and working-memory notes for retrieval across sessions.
+- `conport` stores transient operational context and session handoffs.
 - `structured-artifacts` adds Git-reviewable documents for plans, contracts, and durable decisions.
+
+## Canonical Documentation, Working Memory, And ConPort
+
+Treat the following as canonical documentation:
+
+- `docs/decisions/**`
+- `docs/architecture/**`
+- `MODULE_CONTRACT.md`
+- equivalent local project artifacts that define accepted constraints or contracts
+
+Treat the following as agent working memory:
+
+- `docs/ai-memory/**`
+- investigation notes that are still evolving
+- temporary findings not yet accepted as canonical
+
+Use agent working memory for:
+
+- active context that helps the next task
+- evolving rationale or investigation notes
+- open questions, gotchas, and handoff notes
+- links back to canonical documents
+
+Promote knowledge from working memory into canonical documentation only on explicit user request.
+
+Before changing canonical documentation:
+
+- search for an existing decision record, module contract, or architecture note
+- prefer updating an existing document over creating a duplicate
+- stop and surface contradictions instead of silently resolving them
 
 ## ConPort Versus Decision Records
 
@@ -131,8 +164,8 @@ Use ConPort for:
 
 - active context
 - recent progress
-- lessons learned
-- working rationale that may still evolve
+- transient handoff state
+- compact investigation summaries
 
 Use a decision record for:
 
@@ -141,6 +174,20 @@ Use a decision record for:
 - a documented alternative analysis that should live with the codebase
 
 Do not mirror every ConPort entry into a decision record.
+
+## Explicit Promotion Examples
+
+Examples that belong in `docs/ai-memory/**` without a separate request:
+
+- updating an investigation note after tracing a bug
+- recording an implementation gotcha for the next session
+- refreshing an open-questions file after partial discovery
+
+Examples that require an explicit request before editing canonical documentation:
+
+- recording a new architecture decision in `docs/decisions/**`
+- updating a module contract after agreeing on a new module boundary
+- reconciling or superseding an existing design decision
 
 ## Practical Adoption Guidance
 

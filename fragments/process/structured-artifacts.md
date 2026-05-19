@@ -18,8 +18,22 @@
 
 ## Decision Records
 - Create a short decision record when an architectural or operational choice will matter for future changes and code review.
-- Use decision records for durable repository history; use ConPort for active context, progress, and evolving project memory.
+- Use decision records and module contracts for durable repository history.
+- Use agent working memory for evolving context, temporary findings, and notes that are not yet accepted as canonical documentation.
 - Keep one decision record focused on one choice, its rationale, alternatives, and consequences.
+
+## Canonical Documentation And Agent Working Memory
+- Treat `docs/decisions/**`, `docs/architecture/**`, `MODULE_CONTRACT.md`, and equivalent local artifacts as canonical project knowledge.
+- Treat `docs/ai-memory/**` as agent-managed working memory rather than canonical truth.
+- Durable conclusions must be promoted from working memory into canonical documentation only on explicit user request.
+- Working memory should link to canonical documents when they already exist instead of duplicating them.
+
+## Canonical Documentation Write Policy
+- Do not modify canonical documentation unless the user explicitly asks to record, update, reconcile, supersede, or remove durable project knowledge.
+- Before modifying canonical documentation, search related decision records, architecture docs, module contracts, and agent working memory.
+- Prefer updating an existing canonical document over creating a duplicate.
+- If new knowledge contradicts existing canonical documentation, do not silently resolve the conflict unless the user has already made the decision in the current task.
+- When a decision supersedes an older one, preserve the old document as historical context and add a clear supersession link.
 
 ## Optional Maps And Anchors
 - Use `module-map.md` only for orchestration-heavy, integration-heavy, migration-prone, or repeatedly confusing modules.

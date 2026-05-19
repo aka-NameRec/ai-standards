@@ -13,6 +13,7 @@
 - [Использование Review Lenses в проекте](#использование-review-lenses-в-проекте)
 - [Использование Structured Artifacts в проекте](#использование-structured-artifacts-в-проекте)
 - [Использование Session Hygiene в проекте](#использование-session-hygiene-в-проекте)
+- [Использование Basic Memory в проекте](#использование-basic-memory-в-проекте)
 - [Использование Agent Usage Hygiene в проекте](#использование-agent-usage-hygiene-в-проекте)
 - [Порядок работы с проектом](#порядок-работы-с-проектом)
 - [Версионирование](#версионирование)
@@ -45,7 +46,7 @@ uv run ai-sync sync-templates --project-root /path/to/project
 Используются четыре слоя:
 
 - `fragments`: прямые базовые правила, которые должны включаться всегда.
-- `features`: опциональные возможности вроде `conport`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `structured-artifacts`, `session-hygiene` и `agent-usage-hygiene`.
+- `features`: опциональные возможности вроде `conport`, `basic-memory`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `structured-artifacts`, `session-hygiene` и `agent-usage-hygiene`.
 - `stacks`: правила, зависящие от технологии или архитектурного стиля, например `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring` или `spring-data-jpa`.
 - `tooling.agents`: опциональные agent adapters вроде `codex` и `cursor` для управляемых локальных workflow templates.
 
@@ -427,10 +428,13 @@ Constraints:
 
 - планирования нетривиальных изменений до реализации
 - явных границ модуля и инвариантов для крупных или рискованных областей
-- Git-tracked decision records для устойчивых проектных решений
+- Git-tracked canonical documentation для устойчивых проектных решений
+- agent-managed working memory, остающейся reviewable в Markdown
 - optional module maps для orchestration-heavy или integration-heavy потоков
 
 Эта возможность сознательно отвергает XML-heavy planning, pseudo-XML knowledge overlays и обязательные machine-oriented code graphs как shared standards.
+
+Предпочитайте Git-tracked Markdown как источник durable project knowledge. Markdown indexing и retrieval layer вроде Basic Memory можно использовать для эффективного поиска и повторного использования этих знаний между сессиями, но он не должен размывать границу между canonical documentation и agent-managed working memory.
 
 Подробная методика применения находится в:
 
@@ -453,7 +457,7 @@ Constraints:
 - предупреждения пользователя, когда продолжать thread становится рискованно
 - подготовки компактных handoff summaries перед продолжением длинных сессий
 - начала нового чата, когда работа меняет фазу или контекст перестаёт быть компактно reviewable
-- повторной загрузки project rules, active context и task artifacts на границах фаз
+- повторной загрузки project rules, canonical documents, working-memory notes и task artifacts на границах фаз
 
 `ai-standards` должен хранить переиспользуемую policy:
 
@@ -462,10 +466,36 @@ Constraints:
 - fresh chats предпочтительны, когда long-session context становится менее надёжным, чем explicit artifacts
 - shared defaults не должны продвигать хрупкие message-count или token-count thresholds
 
+ConPort остаётся полезным для transient operational context и handoff storage. Если проект использует Basic Memory или другой Markdown retrieval layer, предпочитайте его для поиска релевантного Git-tracked knowledge вместо широкой перезагрузки контекста.
+
 Подробная методика применения находится в:
 
 - английском руководстве: [docs/session-hygiene-usage.md](docs/session-hygiene-usage.md)
 - русском руководстве: [docs/session-hygiene-usage.ru.md](docs/session-hygiene-usage.ru.md)
+
+## Использование Basic Memory в проекте
+
+`basic-memory` — это опциональная возможность для проектов, которым нужен Git-backed Markdown retrieval layer для durable knowledge между сессиями.
+
+Используйте `basic-memory`, когда проекту полезны переиспользуемые правила для:
+
+- хранения durable project knowledge в Git-tracked Markdown
+- разделения canonical documentation и agent-managed working memory
+- защиты существующих repository docs от accidental frontmatter injection
+- проверки indexing health после repository events вроде pull, merge, rebase и branch switch
+- запуска явного reindex только тогда, когда это оправдано состоянием graph или изменениями в репозитории
+
+`ai-standards` должен хранить переиспользуемую policy:
+
+- Basic Memory — это retrieval и indexing layer, а не canonical source of truth
+- canonical documentation и working memory должны оставаться разделёнными
+- проектам следует предпочитать `ensure_frontmatter_on_sync=false`, если только они явно не хотят Basic Memory-managed frontmatter
+- обычные edits могут полагаться на auto-sync, а repository boundary events и interrupted indexing требуют status checks и targeted reindex
+
+Подробная методика применения находится в:
+
+- английском руководстве: [docs/basic-memory-usage.md](docs/basic-memory-usage.md)
+- русском руководстве: [docs/basic-memory-usage.ru.md](docs/basic-memory-usage.ru.md)
 
 ## Использование Agent Usage Hygiene в проекте
 

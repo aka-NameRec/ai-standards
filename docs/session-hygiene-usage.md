@@ -60,7 +60,7 @@ Warning is especially important when:
 - older decisions conflict with newer instructions
 - the agent is unsure which constraints still apply
 - review would require reconstructing important context from a long conversation
-- the next step depends on old chat context not captured in an artifact or durable memory
+- the next step depends on old chat context not captured in an artifact, working-memory note, or durable memory
 
 ## Handoff Summary
 
@@ -102,7 +102,7 @@ A fresh chat should start with:
 
 - the handoff summary
 - relevant project rules
-- active context or task artifacts
+- active context, working-memory notes, or task artifacts
 - the next bounded objective
 
 ## Reloading Rules And Durable Context
@@ -111,20 +111,24 @@ At phase boundaries, re-read relevant sources instead of relying only on chat me
 
 - `AGENTS.md`
 - project-local AI rules
-- ConPort active context when available
 - task notes or change plans
 - decision records
 - module contracts or migration notes
+- `docs/ai-memory/**` or equivalent working-memory artifacts when the project uses them
+- ConPort handoff or active context when available
 
 Reload only what is relevant to the next slice. Session hygiene should not become broad context loading by default.
 
 ## Relationship To Other Features
 
-- `conport` stores active context, progress, and durable lessons between sessions.
+- `conport` stores transient operational context and session handoffs between sessions.
+- `basic-memory` can retrieve relevant Git-tracked knowledge and working-memory notes without broad context reloads.
 - `structured-artifacts` provides change plans, decision records, and module contracts that make handoffs concrete.
 - `autonomy-boundaries` defines when long autonomous execution must stop for human review.
 - `reasoning-hygiene` keeps assumptions, edge cases, and verification points explicit.
 - `agent-usage-hygiene` reduces avoidable context and usage waste.
+
+If the project uses a Markdown retrieval layer such as Basic Memory, use it to find relevant canonical documents and working-memory notes instead of loading broad context blindly.
 
 `session-hygiene` focuses specifically on the reliability of the active chat session.
 

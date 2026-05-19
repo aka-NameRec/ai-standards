@@ -1,0 +1,12 @@
+## Basic Memory Usage
+- Use Basic Memory as a retrieval and indexing layer over Git-tracked Markdown knowledge when the project explicitly enables this feature.
+- Treat canonical documentation and agent-managed working memory as different layers even when Basic Memory indexes both.
+- Treat `docs/decisions/**`, `docs/architecture/**`, `MODULE_CONTRACT.md`, and equivalent local artifacts as canonical project knowledge.
+- Treat `docs/ai-memory/**` and equivalent local note areas as agent-managed working memory rather than canonical truth.
+- Before creating or updating canonical documentation through Basic Memory, search existing canonical documents and working-memory notes to avoid duplicates and surface contradictions.
+- Prefer `ensure_frontmatter_on_sync=false` when indexing existing Git-tracked Markdown unless the project explicitly wants Basic Memory to inject and manage frontmatter in repository files.
+- Rely on Basic Memory's normal filesystem sync for ordinary edits inside indexed directories.
+- After `git pull`, `git merge`, `git rebase`, branch switches, or other VCS operations that may change indexed Markdown, check sync health before relying on retrieved context.
+- After mass file moves, renames, deletes, interrupted indexing, or indexing-configuration changes, run an explicit project reindex.
+- Use a full reindex after changing project routing, indexed root paths, permalink behavior, or frontmatter-sync policy.
+- If project status reports interrupted or incomplete embeddings, rebuild embeddings before treating semantic search as up to date.

@@ -35,7 +35,12 @@ def test_render_contains_expected_markers(tmp_path: Path) -> None:
         '  "core/architecture",\n'
         '  "core/error-handling",\n'
         ']\n'
-        'features = ["conport", "design-first-collaboration", "structured-artifacts"]\n'
+        'features = [\n'
+        '  "conport",\n'
+        '  "basic-memory",\n'
+        '  "design-first-collaboration",\n'
+        '  "structured-artifacts",\n'
+        ']\n'
         'stacks = ["python", "fastapi", "vue"]\n'
         'local_overrides = ["docs/ai/project-rules.md"]\n'
         'optional_local_overrides = ["docs/ai/private-rules.local.md"]\n'
@@ -66,11 +71,40 @@ def test_render_contains_expected_markers(tmp_path: Path) -> None:
     assert f"<!-- Source: {REPO_ROOT}" not in result.content
     assert f"<!-- Project: {project_root}" not in result.content
     assert "## Design-First Collaboration" in result.content
+    assert "## Basic Memory Usage" in result.content
     assert "## Lightweight Structured Artifacts" in result.content
     assert "## FastAPI Stack" in result.content
     assert "## Vue Stack" in result.content
     assert "Demo override." in result.content
     assert "Private local override." in result.content
+
+
+def test_basic_memory_feature_renders_reindexing_guidance(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["basic-memory"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    assert "## Basic Memory Usage" in result.content
+    assert "Prefer `ensure_frontmatter_on_sync=false`" in result.content
+    assert "After `git pull`, `git merge`, `git rebase`, branch switches" in result.content
 
 
 def test_java_spring_stack_alias_can_be_rendered(tmp_path: Path) -> None:

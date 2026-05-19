@@ -13,6 +13,7 @@
 - [Using Review Lenses In a Project](#using-review-lenses-in-a-project)
 - [Using Structured Artifacts In a Project](#using-structured-artifacts-in-a-project)
 - [Using Session Hygiene In a Project](#using-session-hygiene-in-a-project)
+- [Using Basic Memory In a Project](#using-basic-memory-in-a-project)
 - [Using Agent Usage Hygiene In a Project](#using-agent-usage-hygiene-in-a-project)
 - [Project Flow](#project-flow)
 - [Versioning](#versioning)
@@ -45,7 +46,7 @@ uv run ai-sync sync-templates --project-root /path/to/project
 Use four layers:
 
 - `fragments`: direct core rules that should always be rendered.
-- `features`: optional capabilities such as `conport`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
+- `features`: optional capabilities such as `conport`, `basic-memory`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
 - `stacks`: technology-specific or architecture-specific rules such as `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring`, or `spring-data-jpa`.
 - `tooling.agents`: optional agent adapters such as `codex` and `cursor` for managed local workflow templates.
 
@@ -431,10 +432,13 @@ Use `structured-artifacts` when a project benefits from reusable rules for:
 
 - change planning before non-trivial implementation
 - explicit module boundaries and invariants for major or risky areas
-- Git-tracked decision records for durable design choices
+- Git-tracked canonical documentation for durable design choices
+- agent-managed working memory that stays reviewable in Markdown
 - optional module maps for orchestration-heavy or integration-heavy flows
 
 This feature intentionally rejects XML-heavy planning, pseudo-XML knowledge overlays, and mandatory machine-oriented code graphs as shared standards.
+
+Prefer Git-tracked Markdown as the source of durable project knowledge. A Markdown indexing and retrieval layer such as Basic Memory may be used to search and reuse that knowledge efficiently across sessions, but it should not blur canonical documentation with agent-managed working memory.
 
 Detailed operational guidance lives in:
 
@@ -457,7 +461,7 @@ Use `session-hygiene` when a project benefits from reusable rules for:
 - warning the user when a thread becomes risky to continue
 - producing compact handoff summaries before continuing long sessions
 - starting a fresh chat when the work changes phase or the context stops being compactly reviewable
-- reloading project rules, active context, and task artifacts at phase boundaries
+- reloading project rules, canonical documents, working-memory notes, and task artifacts at phase boundaries
 
 `ai-standards` owns the reusable policy:
 
@@ -466,10 +470,36 @@ Use `session-hygiene` when a project benefits from reusable rules for:
 - fresh chats are preferred when long-session context becomes harder to trust than explicit artifacts
 - shared defaults should avoid brittle message-count or token-count thresholds
 
+ConPort remains useful for transient operational context and handoff storage. If a project uses Basic Memory or another Markdown retrieval layer, prefer it for locating relevant Git-tracked knowledge instead of relying on broad context reloads.
+
 Detailed operational guidance lives in:
 
 - English guide: [docs/session-hygiene-usage.md](docs/session-hygiene-usage.md)
 - Russian guide: [docs/session-hygiene-usage.ru.md](docs/session-hygiene-usage.ru.md)
+
+## Using Basic Memory In a Project
+
+`basic-memory` is an optional feature for projects that want a Git-backed Markdown retrieval layer for durable knowledge across sessions.
+
+Use `basic-memory` when a project benefits from reusable rules for:
+
+- keeping durable project knowledge in Git-tracked Markdown
+- separating canonical documentation from agent-managed working memory
+- protecting existing repository docs from accidental frontmatter injection
+- checking indexing health after repository events such as pulls, merges, rebases, and branch switches
+- running explicit reindex only when graph health or repository changes justify it
+
+`ai-standards` owns the reusable policy:
+
+- Basic Memory is a retrieval and indexing layer, not the canonical source of truth
+- canonical documentation and working memory must stay distinct
+- projects should prefer `ensure_frontmatter_on_sync=false` unless they explicitly want Basic Memory-managed frontmatter
+- ordinary edits may rely on auto-sync, while repository boundary events and interrupted indexing require status checks and targeted reindex
+
+Detailed operational guidance lives in:
+
+- English guide: [docs/basic-memory-usage.md](docs/basic-memory-usage.md)
+- Russian guide: [docs/basic-memory-usage.ru.md](docs/basic-memory-usage.ru.md)
 
 ## Using Agent Usage Hygiene In a Project
 

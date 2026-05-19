@@ -11,6 +11,7 @@ fragments = [
 
 features = [
   "conport",
+  "basic-memory",
   "design-first-collaboration",
   "reasoning-hygiene",
   "autonomy-boundaries",

@@ -33,6 +33,8 @@
 
 Все четыре шаблона используют обычный Markdown и рассчитаны на то, чтобы быть короткими, review-friendly и локально адаптируемыми.
 
+Эта feature также хорошо сочетается с Markdown retrieval layer вроде Basic Memory, если canonical documentation и agent working memory остаются явно разделёнными.
+
 ## Что feature сознательно отвергает
 
 Не считайте следующую практику shared default:
@@ -122,8 +124,39 @@ features = [
 
 - `design-first-collaboration` задаёт, когда intent, boundaries и non-goals должны быть вынесены наружу.
 - `reasoning-hygiene` улучшает качество анализа, стоящего за этими артефактами.
-- `conport` хранит active context, progress и развивающуюся project memory.
+- `basic-memory` может индексировать canonical documentation и working-memory notes для retrieval между сессиями.
+- `conport` хранит transient operational context и session handoffs.
 - `structured-artifacts` добавляет Git-reviewable документы для планов, контрактов и устойчивых решений.
+
+## Canonical Documentation, Working Memory и ConPort
+
+Считайте canonical documentation:
+
+- `docs/decisions/**`
+- `docs/architecture/**`
+- `MODULE_CONTRACT.md`
+- эквивалентные локальные project artifacts, которые фиксируют принятые ограничения или контракты
+
+Считайте agent working memory:
+
+- `docs/ai-memory/**`
+- investigation notes, которые ещё развиваются
+- временные findings, ещё не принятые как canonical
+
+Используйте agent working memory для:
+
+- active context, полезного для следующей задачи
+- evolving rationale или investigation notes
+- open questions, gotchas и handoff notes
+- ссылок на canonical documents
+
+Переносите знание из working memory в canonical documentation только по явному запросу пользователя.
+
+Перед изменением canonical documentation:
+
+- ищите существующий decision record, module contract или architecture note
+- предпочитайте обновление существующего документа созданию дубля
+- при противоречии не разрешайте конфликт молча, а поднимайте его явно
 
 ## ConPort и decision records
 
@@ -131,8 +164,8 @@ features = [
 
 - active context
 - недавнего прогресса
-- извлечённых уроков
-- рабочей rationale, которая ещё может меняться
+- transient handoff state
+- compact investigation summaries
 
 Используйте decision record для:
 
@@ -141,6 +174,20 @@ features = [
 - оформленного анализа альтернатив, который должен жить вместе с кодовой базой
 
 Не нужно зеркалить каждую запись ConPort в decision record.
+
+## Примеры явного promotion
+
+Примеры, которые можно писать в `docs/ai-memory/**` без отдельного запроса:
+
+- обновление investigation note после трассировки бага
+- фиксация implementation gotcha для следующей сессии
+- обновление файла open questions после частичного исследования
+
+Примеры, которые требуют явного запроса перед изменением canonical documentation:
+
+- фиксация нового архитектурного решения в `docs/decisions/**`
+- обновление module contract после согласования новой границы модуля
+- reconciliation или supersede существующего design decision
 
 ## Практика внедрения
 
