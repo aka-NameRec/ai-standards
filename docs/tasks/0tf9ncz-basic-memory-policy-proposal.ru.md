@@ -4,7 +4,7 @@
 
 ## Статус
 
-Подготовлено как change proposal. В shared fragments пока не внедрено.
+Реализовано на feature-ветке и подготовлено к слиянию в `main`.
 
 ## Цель
 
@@ -182,9 +182,9 @@
 - `uv run mypy`
 - `uv run python -m pytest`
 
-## Ожидаемый результат
+## Результат
 
-После внедрения `ai-standards` официально поддержит модель памяти, в которой:
+Теперь эта ветка делает так, что `ai-standards` официально поддерживает модель памяти, в которой:
 
 - Git-tracked Markdown является durable project knowledge source of truth;
 - canonical documentation защищена от autonomous edits;

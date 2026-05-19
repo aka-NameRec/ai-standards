@@ -4,7 +4,7 @@ Russian localized version: [0tf9ncz-basic-memory-policy-proposal.ru.md](0tf9ncz-
 
 ## Status
 
-Prepared as a change proposal. Not implemented in shared fragments yet.
+Implemented on the feature branch and prepared for merge into `main`.
 
 ## Goal
 
@@ -182,9 +182,9 @@ When implemented, verify with:
 - `uv run mypy`
 - `uv run python -m pytest`
 
-## Expected Outcome
+## Outcome
 
-After implementation, `ai-standards` will officially support a memory model where:
+The branch now makes `ai-standards` officially support a memory model where:
 
 - Git-tracked Markdown is the durable project knowledge source of truth.
 - canonical documentation is protected from autonomous edits;

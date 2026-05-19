@@ -6,6 +6,8 @@
 
 Accepted
 
+Частично superseded 2026-05-19 документом [2026-05-19-add-basic-memory-feature.ru.md](2026-05-19-add-basic-memory-feature.ru.md) в части роли ConPort в общей memory model.
+
 ## Дата
 
 2026-04-25

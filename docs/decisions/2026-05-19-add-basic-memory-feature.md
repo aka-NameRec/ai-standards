@@ -6,6 +6,8 @@ Russian localized version: [2026-05-19-add-basic-memory-feature.ru.md](2026-05-1
 
 Accepted
 
+This decision partially supersedes [2026-04-14-replace-grace-with-structured-artifacts.md](2026-04-14-replace-grace-with-structured-artifacts.md) and [2026-04-25-add-session-hygiene-feature.md](2026-04-25-add-session-hygiene-feature.md) for the role of ConPort in the shared memory model.
+
 ## Date
 
 2026-05-19
@@ -78,6 +80,9 @@ Rejected because existing Git-tracked documentation may not permit mass metadata
 ## Affected Modules
 
 - `registry.toml`
+- `fragments/tools/conport.md`
+- `fragments/process/structured-artifacts.md`
+- `fragments/process/session-hygiene.md`
 - `fragments/tools/basic-memory.md`
 - `README.md`
 - `README.ru.md`
@@ -88,6 +93,7 @@ Rejected because existing Git-tracked documentation may not permit mass metadata
 - `docs/session-hygiene-usage.md`
 - `docs/session-hygiene-usage.ru.md`
 - `ai.project.toml`
+- `templates/project_manifest.toml`
 - `AGENTS.md`
 - `tests/test_ai_sync.py`
 

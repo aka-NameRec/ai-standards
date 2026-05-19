@@ -6,6 +6,8 @@ Russian localized version: [2026-04-25-add-session-hygiene-feature.ru.md](2026-0
 
 Accepted
 
+Partially superseded on 2026-05-19 by [2026-05-19-add-basic-memory-feature.md](2026-05-19-add-basic-memory-feature.md) for the role of ConPort in the shared memory model.
+
 ## Date
 
 2026-04-25

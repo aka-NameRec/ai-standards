@@ -6,6 +6,8 @@ Russian localized version: [2026-04-14-replace-grace-with-structured-artifacts.r
 
 Accepted
 
+Partially superseded on 2026-05-19 by [2026-05-19-add-basic-memory-feature.md](2026-05-19-add-basic-memory-feature.md) for the role of ConPort in the shared memory model.
+
 ## Date
 
 2026-04-14
