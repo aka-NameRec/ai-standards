@@ -432,6 +432,8 @@ Constraints:
 - agent-managed working memory, остающейся reviewable в Markdown
 - optional module maps для orchestration-heavy или integration-heavy потоков
 
+Если проект не задаёт более строгую локальную конвенцию, `ai-standards` считает `YYYY-MM-DD-<topic-slug>.md` паттерном имён по умолчанию для canonical notes в `docs/decisions/**` и `docs/architecture/**`.
+
 Эта возможность сознательно отвергает XML-heavy planning, pseudo-XML knowledge overlays и обязательные machine-oriented code graphs как shared standards.
 
 Предпочитайте Git-tracked Markdown как источник durable project knowledge. Markdown indexing и retrieval layer вроде Basic Memory можно использовать для эффективного поиска и повторного использования этих знаний между сессиями, но он не должен размывать границу между canonical documentation и agent-managed working memory.

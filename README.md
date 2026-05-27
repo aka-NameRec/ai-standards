@@ -436,6 +436,8 @@ Use `structured-artifacts` when a project benefits from reusable rules for:
 - agent-managed working memory that stays reviewable in Markdown
 - optional module maps for orchestration-heavy or integration-heavy flows
 
+Unless a project already defines a stricter local convention, `ai-standards` treats `YYYY-MM-DD-<topic-slug>.md` as the default filename pattern for canonical notes under `docs/decisions/**` and `docs/architecture/**`.
+
 This feature intentionally rejects XML-heavy planning, pseudo-XML knowledge overlays, and mandatory machine-oriented code graphs as shared standards.
 
 Prefer Git-tracked Markdown as the source of durable project knowledge. A Markdown indexing and retrieval layer such as Basic Memory may be used to search and reuse that knowledge efficiently across sessions, but it should not blur canonical documentation with agent-managed working memory.

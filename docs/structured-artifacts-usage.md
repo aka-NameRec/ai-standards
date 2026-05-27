@@ -96,6 +96,8 @@ Create a decision record when:
 - the answer to "why did we do it this way?" will matter later
 - the decision should survive code review and commit history browsing
 
+Unless a project defines a stricter local convention, use `YYYY-MM-DD-<topic-slug>.md` for files under `docs/decisions/**` and `docs/architecture/**`.
+
 Create a module map only when:
 
 - the flow is orchestration-heavy

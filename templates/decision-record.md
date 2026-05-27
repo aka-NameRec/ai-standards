@@ -1,5 +1,7 @@
 # DECISION: <slug>
 
+Filename: `YYYY-MM-DD-<topic-slug>.md`
+
 ## Status
 - Proposed | Accepted | Rejected | Superseded
 

@@ -21,6 +21,7 @@
 - Use decision records and module contracts for durable repository history.
 - Use agent working memory for evolving context, temporary findings, and notes that are not yet accepted as canonical documentation.
 - Keep one decision record focused on one choice, its rationale, alternatives, and consequences.
+- Unless a project defines a stricter local convention, name files under `docs/decisions/**` and `docs/architecture/**` as `YYYY-MM-DD-<topic-slug>.md`.
 
 ## Canonical Documentation And Agent Working Memory
 - Treat `docs/decisions/**`, `docs/architecture/**`, `MODULE_CONTRACT.md`, and equivalent local artifacts as canonical project knowledge.
