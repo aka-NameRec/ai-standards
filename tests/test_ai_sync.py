@@ -5,8 +5,12 @@ import sys
 from pathlib import Path
 
 from scripts.ai_sync import (
+    CLAUDE_BRIDGE_FILE,
+    CLAUDE_BRIDGE_MARKER,
+    DEFAULT_OUTPUT_NAME,
     SyncError,
     build_rendered_content,
+    init_claude_bridge,
     init_project,
     sync_project_templates,
     write_rendered_content,
@@ -790,6 +794,52 @@ def test_init_project_seeds_current_ai_standards_version(tmp_path: Path) -> None
 
     assert f'ai_standards_version = "{CURRENT_AI_STANDARDS_VERSION}"' in manifest
     assert 'project_version = "replace-me"' in manifest
+
+
+def test_init_claude_bridge_creates_claude_md(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+
+    init_claude_bridge(project_root)
+
+    bridge_path = project_root / CLAUDE_BRIDGE_FILE
+    assert bridge_path.exists()
+    content = bridge_path.read_text(encoding="utf-8")
+    assert CLAUDE_BRIDGE_MARKER in content
+    assert f"@{DEFAULT_OUTPUT_NAME}" in content
+
+
+def test_init_claude_bridge_respects_custom_output_name(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+
+    init_claude_bridge(project_root, output_name="CUSTOM.md")
+
+    content = (project_root / CLAUDE_BRIDGE_FILE).read_text(encoding="utf-8")
+    assert "@CUSTOM.md" in content
+
+
+def test_init_claude_bridge_skips_unmanaged_claude_md(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    existing_content = "# My custom CLAUDE.md\n\nDo not overwrite me.\n"
+    (project_root / CLAUDE_BRIDGE_FILE).write_text(existing_content, encoding="utf-8")
+
+    init_claude_bridge(project_root)
+
+    assert (project_root / CLAUDE_BRIDGE_FILE).read_text(encoding="utf-8") == existing_content
+
+
+def test_init_claude_bridge_updates_managed_claude_md(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+
+    init_claude_bridge(project_root, output_name="OLD.md")
+    init_claude_bridge(project_root, output_name="NEW.md")
+
+    content = (project_root / CLAUDE_BRIDGE_FILE).read_text(encoding="utf-8")
+    assert "@NEW.md" in content
+    assert "@OLD.md" not in content
 
 
 def test_ai_sync_console_script_resolves_help(tmp_path: Path) -> None:
