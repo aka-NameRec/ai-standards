@@ -4,6 +4,7 @@
 
 - [Структура](#структура)
 - [Быстрый старт](#быстрый-старт)
+- [Интеграция с Claude Code](#интеграция-с-claude-code)
 - [Конфигурация только через манифест](#конфигурация-только-через-манифест)
 - [Правила, специфичные для проекта](#правила-специфичные-для-проекта)
 - [Agent Adapters](#agent-adapters)
@@ -38,6 +39,23 @@ uv run ai-sync render --project-root /path/to/project
 uv run ai-sync check --project-root /path/to/project
 uv run ai-sync sync-templates --project-root /path/to/project
 ```
+
+## Интеграция с Claude Code
+
+`AGENTS.md` — кросс-инструментальный стандарт, который нативно читают Codex CLI, Gemini CLI, GitHub Copilot, Cursor, Aider и Windsurf. Claude Code читает `CLAUDE.md`.
+
+Рекомендуемая схема с единым источником истины:
+
+1. `AGENTS.md` генерируется через `ai-sync render`.
+2. Тонкий `CLAUDE.md` импортирует его:
+
+```bash
+uv run ai-sync init-claude-bridge --project-root /path/to/project
+```
+
+Команда создаёт управляемый `CLAUDE.md` с единственной строкой `@AGENTS.md`. Claude Code разворачивает импорт при запуске — все агенты получают одни и те же правила без дублирования.
+
+`init-claude-bridge` пропускает любой уже существующий `CLAUDE.md`, не помеченный как управляемый ai-standards.
 
 ## Конфигурация только через манифест
 
