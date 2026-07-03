@@ -26,6 +26,8 @@
 - Use `select_related` and `prefetch_related` deliberately for related-object fetching.
 - Be explicit about queryset shape in request-sensitive paths; do not rely on incidental lazy loading for correctness or performance.
 - Extract reusable query construction into custom `QuerySet` or manager methods, but do not hide business workflows there.
+- When you retain or accumulate objects but only need a field from each (caches, memoization maps, returned collections, loop accumulators), keep the derived value — a primary key, a boolean, a small tuple — not the ORM instance or queryset. Instances pin their whole object graph, so resident memory scales with the number of objects held, independent of how long they live. Re-fetch by id at the point of use if the full object is genuinely needed.
+- When only specific columns are needed from a query, use `values()` / `values_list()` instead of materializing full model instances.
 
 ### Writes & Transactions
 - Use transactions deliberately around multi-step writes that must succeed or fail as one unit.
