@@ -1103,8 +1103,8 @@ def test_sync_creates_infra_and_skill_when_chroma_enabled(tmp_path: Path) -> Non
     results = sync_project_templates(project_root)
     statuses = [result.status for result in results]
 
-    # codex(2) + claude(1) + kilo(2) + cursor(2) agent templates + 2 infra = 9
-    assert statuses.count("created") == 9
+    # codex(2) + claude(2) + kilo(2) + cursor(2) agent templates + 2 infra = 10
+    assert statuses.count("created") == 10
     assert (project_root / ".ai-standards" / "scripts" / "code_index.py").exists()
     assert (project_root / ".ai-standards" / "code-index.toml").exists()
     assert (
@@ -1113,6 +1113,7 @@ def test_sync_creates_infra_and_skill_when_chroma_enabled(tmp_path: Path) -> Non
     assert (
         project_root / ".claude/commands/deploy-ai-knowledge-stack.md"
     ).exists()
+    assert (project_root / ".claude/commands/simplify-review.md").exists()
     assert (
         project_root / ".agents/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md"
     ).exists()

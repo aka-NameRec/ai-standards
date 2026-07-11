@@ -101,6 +101,11 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
     "claude": (
         AgentTemplate(
             agent="claude",
+            source_relative_path="templates/review-lenses/simplify-review.claude.md",
+            destination_relative_path=".claude/commands/simplify-review.md",
+        ),
+        AgentTemplate(
+            agent="claude",
             source_relative_path="templates/ai-infrastructure/deploy-ai-knowledge-stack.claude.md",
             destination_relative_path=".claude/commands/deploy-ai-knowledge-stack.md",
             feature="chroma",
