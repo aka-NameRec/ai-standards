@@ -5,7 +5,7 @@
 # ///
 """Freshness-gated Chroma code index for a project.
 
-Managed by ai-standards. Generalized from a DevCats reference implementation.
+Managed by ai-standards. Generalized from a battle-tested reference implementation.
 Lives at ``<project>/.ai-standards/scripts/code_index.py``; configuration is read
 from ``<project>/.ai-standards/code-index.toml``.
 

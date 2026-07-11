@@ -25,7 +25,7 @@ Add a `chroma` feature and a reusable deployment skill to `ai-standards` so the 
 
 - Docker-first Chroma deployment (local `PersistentClient` is the default; Docker remains a documented option).
 - Graphify generalization (mentioned as optional in the skill, not templated here).
-- Migrating existing downstream workspaces (DevCats, cockpit) to the new layout — separate follow-up.
+- Migrating existing downstream workspaces (cockpit and other existing workspaces) to the new layout — separate follow-up.
 - Committing, version bump, and release tagging — handled per the release workflow after review.
 
 ## Touched Modules
@@ -49,7 +49,7 @@ Add a `chroma` feature and a reusable deployment skill to `ai-standards` so the 
 - `AgentTemplate` gains `feature: str | None = None`; templates with a feature sync only when that feature is enabled.
 - New `INFRA_TEMPLATES` tuple of agent-agnostic templates (gated by feature) synced alongside agent templates.
 - `sync_project_templates` extends to gate agent templates by feature and to sync `INFRA_TEMPLATES`.
-- Deployment skill source files live in `templates/ai-infrastructure/`; the `code_index.py` template is generalized from the DevCats reference (paths under `.ai-standards/`, cross-file batching, atomic resumable manifest).
+- Deployment skill source files live in `templates/ai-infrastructure/`; the `code_index.py` template is generalized from a battle-tested reference implementation (paths under `.ai-standards/`, cross-file batching, atomic resumable manifest).
 
 ## Flow
 
@@ -63,7 +63,7 @@ Add a `chroma` feature and a reusable deployment skill to `ai-standards` so the 
 
 ## Risks
 
-- Generalizing `code_index.py` without a live workspace to test the full Chroma build against — mitigate by keeping the proven DevCats algorithm intact and only abstracting paths/config.
+- Generalizing `code_index.py` without a live workspace to test the full Chroma build against — mitigate by keeping the proven reference algorithm intact and only abstracting paths/config.
 - Adding a `feature` gate could change `sync_project_templates` result ordering and break existing exact-list test assertions — mitigate by gating new templates only (existing `simplify-review` stays ungated), so non-`chroma` manifests are unaffected.
 - Four-agent frontmatter differences — mitigate with one shared `SKILL.md` for codex+kilo, plus cursor and claude variants.
 
@@ -92,8 +92,8 @@ Add a `chroma` feature and a reusable deployment skill to `ai-standards` so the 
 
 - Delivered the `chroma` feature (fragment + bilingual usage guide), registry and manifest wiring, and a feature-gated deployment skill propagated to four agents (Codex, Claude, Kilo, Cursor).
 - Added `claude` and `kilo` agent adapters; `AgentTemplate` gained an optional `feature` gate; `INFRA_TEMPLATES` materializes `.ai-standards/scripts/code_index.py` and `.ai-standards/code-index.toml` when `chroma` is enabled.
-- `code_index.py` generalized from the DevCats reference (Chroma-only, paths under `.ai-standards/`, cross-file batched upsert, atomic resumable manifest).
+- `code_index.py` generalized from a battle-tested reference implementation (Chroma-only, paths under `.ai-standards/`, cross-file batched upsert, atomic resumable manifest).
 - Extended `basic-memory` with per-workspace `--project` isolation; added the `conport-usage` bilingual guide.
 - Verification: `render`/`check` pass, `AGENTS.md` includes Chroma and Basic Memory isolation sections; `ruff`, `mypy`, and `pytest` (45 tests, +4 new) pass.
 - Deviation: `simplify-review` was added to `kilo` (reuses the existing SKILL.md source) but deferred for `claude` (would need a dedicated command source); noted as follow-up.
-- Follow-up: commit on the working branch (message approval pending), version bump and release tagging per the release workflow, and migrating DevCats/cockpit to the new layout.
+- Follow-up: commit on the working branch (message approval pending), version bump and release tagging per the release workflow, and migrating cockpit and other existing workspaces to the new layout.

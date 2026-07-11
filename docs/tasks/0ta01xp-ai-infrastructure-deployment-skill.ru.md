@@ -25,7 +25,7 @@
 
 - Развёртывание Chroma через Docker по умолчанию (по умолчанию локальный `PersistentClient`; Docker остаётся задокументированной опцией).
 - Обобщение Graphify (упоминается в навыке как опциональное, здесь не шаблонизируется).
-- Миграция существующих downstream-рабочих пространств (DevCats, cockpit) на новый layout — отдельная follow-up-задача.
+- Миграция существующих downstream-рабочих пространств (cockpit and other existing workspaces) на новый layout — отдельная follow-up-задача.
 - Коммиты, bump версии и release-tagging — выполняются по release-workflow после ревью.
 
 ## Затронутые модули
@@ -49,7 +49,7 @@
 - `AgentTemplate` получает `feature: str | None = None`; шаблоны с фичей синхронизируются только при включённой фиче.
 - Новый кортеж `INFRA_TEMPLATES` агент-независимых шаблонов (с гейтом по фиче), синхронизируемых вместе с шаблонами агентов.
 - `sync_project_templates` расширяется: гейтит шаблоны агентов по фиче и синхронизирует `INFRA_TEMPLATES`.
-- Исходники навыка развёртывания лежат в `templates/ai-infrastructure/`; шаблон `code_index.py` обобщён из эталона DevCats (пути под `.ai-standards/`, cross-file батчинг, atomic resumable-манифест).
+- Исходники навыка развёртывания лежат в `templates/ai-infrastructure/`; шаблон `code_index.py` обобщён из production-эталона (пути под `.ai-standards/`, cross-file батчинг, atomic resumable-манифест).
 
 ## Порядок работ
 
@@ -63,7 +63,7 @@
 
 ## Риски
 
-- Обобщение `code_index.py` без живого рабочего пространства для полной сборки Chroma — смягчение: сохранить доказанный алгоритм DevCats нетронутым, абстрагировать только пути/конфиг.
+- Обобщение `code_index.py` без живого рабочего пространства для полной сборки Chroma — смягчение: сохранить доказанный эталонный алгоритм нетронутым, абстрагировать только пути/конфиг.
 - Добавление гейта `feature` может изменить порядок результатов `sync_project_templates` и сломать существующие точные утверждения в тестах — смягчение: гейтить только новые шаблоны (существующий `simplify-review` остаётся без гейта), так что манифесты без `chroma` не затрагиваются.
 - Различия frontmatter четырёх сред — смягчение: один общий `SKILL.md` для codex+kilo, плюс варианты cursor и claude.
 
@@ -92,8 +92,8 @@
 
 - Доставлена фича `chroma` (фрагмент + двуязычное руководство), проводка реестра и манифеста, и feature-gated навык развёртывания, распространяемый на четыре среды (Codex, Claude, Kilo, Cursor).
 - Добавлены агент-адаптеры `claude` и `kilo`; `AgentTemplate` получил опциональный гейт `feature`; `INFRA_TEMPLATES` материализует `.ai-standards/scripts/code_index.py` и `.ai-standards/code-index.toml` при включённой `chroma`.
-- `code_index.py` обобщён из эталона DevCats (только Chroma, пути под `.ai-standards/`, cross-file batch upsert, atomic resumable-манифест).
+- `code_index.py` обобщён из production-эталона (только Chroma, пути под `.ai-standards/`, cross-file batch upsert, atomic resumable-манифест).
 - Расширен `basic-memory` правилом per-workspace изоляции `--project`; добавлено двуязычное руководство `conport-usage`.
 - Верификация: `render`/`check` проходят, `AGENTS.md` содержит секции Chroma и изоляции Basic Memory; `ruff`, `mypy` и `pytest` (45 тестов, +4 новых) проходят.
 - Отклонение: `simplify-review` добавлен для `kilo` (переиспользует существующий SKILL.md-источник), но отложен для `claude` (потребовал бы отдельного command-источника); отмечено как follow-up.
-- Follow-up: коммит на рабочей ветке (утверждение сообщения ожидается), bump версии и release-tagging по release-workflow, миграция DevCats/cockpit на новый layout.
+- Follow-up: коммит на рабочей ветке (утверждение сообщения ожидается), bump версии и release-tagging по release-workflow, миграция cockpit и других существующих пространств на новый layout.

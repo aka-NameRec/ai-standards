@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Deploy AI Knowledge Stack
 
-This skill deploys the AI knowledge stack in a project: ConPort (operational context), Basic Memory (documentation retrieval), and Chroma (semantic code search). It follows an order that eliminates the setup races observed in a prior DevCats deployment (synchronous polling burn, Basic Memory bootstrap race and destructive reset, cloud-routing errors, ConPort detection walk-up, and inconsistent MCP wiring).
+This skill deploys the AI knowledge stack in a project: ConPort (operational context), Basic Memory (documentation retrieval), and Chroma (semantic code search). It follows an order that eliminates the setup races observed in a prior production deployment (synchronous polling burn, Basic Memory bootstrap race and destructive reset, cloud-routing errors, ConPort detection walk-up, and inconsistent MCP wiring).
 
 Deploy only the layers enabled in the project manifest (`ai.project.toml` `features`). If the manifest is absent, ask the user which layers to deploy.
 

@@ -14,8 +14,8 @@ Accepted
 
 `ai-standards` already standardizes usage policy for `conport` and `basic-memory`, and both have a rendered fragment plus (for Basic Memory) a usage guide. Two gaps remained:
 
-1. **No Chroma standard.** Semantic code search over repository source was deployed ad hoc in downstream workspaces (notably DevCats) but was absent from `ai-standards`: no fragment, no registry entry, no usage guide, no skill. Chroma appeared only as an undocumented gitignored runtime artifact under `context_portal/` produced by ConPort's own internal vector store, which is a different concern.
-2. **No deployment skill.** `ai-standards` standardizes how to *use* tools ("when the MCP server is available") but never how to *deploy* them. A real DevCats setup session (GPT-5 family) burned roughly 22.8 million tokens — about 80% of a five-hour window — almost entirely on infrastructure: synchronous polling of a long Chroma build, a per-file embedding bottleneck and a mid-build manifest crash, a Basic Memory bootstrap race that ended in a destructive database reset, recurring cloud-routing errors, ConPort workspace detection walking up to `$HOME`, and inconsistent MCP wiring across clients (Kilo lacked the ConPort server that Codex had).
+1. **No Chroma standard.** Semantic code search over repository source was deployed ad hoc in downstream workspaces (notably in a large multi-repository workspace) but was absent from `ai-standards`: no fragment, no registry entry, no usage guide, no skill. Chroma appeared only as an undocumented gitignored runtime artifact under `context_portal/` produced by ConPort's own internal vector store, which is a different concern.
+2. **No deployment skill.** `ai-standards` standardizes how to *use* tools ("when the MCP server is available") but never how to *deploy* them. A real-world setup session (GPT-5 family) burned roughly 22.8 million tokens — about 80% of a five-hour window — almost entirely on infrastructure: synchronous polling of a long Chroma build, a per-file embedding bottleneck and a mid-build manifest crash, a Basic Memory bootstrap race that ended in a destructive database reset, recurring cloud-routing errors, ConPort workspace detection walking up to `$HOME`, and inconsistent MCP wiring across clients (Kilo lacked the ConPort server that Codex had).
 
 The team's goal is to unify the AI knowledge stack and its deployment so the expensive setup is done once and reused, instead of rediscovered per project.
 
@@ -47,7 +47,7 @@ Invariant: ConPort internal vectors, the Chroma code index, and Basic Memory emb
 
 ### Deployment skill (`templates/ai-infrastructure/`)
 
-A manually invoked skill, propagated to four agents (Codex, Claude, Kilo, Cursor), that deploys the stack in a project following an order that eliminates the races observed in DevCats:
+A manually invoked skill, propagated to four agents (Codex, Claude, Kilo, Cursor), that deploys the stack in a project following an order that eliminates the races observed in a prior large-scale deployment:
 
 1. Token-cheap pre-flight: read layout once and summarize; never poll.
 2. ConPort: create `context_portal/` before relying on detection (else it walks to `$HOME`); `workspace_id` is the project root.
@@ -62,7 +62,7 @@ ai-standards-managed infrastructure in a downstream project lives under `.ai-sta
 
 ```
 .ai-standards/
-├── scripts/code_index.py   # managed template (generalized from DevCats)
+├── scripts/code_index.py   # managed template (generalized from a production reference implementation)
 ├── code-index.toml         # managed starter config (collections, roots, chunking)
 ├── chroma/                 # runtime sqlite (gitignored)
 └── state/                  # manifest.json (gitignored)
@@ -83,7 +83,7 @@ ai-standards-managed infrastructure in a downstream project lives under `.ai-sta
 
 ## Alternatives Considered
 
-### Keep deployment knowledge only in DevCats `code_index.py`
+### Keep deployment knowledge only in the original `code_index.py`
 
 Rejected because the implementation would be rediscovered per project, and the race conditions and token-cost traps are operational, not project-specific. They belong in a shared standard.
 
@@ -104,13 +104,13 @@ Considered and deferred. `chroma` is the natural trigger because the code-index 
 ### Benefits
 
 - a downstream project enables `chroma` and gets usage rules, infra templates, and a deployment skill in one step;
-- the DevCats token-cost traps (synchronous polling, per-file upsert, manifest crash, BM reset, cloud routing, detection walk-up, MCP drift) are encoded as preventive ordering in the skill;
+- the token-cost traps from that deployment (synchronous polling, per-file upsert, manifest crash, BM reset, cloud routing, detection walk-up, MCP drift) are encoded as preventive ordering in the skill;
 - four agent environments receive managed skill copies through `ai-sync sync-templates`.
 
 ### Costs Or Tradeoffs
 
 - the repository carries a new feature, usage guide pair, skill templates, an infra script template, and additional `ai_sync.py` logic with tests;
-- the `code_index.py` template must be generalized from the DevCats-specific implementation and maintained as the reference;
+- the `code_index.py` template must be generalized from the original production implementation and maintained as the reference;
 - teams that enable `chroma` must run the deployment skill to materialize the infrastructure.
 
 ## Affected Modules

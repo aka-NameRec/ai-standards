@@ -6,7 +6,7 @@ Russian localized version: [0thzm41-proposal-graphify-integration.ru.md](0thzm41
 
 ## Context
 
-`ai-standards` now standardizes usage policy and deployment for ConPort, Basic Memory, and Chroma (task `0ta01xp`). A structural code-analysis layer is the remaining gap. DevCats already uses Graphify (`graphify` CLI) for `broadleaf/backend`: `graphify update .` produces `graphify-out/graph.json` (~9k nodes / ~23k edges) and exposes `query` / `path` / `explain` operations over the code-structure graph.
+`ai-standards` now standardizes usage policy and deployment for ConPort, Basic Memory, and Chroma (task `0ta01xp`). A structural code-analysis layer is the remaining gap. Graphify is already in use in a large backend codebase: `graphify update .` produces a `graphify-out/graph.json` (~9k nodes / ~23k edges) and exposes `query` / `path` / `explain` operations over the code-structure graph.
 
 Graphify is **descriptive** (it captures what the code structurally IS), which is a different nature from a **normative** module contract (what the code SHOULD be). This distinction governs the whole proposal.
 
@@ -20,7 +20,7 @@ Add `graphify` as an **opt-in feature** (like `chroma`), scoped to two complemen
 ### Explicit Non-Goals
 
 - Graphify does **not** replace authored module contracts. Non-goals, invariants, failure boundaries, and ownership are normative and cannot be derived from code structure.
-- Graphify is **not** a default feature. It targets large, layered, integration-heavy codebases (broadleaf-scale); for small or medium projects it is overhead.
+- Graphify is **not** a default feature. It targets large, layered, integration-heavy codebases (large-scale); for small or medium projects it is overhead.
 - Graphify does **not** store contracts. It stores a structural graph used to generate maps and verify contract facts.
 
 ## Deployment Skill Integration (fire-and-forget)
@@ -54,17 +54,17 @@ ai-standards-managed Graphify artifacts live under `.ai-standards/`, consistent 
 .ai-standards/
 ├── scripts/
 │   └── code_index.py        # extended with graphify refresh/query subcommands (or a sibling script)
-├── graphify-out/            # per-repo graph.json (gitignored runtime, or repo-local per DevCats precedent)
+├── graphify-out/            # per-repo graph.json (gitignored runtime, or repo-local per the original deployment's precedent)
 └── state/                   # per-target graph state (gitignored runtime)
 ```
 
-Configuration of graph targets is declared in the existing `.ai-standards/code-index.toml` under a `[[graph]]` section (DevCats precedent), so one config drives both Chroma collections and Graphify targets.
+Configuration of graph targets is declared in the existing `.ai-standards/code-index.toml` under a `[[graph]]` section (per the original deployment), so one config drives both Chroma collections and Graphify targets.
 
 ## Open Design Questions (for the later design-first pass)
 
 - Per-language support boundaries and how to express them (Graphify coverage differs by language).
 - Whether Graphify refresh/query lives in the existing `code_index.py` wrapper or a sibling script.
-- Whether `graphify-out/` is workspace-central (`.ai-standards/`) or repo-local (DevCats used repo-local `broadleaf/backend/graphify-out/`).
+- Whether `graphify-out/` is workspace-central (`.ai-standards/`) or repo-local (the original deployment used repo-local graph output).
 - Contract structured-fact schema: which fields are machine-checkable (`depends_on`, `layer`, `public_api`, `forbidden_callers`) and how they are declared in `MODULE_CONTRACT.md` (frontmatter block vs separate structured file).
 - Verification output format for contract-invariant drift (report-only vs failing check).
 
