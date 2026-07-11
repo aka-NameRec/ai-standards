@@ -39,5 +39,5 @@ files = ["scripts", "tests"]
 mypy_path = "typings"
 
 [tool.ai-standards]
-version = "2.0.1"
-release_date = "2026-05-27"
+version = "2.1.0"
+release_date = "2026-07-11"
