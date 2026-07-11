@@ -56,6 +56,7 @@ class AgentTemplate:
     agent: str
     source_relative_path: str
     destination_relative_path: str
+    feature: str | None = None
 
 
 @dataclass(frozen=True)
@@ -77,6 +78,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/review-lenses/simplify-review.SKILL.md",
             destination_relative_path=".codex/skills/review-lenses/simplify-review/SKILL.md",
         ),
+        AgentTemplate(
+            agent="codex",
+            source_relative_path="templates/ai-infrastructure/deploy-ai-knowledge-stack.SKILL.md",
+            destination_relative_path=".codex/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md",
+            feature="chroma",
+        ),
     ),
     "cursor": (
         AgentTemplate(
@@ -84,8 +91,53 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/review-lenses/simplify-review.cursor.mdc",
             destination_relative_path=".cursor/rules/simplify-review.mdc",
         ),
+        AgentTemplate(
+            agent="cursor",
+            source_relative_path="templates/ai-infrastructure/deploy-ai-knowledge-stack.cursor.mdc",
+            destination_relative_path=".cursor/rules/deploy-ai-knowledge-stack.mdc",
+            feature="chroma",
+        ),
+    ),
+    "claude": (
+        AgentTemplate(
+            agent="claude",
+            source_relative_path="templates/ai-infrastructure/deploy-ai-knowledge-stack.claude.md",
+            destination_relative_path=".claude/commands/deploy-ai-knowledge-stack.md",
+            feature="chroma",
+        ),
+    ),
+    "kilo": (
+        AgentTemplate(
+            agent="kilo",
+            source_relative_path="templates/review-lenses/simplify-review.SKILL.md",
+            destination_relative_path=".agents/skills/review-lenses/simplify-review/SKILL.md",
+        ),
+        AgentTemplate(
+            agent="kilo",
+            source_relative_path="templates/ai-infrastructure/deploy-ai-knowledge-stack.SKILL.md",
+            destination_relative_path=".agents/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md",
+            feature="chroma",
+        ),
     ),
 }
+
+# Agent-agnostic infrastructure templates, synced once per project (not per
+# agent). Each is gated by a feature, so it is materialized only when the
+# manifest enables that feature. The ``agent`` field is unused for sync.
+INFRA_TEMPLATES: tuple[AgentTemplate, ...] = (
+    AgentTemplate(
+        agent="",
+        source_relative_path="templates/ai-infrastructure/scripts/code_index.py",
+        destination_relative_path=".ai-standards/scripts/code_index.py",
+        feature="chroma",
+    ),
+    AgentTemplate(
+        agent="",
+        source_relative_path="templates/ai-infrastructure/code-index.toml",
+        destination_relative_path=".ai-standards/code-index.toml",
+        feature="chroma",
+    ),
+)
 
 
 def _repo_root() -> Path:
@@ -467,10 +519,17 @@ def _is_claude_bridge_content(content: str) -> bool:
 
 def sync_project_templates(project_root: Path) -> list[TemplateSyncResult]:
     manifest = _load_manifest(project_root)
+    enabled_features = set(manifest.features)
     results: list[TemplateSyncResult] = []
     for agent in manifest.agents:
         for template in AGENT_TEMPLATES[agent]:
+            if template.feature is not None and template.feature not in enabled_features:
+                continue
             results.append(_sync_agent_template(project_root, template))
+    for template in INFRA_TEMPLATES:
+        if template.feature is not None and template.feature not in enabled_features:
+            continue
+        results.append(_sync_agent_template(project_root, template))
     return results
 
 

@@ -1,5 +1,7 @@
 ## Basic Memory Usage
 - Use Basic Memory as a retrieval and indexing layer over Git-tracked Markdown knowledge when the project explicitly enables this feature.
+- Constrain the Basic Memory MCP server to a single project per workspace (for example `bm mcp --project <name>` or the equivalent MCP configuration) so retrieval returns only the current project's artifacts.
+- Disable the Basic Memory MCP server in workspaces that do not have a project, so queries never fall back to a shared default dump.
 - Treat canonical documentation and agent-managed working memory as different layers even when Basic Memory indexes both.
 - Treat `docs/decisions/**`, `docs/architecture/**`, `MODULE_CONTRACT.md`, and equivalent local artifacts as canonical project knowledge.
 - Treat `docs/ai-memory/**` and equivalent local note areas as agent-managed working memory rather than canonical truth.

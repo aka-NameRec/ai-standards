@@ -1,0 +1,84 @@
+---
+name: deploy-ai-knowledge-stack
+description: Deploy the AI knowledge stack (ConPort, Basic Memory, Chroma) in a project. Use when the user asks to set up AI infrastructure, deploy ConPort/Basic Memory/Chroma, or initialize the knowledge stack.
+disable-model-invocation: true
+---
+
+# Deploy AI Knowledge Stack
+
+This skill deploys the AI knowledge stack in a project: ConPort (operational context), Basic Memory (documentation retrieval), and Chroma (semantic code search). It follows an order that eliminates the setup races observed in a prior DevCats deployment (synchronous polling burn, Basic Memory bootstrap race and destructive reset, cloud-routing errors, ConPort detection walk-up, and inconsistent MCP wiring).
+
+Deploy only the layers enabled in the project manifest (`ai.project.toml` `features`). If the manifest is absent, ask the user which layers to deploy.
+
+## Stack Model
+
+| Layer | Tool | Purpose | Store |
+|---|---|---|---|
+| 0 | `docs/` (Git) | durable source of truth | Markdown |
+| 1 | Basic Memory | retrieval over documentation | BM sqlite + embeddings |
+| 2 | ConPort | transient operational context | ConPort sqlite |
+| 3 | Chroma | semantic code search | Chroma PersistentClient sqlite |
+
+Invariant: the three vector/data stores (ConPort internal vectors, Chroma code index, Basic Memory embeddings) are never mixed.
+
+## Token Discipline
+
+- Read the project layout once and summarize; do not re-read large trees every turn.
+- Never poll a long index build synchronously. Run it detached, checkpoint, and check once.
+- Keep each step a small, reviewable patch with targeted verification.
+
+## Playbook (order matters — eliminates races)
+
+### 1. Pre-flight
+
+- Determine the project root, the documentation path (usually `docs/`), and the source roots to index.
+- Read `ai.project.toml` if present; deploy only the enabled layers (`conport`, `basic-memory`, `chroma`).
+- Confirm with the user which BM project name and which Chroma collections to create.
+
+### 2. ConPort
+
+- Create `context_portal/` at the project root FIRST, before relying on workspace detection. Without it, ConPort detection can walk up the directory tree to a parent (such as `$HOME`) and bind the workspace to the wrong root.
+- Use the project root absolute path as the `workspace_id`.
+- Initialize ConPort for the workspace.
+- (Optional) If consolidating from existing per-repo ConPort databases, export them to Markdown, then import into the central workspace. Retain source databases as rollback.
+
+### 3. Basic Memory
+
+- Create the BM project BEFORE any resolve or search call: `bm project add <name> <docs-path>`. Expect and handle an "already exists" race idempotently.
+- Never run `db reset` as a recovery step. It is destructive and unnecessary.
+- Set `ensure_frontmatter_on_sync=false` for existing Git-tracked documentation unless the project explicitly wants frontmatter injection.
+- Force LOCAL mode: leave `cloud_api_key` null and ensure the MCP server uses local routing, so `search_notes` never fails with "Cloud routing requested but no credentials found".
+- Build the index: `bm reindex --full -p <name>`.
+- Constrain the MCP server to this project per-workspace (`bm mcp --project <name>` or the equivalent MCP configuration), so retrieval returns only this project's artifacts.
+
+### 4. Chroma
+
+- Use a local `PersistentClient` (embedded storage, no Docker, no port) as the default.
+- Deploy the managed wrapper and config under `.ai-standards/` (provided by `ai-sync sync-templates` when `chroma` is enabled):
+  - `.ai-standards/scripts/code_index.py` — freshness-gated wrapper (refresh before query, block on failure).
+  - `.ai-standards/code-index.toml` — collections, roots, chunking config. Edit this to declare the project's collections and source roots.
+- The wrapper must use cross-file batched upsert (not one upsert per source file) and an atomic resumable manifest (tmp-file + replace, per-file content hash) so interrupted builds resume without re-embedding finished files.
+- Run the initial build DETACHED (background process), checkpoint progress to the manifest, and check once. Do NOT poll in a 30-second loop.
+- Add `.ai-standards/chroma/` and `.ai-standards/state/` to `.gitignore` (runtime state); keep `scripts/code_index.py` and `code-index.toml` tracked as managed templates.
+
+### 5. MCP Wiring (consistent across clients)
+
+- Wire the MCP servers consistently in every client the project uses. A prior deployment failed because Kilo lacked the ConPort server that Codex had.
+- ConPort: `workspace_id` = project root.
+- Basic Memory: `--project <name>` constraint, local config dir via environment if needed.
+- Chroma: wrapper-only by default (queries via `.ai-standards/scripts/code_index.py`); no dedicated MCP server unless the project explicitly wants one.
+- Apply to both Kilo (`kilo.json`) and Codex (`.codex/config.toml`) when both are used.
+
+### 6. Verify
+
+- `bm status --project <name>` — clean, no pending.
+- `bm doctor` — consistency checks pass.
+- ConPort `get_active_context` — workspace resolves to the project root.
+- Chroma: collection counts are non-zero for each declared collection; a sample query returns results after a refresh.
+- Record a decision record and ConPort decision/progress entries for the deployment.
+
+## Stop Conditions
+
+- Stop and confirm if the project already has a deployed stack that conflicts with this plan.
+- Stop if a destructive operation (BM `db reset`, dropping a Chroma collection with data) would be required — ask the user first.
+- Stop if MCP wiring cannot be made consistent across the clients in use.

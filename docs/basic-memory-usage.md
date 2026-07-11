@@ -69,6 +69,16 @@ For repositories that treat Markdown as reviewable project knowledge, prefer:
 
 Use frontmatter injection only when the project explicitly wants Basic Memory to own that metadata lifecycle.
 
+## Workspace Isolation
+
+Basic Memory must be scoped to a single project per workspace so retrieval returns only the current project's artifacts instead of a noisy mix from unrelated projects.
+
+- Constrain the MCP server to one project (for example `bm mcp --project <project>` or the equivalent per-workspace MCP configuration).
+- Disable the Basic Memory MCP server in workspaces that do not have a project, so queries never fall back to a shared default dump.
+- Reserve cross-project search for an explicit, intentional action from a meta-project; it is not the default retrieval mode.
+
+This keeps each project's knowledge layer precise and prevents the "common dump" problem where results mix artifacts from unrelated projects.
+
 ## Reindexing Policy
 
 Normal file edits inside indexed directories should rely on Basic Memory's regular filesystem sync.

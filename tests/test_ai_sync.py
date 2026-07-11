@@ -1017,3 +1017,143 @@ def test_unknown_agent_in_manifest_raises_sync_error(tmp_path: Path) -> None:
         assert "Unknown agent" in str(error)
     else:
         raise AssertionError("Expected SyncError for unsupported agent")
+
+
+def test_chroma_feature_renders_usage_guidance(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["chroma"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    assert "## Chroma Usage" in result.content
+    assert "freshness-gate wrapper" in result.content
+    assert "atomic, resumable manifest" in result.content
+
+
+def test_claude_and_kilo_are_accepted_agents(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["chroma"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + 'agents = ["codex", "claude", "kilo", "cursor"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    # Must not raise; claude and kilo are supported agents now.
+    build_rendered_content(project_root)
+    sync_project_templates(project_root)
+
+
+def test_sync_creates_infra_and_skill_when_chroma_enabled(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base", "core/architecture"]\n'
+        + 'features = ["chroma"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + 'agents = ["codex", "claude", "kilo", "cursor"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    results = sync_project_templates(project_root)
+    statuses = [result.status for result in results]
+
+    # codex(2) + claude(1) + kilo(2) + cursor(2) agent templates + 2 infra = 9
+    assert statuses.count("created") == 9
+    assert (project_root / ".ai-standards" / "scripts" / "code_index.py").exists()
+    assert (project_root / ".ai-standards" / "code-index.toml").exists()
+    assert (
+        project_root / ".codex/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md"
+    ).exists()
+    assert (
+        project_root / ".claude/commands/deploy-ai-knowledge-stack.md"
+    ).exists()
+    assert (
+        project_root / ".agents/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md"
+    ).exists()
+    assert (
+        project_root / ".cursor/rules/deploy-ai-knowledge-stack.mdc"
+    ).exists()
+    assert (
+        project_root / ".agents/skills/review-lenses/simplify-review/SKILL.md"
+    ).exists()
+    assert "Managed by ai-standards template:" in (
+        project_root / ".ai-standards" / "scripts" / "code_index.py"
+    ).read_text(encoding="utf-8")
+
+
+def test_sync_skips_chroma_infra_when_feature_disabled(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base", "core/architecture"]\n'
+        + 'features = ["review-lenses"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + 'agents = ["codex", "kilo"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    results = sync_project_templates(project_root)
+
+    # Only simplify-review for codex and kilo; deploy skill and infra are gated.
+    assert [result.status for result in results] == ["created", "created"]
+    assert not (project_root / ".ai-standards").exists()
+    assert not (project_root / ".codex" / "skills" / "ai-infrastructure").exists()

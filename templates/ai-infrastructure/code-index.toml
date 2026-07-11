@@ -1,0 +1,34 @@
+# Chroma code-index configuration for this project.
+# Managed by ai-standards (synced when the `chroma` feature is enabled).
+# Edit this file to declare the project's collections and source roots.
+
+workspace = ".."
+state_dir = ".ai-standards/state"
+chroma_dir = ".ai-standards/chroma"
+manifest = ".ai-standards/state/manifest.json"
+chunk_lines = 100
+chunk_overlap = 20
+max_file_bytes = 1048576
+
+include_extensions = [
+  ".c", ".cc", ".cpp", ".cs", ".css", ".go", ".graphql", ".groovy",
+  ".html", ".java", ".js", ".jsx", ".json", ".kt", ".kts", ".md",
+  ".php", ".proto", ".py", ".rb", ".rs", ".scss", ".sh", ".sql",
+  ".ts", ".tsx", ".vue", ".xml", ".yaml", ".yml",
+]
+
+exclude_globs = [
+  "**/.git/**", "**/.idea/**", "**/.next/**", "**/.venv/**",
+  "**/build/**", "**/coverage/**", "**/dist/**", "**/generated/**",
+  "**/graphify-out/**", "**/node_modules/**", "**/target/**",
+  "**/vendor/**", "**/staticfiles/**", "**/*.lock", "**/*.min.js",
+  "**/*.map", "**/.env", "**/.env.*", "**/*credential*", "**/*secret*",
+  "**/*.key", "**/*.pem", "**/*.p12", "**/*.pfx",
+]
+
+# Declare one [[collection]] per logical code area. `roots` are relative to the
+# project root. Replace the example below with the project's own collections.
+
+[[collection]]
+name = "project-code"
+roots = ["."]

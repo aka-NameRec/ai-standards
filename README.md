@@ -15,6 +15,7 @@
 - [Using Structured Artifacts In a Project](#using-structured-artifacts-in-a-project)
 - [Using Session Hygiene In a Project](#using-session-hygiene-in-a-project)
 - [Using Basic Memory In a Project](#using-basic-memory-in-a-project)
+- [Using Chroma In a Project](#using-chroma-in-a-project)
 - [Using Agent Usage Hygiene In a Project](#using-agent-usage-hygiene-in-a-project)
 - [Project Flow](#project-flow)
 - [Versioning](#versioning)
@@ -68,9 +69,9 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project --output-name 
 Use four layers:
 
 - `fragments`: direct core rules that should always be rendered.
-- `features`: optional capabilities such as `conport`, `basic-memory`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
+- `features`: optional capabilities such as `conport`, `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
 - `stacks`: technology-specific or architecture-specific rules such as `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring`, or `spring-data-jpa`.
-- `tooling.agents`: optional agent adapters such as `codex` and `cursor` for managed local workflow templates.
+- `tooling.agents`: optional agent adapters such as `codex`, `claude`, `kilo`, and `cursor` for managed local workflow templates.
 
 Recommended starting point for a Python/FastAPI project with standard communication, planning, and architecture requirements:
 
@@ -294,7 +295,11 @@ agents = ["codex", "cursor"]
 Supported adapters:
 
 - `codex`: installs managed skill templates under `.codex/skills/`
+- `claude`: installs managed slash-command templates under `.claude/commands/`; use `init-claude-bridge` to also create the `CLAUDE.md` import bridge
+- `kilo`: installs managed skill templates under `.agents/skills/`
 - `cursor`: installs managed rule templates under `.cursor/rules/`
+
+Some templates are feature-gated. For example, enabling the `chroma` feature propagates a `deploy-ai-knowledge-stack` skill/command/rule to the declared agents and materializes the code-index infrastructure under `.ai-standards/` (see [Using Chroma In a Project](#using-chroma-in-a-project)). Feature-gated templates sync only when their feature is enabled in the manifest.
 
 Commands:
 
@@ -524,6 +529,32 @@ Detailed operational guidance lives in:
 
 - English guide: [docs/basic-memory-usage.md](docs/basic-memory-usage.md)
 - Russian guide: [docs/basic-memory-usage.ru.md](docs/basic-memory-usage.ru.md)
+
+## Using Chroma In a Project
+
+`chroma` is an optional feature for projects that want a semantic code-search layer over repository source files, kept separate from ConPort operational memory and Basic Memory documentation retrieval.
+
+Use `chroma` when a project benefits from reusable rules for:
+
+- searching source code semantically across a large or multi-repository workspace
+- keeping code retrieval isolated from documentation retrieval and operational context
+- avoiding stale results by refreshing the index before querying
+- resuming interrupted index builds without re-embedding unchanged files
+
+`ai-standards` owns the reusable policy:
+
+- Chroma is a semantic code-search layer, separate from ConPort and Basic Memory stores
+- all queries go through a freshness-gate wrapper (refresh before query, block on failure)
+- similarity narrows investigation but does not prove completeness
+- indexing is incremental by content hash with an atomic resumable manifest
+- local `PersistentClient` (embedded storage) is the default deployment mode
+
+Enabling `chroma` in a manifest does three things at once: renders the usage fragment into `AGENTS.md`, syncs the code-index infrastructure templates under `.ai-standards/` (`scripts/code_index.py` and `code-index.toml`), and propagates a `deploy-ai-knowledge-stack` skill/command/rule to the declared agents. The deployment skill deploys the whole AI knowledge stack (ConPort, Basic Memory, Chroma) in a race-free order.
+
+Detailed operational guidance lives in:
+
+- English guide: [docs/chroma-usage.md](docs/chroma-usage.md)
+- Russian guide: [docs/chroma-usage.ru.md](docs/chroma-usage.ru.md)
 
 ## Using Agent Usage Hygiene In a Project
 

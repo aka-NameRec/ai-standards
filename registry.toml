@@ -1,6 +1,7 @@
 [features]
 conport = ["tools/conport"]
 basic-memory = ["tools/basic-memory"]
+chroma = ["tools/chroma"]
 design-first-collaboration = ["process/design-first-collaboration"]
 reasoning-hygiene = ["process/reasoning-hygiene"]
 autonomy-boundaries = ["process/autonomy-boundaries"]
