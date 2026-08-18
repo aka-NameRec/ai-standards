@@ -12,6 +12,7 @@
 - [Using Reasoning Hygiene In a Project](#using-reasoning-hygiene-in-a-project)
 - [Using Autonomy Boundaries In a Project](#using-autonomy-boundaries-in-a-project)
 - [Using Review Lenses In a Project](#using-review-lenses-in-a-project)
+- [Using Code Review In a Project](#using-code-review-in-a-project)
 - [Using Structured Artifacts In a Project](#using-structured-artifacts-in-a-project)
 - [Using Session Hygiene In a Project](#using-session-hygiene-in-a-project)
 - [Using Basic Memory In a Project](#using-basic-memory-in-a-project)
@@ -69,7 +70,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project --output-name 
 Use four layers:
 
 - `fragments`: direct core rules that should always be rendered.
-- `features`: optional capabilities such as `conport`, `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
+- `features`: optional capabilities such as `conport`, `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
 - `stacks`: technology-specific or architecture-specific rules such as `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring`, or `spring-data-jpa`.
 - `tooling.agents`: optional agent adapters such as `codex`, `claude`, `kilo`, and `cursor` for managed local workflow templates.
 
@@ -95,6 +96,7 @@ features = [
   "structured-artifacts",
   "session-hygiene",
   "agent-usage-hygiene",
+  "code-review",
 ]
 
 stacks = [
@@ -299,7 +301,13 @@ Supported adapters:
 - `kilo`: installs managed skill templates under `.agents/skills/`
 - `cursor`: installs managed rule templates under `.cursor/rules/`
 
-Some templates are feature-gated. For example, enabling the `chroma` feature propagates a `deploy-ai-knowledge-stack` skill/command/rule to the declared agents and materializes the code-index infrastructure under `.ai-standards/` (see [Using Chroma In a Project](#using-chroma-in-a-project)). Feature-gated templates sync only when their feature is enabled in the manifest.
+Every template is feature-gated: it syncs only when its own feature is enabled in the manifest, so declaring an agent never hands a project an adapter for a workflow it has not adopted.
+
+- `review-lenses` propagates the `simplify-review` skill, command, or rule to the declared agents.
+- `chroma` propagates `deploy-ai-knowledge-stack` and materializes the code-index infrastructure under `.ai-standards/` (see [Using Chroma In a Project](#using-chroma-in-a-project)).
+- `code-review` materializes the report template under `.ai-standards/`.
+
+Templates that land under `.ai-standards/` are agent-agnostic: they sync from the feature alone, whether or not `tooling.agents` declares anything.
 
 Commands:
 
@@ -450,6 +458,32 @@ Ready-to-copy downstream templates:
 - [templates/review-lenses/simplify-review.cursor.mdc](templates/review-lenses/simplify-review.cursor.mdc)
 
 When a downstream project declares `tooling.agents`, use `sync-templates` to keep these adapter templates aligned with the current repository version instead of copying them manually.
+
+## Using Code Review In a Project
+
+`code-review` is an optional feature that turns a plain, unqualified "code review" chat request into a fixed workflow with a fixed output shape, so the result reads the same way every time.
+
+Use `code-review` when a project wants:
+
+- a natural-language trigger (`code review`, `сделай ревью`, `проверь код`, and similar) that activates without a slash command or custom skill
+- a review that covers correctness and conformance to the project's own architecture, error-handling, and stack rules, not only cleanup
+- a stable report shape across every tool that renders `AGENTS.md` or `CLAUDE.md`
+
+`ai-standards` owns the reusable policy:
+
+- which phrasing counts as an unqualified trigger
+- the checked dimensions and their priority order
+- what makes a finding reportable: a real file location, a named violated rule, no invented rules, no padding
+- the default reporting posture and when editing is allowed
+
+The report shape itself is defined once, by the worked example in [templates/code-review-report.md](templates/code-review-report.md), deployed into each enabling project as `.ai-standards/code-review-report.md` by `sync-templates`. No document restates it, so changing the format is a single-file edit.
+
+Because the trigger and the report shape live in the rendered instructions themselves, no `tooling.agents` adapter is required; the workflow behaves the same in Claude Code, Codex, Cursor, and any other `AGENTS.md`-reading tool. It composes with `review-lenses` without conflict — see the relationship notes in the usage guide.
+
+Detailed operational guidance lives in:
+
+- English guide: [docs/code-review-usage.md](docs/code-review-usage.md)
+- Russian guide: [docs/code-review-usage.ru.md](docs/code-review-usage.ru.md)
 
 ## Using Structured Artifacts In a Project
 
