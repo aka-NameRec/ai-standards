@@ -647,6 +647,10 @@ def test_report_template_sections_stay_in_sync_with_the_fragment() -> None:
     assert "Code Review" in mapping
     assert "Task" in fallback and "Task" in mapping
 
+    # The example teaches the linked form of the task reference, not the bare id.
+    task_line = next(line for line in template.splitlines() if line.startswith("Task:"))
+    assert "http" in task_line, "the worked example must show a task link, not just an id"
+
 
 def test_reasoning_hygiene_feature_can_be_rendered(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"

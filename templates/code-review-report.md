@@ -8,7 +8,7 @@ are. The rules that govern what belongs in a finding live in the rendered `AGENT
 
 ## Code Review
 
-Task: ALS-4821
+Task: ALS-4821 — https://tracker.example.com/browse/ALS-4821
 
 ### What Was Done
 Payment amounts uploaded from XLSX are now validated before any row is persisted.

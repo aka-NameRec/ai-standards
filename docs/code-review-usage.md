@@ -38,6 +38,19 @@ Two rules shape what actually gets reported, and both exist to keep the output t
 
 Problems that predate the diff are still surfaced, marked `(pre-existing)` so they do not read as blame for the current change. Reporting one does not obligate a fix — that decision stays with the author, and it can be tracked as a follow-up instead of expanding the patch.
 
+## Task Reference And Multi-Repository Changes
+
+The report leads with the tracked task when one exists, and prefers a full link over a bare id. The link is only emitted when its base is actually knowable — from the session, from the project's own rules, or from a `tracker_url` entry under `[metadata]` in `ai.project.toml`, which renders into the header of the generated `AGENTS.md` where the agent can read it:
+
+```toml
+[metadata]
+tracker_url = "https://tracker.example.com/browse/"
+```
+
+Keeping that value in the project manifest rather than in `ai-standards` is deliberate: the tracker host belongs to the organisation using the standard, not to the standard itself.
+
+When one task spans several repositories, the workflow produces one report per repository rather than a combined one, because each repository gets its own pull request and each report is pasted into a different description. Those reports name the repository in the heading (`## Code Review — <repository>`), keep file paths relative to that repository's root, and cross-reference the sibling repositories in `How It Was Done`, so a reviewer looking at a single pull request still knows the change is part of a set.
+
 ## Relationship To Review Lenses
 
 `code-review` and `review-lenses` are complementary, and a project can enable either or both:
