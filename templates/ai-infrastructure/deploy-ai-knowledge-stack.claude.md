@@ -40,7 +40,8 @@ Invariant: the three vector/data stores (ConPort internal vectors, Chroma code i
 
 ### 3. Basic Memory
 - Create the BM project BEFORE any search: `bm project add <name> <docs-path>`. Handle "already exists" idempotently.
-- Never run `db reset`. Set `ensure_frontmatter_on_sync=false`. Force LOCAL mode (`cloud_api_key` null, local routing).
+- Point the project at a dedicated knowledge tree, never a repository root. Leave permalinks enabled; `ensure_frontmatter_on_sync=false` plus `disable_permalinks=true` is a legacy-tree fallback only.
+- Never run `db reset`. Force LOCAL mode (`cloud_api_key` null, local routing).
 - Build: `bm reindex --full -p <name>`. Constrain MCP per-workspace (`bm mcp --project <name>`).
 
 ### 4. Chroma

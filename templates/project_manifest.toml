@@ -24,11 +24,16 @@ stacks = [
   "fastapi",
 ]
 local_overrides = [
-  "docs/ai/project-rules.md",
+  "ai/project-rules.md",
 ]
 optional_local_overrides = [
-  "docs/ai/private-rules.local.md",
+  "ai/private-rules.local.md",
 ]
+
+# Optional. Defaults: knowledge_tree = "docs", dated_note_directories = ["decisions", "architecture"].
+# [basic_memory]
+# knowledge_tree = "docs"
+# dated_note_directories = ["decisions", "architecture"]
 
 [tooling]
 agents = []

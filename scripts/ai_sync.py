@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import re
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -13,6 +15,20 @@ DEFAULT_OUTPUT_NAME = "AGENTS.md"
 CLAUDE_BRIDGE_FILE = "CLAUDE.md"
 CLAUDE_BRIDGE_MARKER = "Managed by ai-standards: claude-bridge"
 MANAGED_TEMPLATE_MARKER_PREFIX = "Managed by ai-standards template:"
+FRONTMATTER_DELIMITER = "---\n"
+DEFAULT_KNOWLEDGE_TREE = "docs"
+DEFAULT_INDEXER_CONFIG = Path.home() / ".basic-memory" / "config.json"
+SEVERITY_ERROR = "error"
+SEVERITY_WARNING = "warning"
+# A canonical note file name: a lowercase ASCII slug, optionally date-prefixed.
+NOTE_NAME_PATTERN = re.compile(r"^(\d{4}-\d{2}-\d{2}-)?[a-z0-9]+(-[a-z0-9]+)*$")
+# The convention claims canonical notes only. Everything else in the tree — living
+# documents, working memory, conventional files like MODULE_CONTRACT.md — is out of scope.
+DEFAULT_DATED_NOTE_DIRECTORIES = ("decisions", "architecture")
+# A localized sibling such as `<name>.ru.md` keeps the base name, so the language tag is
+# stripped before the name is judged.
+LANGUAGE_SUFFIX_PATTERN = re.compile(r"\.[a-z]{2}$")
+DEFAULT_OVERRIDE_DIRECTORY = "ai"
 PROJECT_ROOT_OPTION = typer.Option(..., exists=True, file_okay=False, resolve_path=True)
 OUTPUT_NAME_OPTION: object = typer.Option(...)
 
@@ -41,6 +57,8 @@ class Manifest:
     optional_local_overrides: list[str]
     agents: list[str]
     metadata: dict[str, str]
+    knowledge_tree: str | None
+    dated_note_directories: list[str] | None
 
 
 @dataclass(frozen=True)
@@ -85,6 +103,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             destination_relative_path=".codex/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md",
             feature="chroma",
         ),
+        AgentTemplate(
+            agent="codex",
+            source_relative_path="templates/knowledge-tree/audit-knowledge-tree.SKILL.md",
+            destination_relative_path=".codex/skills/knowledge-tree/audit-knowledge-tree/SKILL.md",
+            feature="basic-memory",
+        ),
     ),
     "cursor": (
         AgentTemplate(
@@ -98,6 +122,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/ai-infrastructure/deploy-ai-knowledge-stack.cursor.mdc",
             destination_relative_path=".cursor/rules/deploy-ai-knowledge-stack.mdc",
             feature="chroma",
+        ),
+        AgentTemplate(
+            agent="cursor",
+            source_relative_path="templates/knowledge-tree/audit-knowledge-tree.cursor.mdc",
+            destination_relative_path=".cursor/rules/audit-knowledge-tree.mdc",
+            feature="basic-memory",
         ),
     ),
     "claude": (
@@ -113,6 +143,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             destination_relative_path=".claude/commands/deploy-ai-knowledge-stack.md",
             feature="chroma",
         ),
+        AgentTemplate(
+            agent="claude",
+            source_relative_path="templates/knowledge-tree/audit-knowledge-tree.claude.md",
+            destination_relative_path=".claude/commands/audit-knowledge-tree.md",
+            feature="basic-memory",
+        ),
     ),
     "kilo": (
         AgentTemplate(
@@ -126,6 +162,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/ai-infrastructure/deploy-ai-knowledge-stack.SKILL.md",
             destination_relative_path=".agents/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md",
             feature="chroma",
+        ),
+        AgentTemplate(
+            agent="kilo",
+            source_relative_path="templates/knowledge-tree/audit-knowledge-tree.SKILL.md",
+            destination_relative_path=".agents/skills/knowledge-tree/audit-knowledge-tree/SKILL.md",
+            feature="basic-memory",
         ),
     ),
 }
@@ -198,6 +240,7 @@ def _load_manifest(project_root: Path) -> Manifest:
     data = _load_toml(project_root / MANIFEST_FILE_NAME)
     metadata_raw = _expect_optional_table(data, "metadata", "manifest")
     tooling_raw = _expect_optional_table(data, "tooling", "manifest")
+    knowledge_raw = _expect_optional_table(data, "basic_memory", "manifest")
     metadata: dict[str, str] = {}
     for key, value in metadata_raw.items():
         if not isinstance(value, str):
@@ -228,6 +271,20 @@ def _load_manifest(project_root: Path) -> Manifest:
         ),
         agents=_expect_supported_agents(tooling_raw, "agents", "manifest.tooling"),
         metadata=metadata,
+        knowledge_tree=_expect_optional_string(
+            knowledge_raw,
+            "knowledge_tree",
+            "manifest.basic_memory",
+        ),
+        dated_note_directories=(
+            _expect_optional_string_list(
+                knowledge_raw,
+                "dated_note_directories",
+                "manifest.basic_memory",
+            )
+            if "dated_note_directories" in knowledge_raw
+            else None
+        ),
     )
 
 
@@ -355,25 +412,53 @@ def _append_fragment_id(resolved: list[str], seen: set[str], fragment_id: str) -
         seen.add(fragment_id)
 
 
+def _split_frontmatter(raw_content: str) -> tuple[str | None, str]:
+    """Split Markdown into its leading frontmatter block and the body after it.
+
+    Returns ``(None, raw_content)`` when the text carries no frontmatter, so callers can
+    distinguish "absent" from "present but empty".
+    """
+    if not raw_content.startswith(FRONTMATTER_DELIMITER):
+        return None, raw_content
+    closing_index = raw_content.find(
+        f"\n{FRONTMATTER_DELIMITER}", len(FRONTMATTER_DELIMITER)
+    )
+    if closing_index == -1:
+        return None, raw_content
+    block = raw_content[len(FRONTMATTER_DELIMITER) : closing_index + 1]
+    body = raw_content[closing_index + len(f"\n{FRONTMATTER_DELIMITER}") :]
+    return block, body
+
+
+def _strip_frontmatter(raw_content: str) -> str:
+    """Drop a leading YAML frontmatter block from a rendering input.
+
+    Knowledge-base indexers may add frontmatter to Markdown they index. Fragments and
+    local overrides are concatenated verbatim into the generated file, so that metadata
+    would otherwise surface in the middle of the rendered output.
+    """
+    return _split_frontmatter(raw_content)[1]
+
+
 def _read_fragment(repo_root: Path, fragment_id: str) -> str:
     fragment_path = repo_root / "fragments" / f"{fragment_id}.md"
     if not fragment_path.exists():
         raise SyncError(f"Fragment does not exist: {fragment_path}")
-    return fragment_path.read_text(encoding="utf-8").strip()
+    return _strip_frontmatter(fragment_path.read_text(encoding="utf-8")).strip()
 
 
 def _read_override(project_root: Path, relative_path: str) -> str:
     override_path = project_root / relative_path
     if not override_path.exists():
         raise SyncError(f"Local override does not exist: {override_path}")
-    return override_path.read_text(encoding="utf-8").strip()
+    return _strip_frontmatter(override_path.read_text(encoding="utf-8")).strip()
 
 
 def _read_optional_override(project_root: Path, relative_path: str) -> str | None:
     override_path = project_root / relative_path
     if not override_path.exists():
         return None
-    return override_path.read_text(encoding="utf-8").strip()
+    return _strip_frontmatter(override_path.read_text(encoding="utf-8")).strip()
 
 
 def build_rendered_content(
@@ -474,11 +559,12 @@ def _build_managed_template_content(source_relative_path: str, raw_content: str)
         f"<!-- {MANAGED_TEMPLATE_MARKER_PREFIX} {source_relative_path} -->\n"
         "<!-- Do not edit manually unless you remove this marker. -->\n"
     )
-    frontmatter_delimiter = "---\n"
-    if raw_content.startswith(frontmatter_delimiter):
-        frontmatter_end = raw_content.find(f"\n{frontmatter_delimiter}", len(frontmatter_delimiter))
+    if raw_content.startswith(FRONTMATTER_DELIMITER):
+        frontmatter_end = raw_content.find(
+            f"\n{FRONTMATTER_DELIMITER}", len(FRONTMATTER_DELIMITER)
+        )
         if frontmatter_end != -1:
-            insertion_index = frontmatter_end + len(f"\n{frontmatter_delimiter}")
+            insertion_index = frontmatter_end + len(f"\n{FRONTMATTER_DELIMITER}")
             return (
                 raw_content[:insertion_index]
                 + "\n"
@@ -607,10 +693,10 @@ def init_project(
 
     project_rules_created = _copy_template_if_missing(
         repo_root / "templates" / "project_rules.md",
-        project_root / "docs" / "ai" / "project-rules.md",
+        project_root / "ai" / "project-rules.md",
     )
     if project_rules_created:
-        created_paths.append(project_root / "docs" / "ai" / "project-rules.md")
+        created_paths.append(project_root / "ai" / "project-rules.md")
 
     template_results: list[TemplateSyncResult] = []
     manifest_path = project_root / MANIFEST_FILE_NAME
@@ -666,6 +752,666 @@ def init_claude_bridge(
 
     bridge_path.write_text(bridge_content, encoding="utf-8")
     typer.echo(f"Created {bridge_path}")
+
+
+@dataclass(frozen=True)
+class DoctorFinding:
+    severity: str
+    code: str
+    location: str
+    message: str
+
+
+@dataclass(frozen=True)
+class DoctorReport:
+    findings: tuple[DoctorFinding, ...]
+    notes_checked: int
+    knowledge_tree: Path
+
+    @property
+    def error_count(self) -> int:
+        return sum(1 for finding in self.findings if finding.severity == SEVERITY_ERROR)
+
+    @property
+    def warning_count(self) -> int:
+        return sum(1 for finding in self.findings if finding.severity == SEVERITY_WARNING)
+
+
+def _is_inside(path: Path, container: Path) -> bool:
+    """Return True when ``path`` sits at or below ``container``."""
+    try:
+        path.relative_to(container)
+    except ValueError:
+        return False
+    return True
+
+
+def _yaml_scalar(value: str) -> str:
+    """Render a string as a YAML scalar, quoting it when a plain one would not parse.
+
+    A title lifted from a heading may contain a colon — `# DECISION: something` is the
+    common case — and an unquoted colon turns the value into a nested mapping.
+    """
+    plain_is_safe = (
+        bool(value)
+        and value == value.strip()
+        and ": " not in value
+        and not value.endswith(":")
+        and " #" not in value
+        and value[0] not in "-?:,[]{}#&*!|>'\"%@`"
+    )
+    if plain_is_safe:
+        return value
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
+def _frontmatter_title(raw_content: str) -> str | None:
+    """Read the top-level ``title`` value without pulling in a YAML dependency."""
+    block, _ = _split_frontmatter(raw_content)
+    if block is None:
+        return None
+    for line in block.splitlines():
+        if line.startswith("title:"):
+            value = line[len("title:") :].strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+                inner = value[1:-1]
+                return inner.replace('\\"', '"').replace("\\\\", "\\") if value[0] == '"' else inner
+            return value
+    return None
+
+
+def _first_heading(raw_content: str) -> str | None:
+    _, body = _split_frontmatter(raw_content)
+    for line in body.splitlines():
+        if line.startswith("# "):
+            return line[2:].strip()
+    return None
+
+
+class UnreadableFile(SyncError):
+    """Raised when a file an audit must inspect cannot be decoded as UTF-8 text."""
+
+
+def _read_audit_text(path: Path) -> str:
+    """Read a file for auditing, translating a low-level failure into an audit error.
+
+    An audit runs against trees that may already be damaged, so callers catch this and
+    turn it into a finding rather than aborting the whole run.
+    """
+    try:
+        return path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        raise UnreadableFile(f"{path} is not valid UTF-8 text: {exc}") from exc
+
+
+def _audit_override_placement(
+    project_root: Path,
+    manifest: Manifest,
+    knowledge_tree: Path,
+) -> list[DoctorFinding]:
+    """Rendering inputs are concatenated verbatim, so they must stay out of the tree."""
+    findings: list[DoctorFinding] = []
+    declared = [(path, True) for path in manifest.local_overrides]
+    declared += [(path, False) for path in manifest.optional_local_overrides]
+
+    for relative_path, required in declared:
+        override_path = project_root / relative_path
+        if _is_inside(override_path, knowledge_tree):
+            findings.append(
+                DoctorFinding(
+                    severity=SEVERITY_ERROR,
+                    code="override-inside-knowledge-tree",
+                    location=relative_path,
+                    message=(
+                        "Rendering input lives inside the knowledge tree. An indexer will "
+                        "treat it as a note, and its content is concatenated verbatim into "
+                        "the generated file. Move it outside, for example to 'ai/'."
+                    ),
+                )
+            )
+        if not override_path.exists():
+            if required:
+                findings.append(
+                    DoctorFinding(
+                        severity=SEVERITY_ERROR,
+                        code="override-missing",
+                        location=relative_path,
+                        message="Declared local override does not exist; rendering will fail.",
+                    )
+                )
+            continue
+        try:
+            override_content = _read_audit_text(override_path)
+        except UnreadableFile:
+            findings.append(
+                DoctorFinding(
+                    severity=SEVERITY_ERROR,
+                    code="override-unreadable",
+                    location=relative_path,
+                    message="Local override is not valid UTF-8 text; rendering will fail.",
+                )
+            )
+            continue
+        if _split_frontmatter(override_content)[0] is not None:
+            findings.append(
+                DoctorFinding(
+                    severity=SEVERITY_WARNING,
+                    code="override-carries-frontmatter",
+                    location=relative_path,
+                    message=(
+                        "Rendering input starts with frontmatter, which usually means an "
+                        "indexer is treating it as a note. Rendering strips the block, but "
+                        "the file itself keeps being rewritten."
+                    ),
+                )
+            )
+    return findings
+
+
+def _audit_note(
+    note_path: Path,
+    relative_path: str,
+    name_is_governed: bool,
+) -> list[DoctorFinding]:
+    try:
+        raw_content = _read_audit_text(note_path)
+    except UnreadableFile:
+        return [
+            DoctorFinding(
+                severity=SEVERITY_ERROR,
+                code="note-unreadable",
+                location=relative_path,
+                message="Note is not valid UTF-8 text and cannot be indexed.",
+            )
+        ]
+    findings: list[DoctorFinding] = []
+
+    title = _frontmatter_title(raw_content)
+    if _split_frontmatter(raw_content)[0] is None:
+        findings.append(
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="note-without-frontmatter",
+                location=relative_path,
+                message=(
+                    "Note has no frontmatter, so its title falls back to the file name and "
+                    "its type falls back to the default."
+                ),
+            )
+        )
+    elif title is None:
+        findings.append(
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="note-without-title",
+                location=relative_path,
+                message="Frontmatter has no 'title'; identity falls back to the file name.",
+            )
+        )
+
+    heading = _first_heading(raw_content)
+    if heading is None:
+        findings.append(
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="note-without-heading",
+                location=relative_path,
+                message="Note has no top-level '# ' heading.",
+            )
+        )
+    elif title is not None and heading != title:
+        findings.append(
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="note-title-heading-mismatch",
+                location=relative_path,
+                message=f"Frontmatter title {title!r} does not match heading {heading!r}.",
+            )
+        )
+
+    stem = LANGUAGE_SUFFIX_PATTERN.sub("", Path(relative_path).stem)
+    if name_is_governed and not NOTE_NAME_PATTERN.match(stem):
+        findings.append(
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="note-name-against-convention",
+                location=relative_path,
+                message=(
+                    "File name is not a lowercase ASCII slug of the form "
+                    "'YYYY-MM-DD-topic-slug.md'. Renaming needs a meaningful slug, so it is "
+                    "reported rather than fixed automatically."
+                ),
+            )
+        )
+
+    if "## Observations" not in raw_content:
+        findings.append(
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="note-without-observations",
+                location=relative_path,
+                message="Note contributes no observations to the knowledge graph.",
+            )
+        )
+    if "## Relations" not in raw_content:
+        findings.append(
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="note-without-relations",
+                location=relative_path,
+                message="Note contributes no relations to the knowledge graph.",
+            )
+        )
+    return findings
+
+
+def _audit_knowledge_tree(
+    project_root: Path,
+    knowledge_tree: Path,
+    manifest: Manifest,
+    dated_note_directories: tuple[str, ...],
+) -> tuple[list[DoctorFinding], int]:
+    if not knowledge_tree.is_dir():
+        return (
+            [
+                DoctorFinding(
+                    severity=SEVERITY_WARNING,
+                    code="knowledge-tree-missing",
+                    location=str(knowledge_tree.name),
+                    message="Knowledge tree directory does not exist; nothing to audit.",
+                )
+            ],
+            0,
+        )
+
+    declared_overrides = {
+        (project_root / path).resolve()
+        for path in [*manifest.local_overrides, *manifest.optional_local_overrides]
+    }
+
+    findings: list[DoctorFinding] = []
+    for directory in sorted(knowledge_tree.rglob("*")):
+        if directory.is_dir() and not any(directory.iterdir()):
+            findings.append(
+                DoctorFinding(
+                    severity=SEVERITY_WARNING,
+                    code="empty-directory",
+                    location=directory.relative_to(project_root).as_posix(),
+                    message="Directory inside the knowledge tree holds nothing.",
+                )
+            )
+
+    notes_checked = 0
+    for note_path in sorted(knowledge_tree.rglob("*.md")):
+        if note_path.resolve() in declared_overrides:
+            continue
+        notes_checked += 1
+        relative_path = note_path.relative_to(project_root).as_posix()
+        governed_directories = tuple(knowledge_tree / name for name in dated_note_directories)
+        name_is_governed = any(
+            _is_inside(note_path, directory) for directory in governed_directories
+        )
+        findings.extend(_audit_note(note_path, relative_path, name_is_governed))
+    return findings, notes_checked
+
+
+def _audit_indexer_config(
+    project_root: Path,
+    knowledge_tree: Path,
+    indexer_config: Path,
+) -> list[DoctorFinding]:
+    """Check the indexer's own configuration when the project enables the feature."""
+    if not indexer_config.exists():
+        return []
+    try:
+        config = cast(dict[str, object], json.loads(indexer_config.read_text(encoding="utf-8")))
+    except (OSError, json.JSONDecodeError):
+        return [
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="indexer-config-unreadable",
+                location=str(indexer_config),
+                message="Indexer configuration exists but could not be parsed.",
+            )
+        ]
+
+    findings: list[DoctorFinding] = []
+    projects = config.get("projects")
+    matched_tree = False
+    if isinstance(projects, dict):
+        for name, entry in cast(dict[str, object], projects).items():
+            raw_path = entry.get("path") if isinstance(entry, dict) else entry
+            if not isinstance(raw_path, str):
+                continue
+            indexed_root = Path(raw_path).expanduser().resolve()
+            if indexed_root == knowledge_tree:
+                matched_tree = True
+            elif indexed_root == project_root:
+                findings.append(
+                    DoctorFinding(
+                        severity=SEVERITY_ERROR,
+                        code="indexed-repository-root",
+                        location=f"{indexer_config}:{name}",
+                        message=(
+                            "Indexed root is the repository root. It pulls vendored files, "
+                            f"build artifacts, and generated output into the graph. Point it "
+                            f"at {knowledge_tree} instead."
+                        ),
+                    )
+                )
+    if not matched_tree:
+        findings.append(
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="knowledge-tree-not-indexed",
+                location=str(indexer_config),
+                message=f"No indexer project points at {knowledge_tree}.",
+            )
+        )
+
+    if config.get("disable_permalinks") is True:
+        findings.append(
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="permalinks-disabled",
+                location=f"{indexer_config}:disable_permalinks",
+                message=(
+                    "Permalinks are disabled, so 'memory://' addressing and graph traversal "
+                    "resolve against nothing and retrieval degrades to plain search. Keep "
+                    "this only as a fallback for a tree that cannot be narrowed yet."
+                ),
+            )
+        )
+    return findings
+
+
+def run_doctor(
+    project_root: Path,
+    knowledge_tree_name: str | None = None,
+    indexer_config: Path | None = None,
+) -> DoctorReport:
+    """Audit how a project is wired for Markdown knowledge retrieval.
+
+    Knowledge-tree settings resolve explicit argument first, then the project manifest,
+    then the built-in default, so a project can declare its own layout once.
+    """
+    # Paths are compared against a resolved knowledge tree, so the root is normalized
+    # here rather than relying on the caller: the CLI resolves it, the API need not.
+    project_root = project_root.resolve()
+    manifest = _load_manifest(project_root)
+    tree_name = knowledge_tree_name or manifest.knowledge_tree or DEFAULT_KNOWLEDGE_TREE
+    knowledge_tree = (project_root / tree_name).resolve()
+    dated_note_directories = (
+        tuple(manifest.dated_note_directories)
+        if manifest.dated_note_directories is not None
+        else DEFAULT_DATED_NOTE_DIRECTORIES
+    )
+
+    findings = _audit_override_placement(project_root, manifest, knowledge_tree)
+    tree_findings, notes_checked = _audit_knowledge_tree(
+        project_root, knowledge_tree, manifest, dated_note_directories
+    )
+    findings.extend(tree_findings)
+
+    if "basic-memory" in manifest.features:
+        findings.extend(
+            _audit_indexer_config(
+                project_root,
+                knowledge_tree,
+                DEFAULT_INDEXER_CONFIG if indexer_config is None else indexer_config,
+            )
+        )
+
+    return DoctorReport(
+        findings=tuple(findings),
+        notes_checked=notes_checked,
+        knowledge_tree=knowledge_tree,
+    )
+
+
+FIXABLE_CODES = frozenset(
+    {
+        "override-inside-knowledge-tree",
+        "note-without-frontmatter",
+        "note-without-title",
+        "note-without-heading",
+        "note-title-heading-mismatch",
+        "empty-directory",
+    }
+)
+
+
+@dataclass(frozen=True)
+class RepairAction:
+    code: str
+    location: str
+    description: str
+
+
+def _repair_override_placement(
+    project_root: Path,
+    relative_path: str,
+    override_directory: str,
+) -> RepairAction:
+    """Move a rendering input out of the knowledge tree and repoint the manifest.
+
+    The move and the manifest rewrite have to succeed together: a moved file with a stale
+    manifest leaves the project unable to render at all. Everything that can be checked is
+    therefore checked before the filesystem is touched, and the move is rolled back if the
+    rewrite still fails.
+    """
+    source = project_root / relative_path
+    destination_relative = f"{override_directory}/{Path(relative_path).name}"
+    destination = project_root / destination_relative
+    if destination.exists():
+        raise SyncError(f"Cannot move {relative_path}: {destination_relative} already exists")
+
+    # tomllib only reads, and the manifest is hand-maintained, so the declared path is
+    # repointed textually to preserve formatting — which requires it to appear verbatim.
+    manifest_path = project_root / MANIFEST_FILE_NAME
+    manifest_content = manifest_path.read_text(encoding="utf-8")
+    quoted_old = f'"{relative_path}"'
+    if quoted_old not in manifest_content:
+        raise SyncError(
+            f"Cannot repoint {relative_path}: {MANIFEST_FILE_NAME} does not contain it as a "
+            f"double-quoted string. Nothing was moved; repoint it by hand."
+        )
+
+    moved = False
+    if source.exists():
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        source.rename(destination)
+        moved = True
+    try:
+        manifest_path.write_text(
+            manifest_content.replace(quoted_old, f'"{destination_relative}"'),
+            encoding="utf-8",
+        )
+    except OSError as error:
+        if moved:
+            destination.rename(source)
+        raise SyncError(
+            f"Cannot repoint {relative_path} in {MANIFEST_FILE_NAME}: {error}"
+        ) from error
+
+    return RepairAction(
+        code="override-inside-knowledge-tree",
+        location=relative_path,
+        description=f"moved to {destination_relative} and repointed in {MANIFEST_FILE_NAME}",
+    )
+
+
+def _repair_note(note_path: Path, relative_path: str, codes: set[str]) -> list[RepairAction]:
+    """Apply the structural note fixes that do not require judgement."""
+    try:
+        raw_content = _read_audit_text(note_path)
+    except UnreadableFile:
+        # Already surfaced as note-unreadable by the audit; nothing here can repair it.
+        return []
+
+    actions: list[RepairAction] = []
+    heading = _first_heading(raw_content)
+    stem = note_path.stem
+
+    if "note-without-frontmatter" in codes:
+        title = heading or stem
+        raw_content = (
+            f"{FRONTMATTER_DELIMITER}title: {_yaml_scalar(title)}\n"
+            f"{FRONTMATTER_DELIMITER}\n{raw_content}"
+        )
+        actions.append(
+            RepairAction(
+                "note-without-frontmatter", relative_path, f"added frontmatter title {title!r}"
+            )
+        )
+    elif "note-without-title" in codes:
+        title = heading or stem
+        raw_content = raw_content.replace(
+            FRONTMATTER_DELIMITER, f"{FRONTMATTER_DELIMITER}title: {_yaml_scalar(title)}\n", 1
+        )
+        actions.append(
+            RepairAction("note-without-title", relative_path, f"added frontmatter title {title!r}")
+        )
+
+    title = _frontmatter_title(raw_content) or stem
+    _, body = _split_frontmatter(raw_content)
+    prefix = raw_content[: len(raw_content) - len(body)]
+
+    if "note-without-heading" in codes:
+        raw_content = f"{prefix}\n# {title}\n\n{body.lstrip()}"
+        actions.append(
+            RepairAction("note-without-heading", relative_path, f"inserted heading '# {title}'")
+        )
+    elif "note-title-heading-mismatch" in codes and heading is not None:
+        # The frontmatter title is the graph identity, so the heading follows it. Matching
+        # whole lines matters: a substring replacement would rewrite a deeper heading that
+        # merely starts with the same text.
+        lines = body.splitlines(keepends=True)
+        for index, line in enumerate(lines):
+            if line.startswith("# "):
+                lines[index] = f"# {title}\n"
+                break
+        raw_content = prefix + "".join(lines)
+        actions.append(
+            RepairAction(
+                "note-title-heading-mismatch",
+                relative_path,
+                f"aligned heading with title {title!r}",
+            )
+        )
+
+    if actions:
+        note_path.write_text(raw_content, encoding="utf-8")
+    return actions
+
+
+def run_repair(
+    project_root: Path,
+    report: DoctorReport,
+    override_directory: str = DEFAULT_OVERRIDE_DIRECTORY,
+) -> list[RepairAction]:
+    """Apply every deterministic repair the report calls for.
+
+    Findings that need a naming or content decision are deliberately left alone; they
+    belong to the audit skill, which proposes them for confirmation.
+    """
+    project_root = project_root.resolve()
+    actions: list[RepairAction] = []
+
+    for finding in report.findings:
+        if finding.code == "override-inside-knowledge-tree":
+            actions.append(
+                _repair_override_placement(project_root, finding.location, override_directory)
+            )
+
+    note_codes: dict[str, set[str]] = {}
+    for finding in report.findings:
+        if finding.code in FIXABLE_CODES and finding.code.startswith("note-"):
+            note_codes.setdefault(finding.location, set()).add(finding.code)
+    for relative_path, codes in sorted(note_codes.items()):
+        actions.extend(_repair_note(project_root / relative_path, relative_path, codes))
+
+    # Swept last and deepest first, so directories emptied by the repairs above — a
+    # knowledge-tree folder that held nothing but a rendering input, for instance — go too.
+    for directory in sorted(
+        (path for path in report.knowledge_tree.rglob("*") if path.is_dir()),
+        key=lambda path: len(path.parts),
+        reverse=True,
+    ):
+        if not any(directory.iterdir()):
+            location = directory.relative_to(project_root).as_posix()
+            directory.rmdir()
+            actions.append(RepairAction("empty-directory", location, "removed"))
+
+    return actions
+
+
+def _echo_findings(report: DoctorReport) -> None:
+    for finding in report.findings:
+        marker = "ERROR" if finding.severity == SEVERITY_ERROR else "warn "
+        fixable = " (fixable)" if finding.code in FIXABLE_CODES else ""
+        typer.echo(f"{marker} [{finding.code}]{fixable} {finding.location}")
+        typer.echo(f"      {finding.message}")
+
+    typer.echo(
+        f"Checked {report.notes_checked} notes under {report.knowledge_tree}: "
+        f"{report.error_count} errors, {report.warning_count} warnings"
+    )
+
+
+@app.command()
+def doctor(
+    project_root: Annotated[Path, PROJECT_ROOT_OPTION],
+    knowledge_tree: Annotated[
+        str | None,
+        typer.Option(help="Directory holding the notes; overrides the manifest."),
+    ] = None,
+    indexer_config: Annotated[
+        Path | None,
+        typer.Option(help="Indexer configuration file to inspect."),
+    ] = None,
+    fix: Annotated[
+        bool,
+        typer.Option("--fix", help="Apply the repairs that need no judgement."),
+    ] = False,
+    override_directory: Annotated[
+        str,
+        typer.Option(help="Directory that rendering inputs are moved into by --fix."),
+    ] = DEFAULT_OVERRIDE_DIRECTORY,
+) -> None:
+    """Audit how the project is wired for Markdown knowledge retrieval."""
+
+    report = run_doctor(project_root, knowledge_tree, indexer_config)
+    _echo_findings(report)
+
+    if not fix:
+        if any(finding.code in FIXABLE_CODES for finding in report.findings):
+            typer.echo("Re-run with --fix to apply the repairs marked fixable.")
+        if report.error_count:
+            raise typer.Exit(code=1)
+        return
+
+    if not any((parent / ".git").exists() for parent in (project_root, *project_root.parents)):
+        typer.echo(
+            "Warning: no git repository at the project root, so --fix cannot be undone with git."
+        )
+
+    actions = run_repair(project_root, report, override_directory)
+    if not actions:
+        typer.echo("Nothing to fix automatically.")
+    for action in actions:
+        typer.echo(f"fixed [{action.code}] {action.location}: {action.description}")
+
+    if any(action.code == "override-inside-knowledge-tree" for action in actions):
+        typer.echo("A rendering input moved; run 'ai-sync render' to refresh the generated file.")
+
+    remaining = run_doctor(project_root, knowledge_tree, indexer_config)
+    typer.echo(
+        f"Remaining: {remaining.error_count} errors, {remaining.warning_count} warnings"
+    )
+    if remaining.error_count:
+        raise typer.Exit(code=1)
 
 
 def main() -> None:

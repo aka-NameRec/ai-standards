@@ -1,17 +1,25 @@
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 from scripts.ai_sync import (
     CLAUDE_BRIDGE_FILE,
     CLAUDE_BRIDGE_MARKER,
     DEFAULT_OUTPUT_NAME,
+    SEVERITY_ERROR,
+    DoctorReport,
     SyncError,
+    _strip_frontmatter,
     build_rendered_content,
     init_claude_bridge,
     init_project,
+    run_doctor,
+    run_repair,
     sync_project_templates,
     write_rendered_content,
 )
@@ -107,7 +115,8 @@ def test_basic_memory_feature_renders_reindexing_guidance(tmp_path: Path) -> Non
     result = build_rendered_content(project_root)
 
     assert "## Basic Memory Usage" in result.content
-    assert "Prefer `ensure_frontmatter_on_sync=false`" in result.content
+    assert "never at a repository root" in result.content
+    assert "Keep permalink generation enabled" in result.content
     assert "After `git pull`, `git merge`, `git rebase`, branch switches" in result.content
 
 
@@ -805,13 +814,13 @@ def test_session_hygiene_feature_can_be_rendered(tmp_path: Path) -> None:
 def test_written_file_matches_rendered_content(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()
-    (project_root / "docs" / "ai").mkdir(parents=True)
+    (project_root / "ai").mkdir(parents=True)
 
     (project_root / "ai.project.toml").write_text(
         (REPO_ROOT / "templates" / "project_manifest.toml").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
-    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+    (project_root / "ai" / "project-rules.md").write_text(
         (REPO_ROOT / "templates" / "project_rules.md").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
@@ -825,13 +834,13 @@ def test_written_file_matches_rendered_content(tmp_path: Path) -> None:
 def test_render_cli_accepts_default_output_name_with_typer_024_plus(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()
-    (project_root / "docs" / "ai").mkdir(parents=True)
+    (project_root / "ai").mkdir(parents=True)
 
     (project_root / "ai.project.toml").write_text(
         (REPO_ROOT / "templates" / "project_manifest.toml").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
-    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+    (project_root / "ai" / "project-rules.md").write_text(
         (REPO_ROOT / "templates" / "project_rules.md").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
@@ -1328,3 +1337,393 @@ def test_sync_skips_chroma_infra_when_feature_disabled(tmp_path: Path) -> None:
     assert [result.status for result in results] == ["created", "created"]
     assert not (project_root / ".ai-standards").exists()
     assert not (project_root / ".codex" / "skills" / "ai-infrastructure").exists()
+
+
+def _minimal_manifest(
+    local_override: str,
+    optional_override: str | None = None,
+    features: str = "conport",
+) -> str:
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + f'features = ["{features}"]\n'
+        + 'stacks = ["python"]\n'
+        + f'local_overrides = ["{local_override}"]\n'
+    )
+    if optional_override is not None:
+        manifest += f'optional_local_overrides = ["{optional_override}"]\n'
+    return manifest + "\n[metadata]\nproject_name = \"demo-project\"\n"
+
+
+def test_strip_frontmatter_removes_only_a_leading_block() -> None:
+    assert _strip_frontmatter("---\ntitle: x\n---\n# Heading\n") == "# Heading\n"
+    assert _strip_frontmatter("# Heading\n\n---\n") == "# Heading\n\n---\n"
+
+
+def test_strip_frontmatter_keeps_content_when_the_block_is_never_closed() -> None:
+    unclosed = "---\nnot really frontmatter\n"
+
+    assert _strip_frontmatter(unclosed) == unclosed
+
+
+def test_local_override_frontmatter_does_not_reach_rendered_output(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "ai").mkdir(parents=True)
+    (project_root / "ai.project.toml").write_text(
+        _minimal_manifest("ai/project-rules.md", "ai/private-rules.local.md"),
+        encoding="utf-8",
+    )
+    # An indexer that treats the file as a note stamps frontmatter onto it.
+    (project_root / "ai" / "project-rules.md").write_text(
+        "---\ntitle: project-rules\ntype: note\npermalink: demo/ai/project-rules\n---\n\n"
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+    (project_root / "ai" / "private-rules.local.md").write_text(
+        "---\ntitle: private-rules\n---\n\n# Private Rules\n\n- Local only.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    assert "permalink: demo/ai/project-rules" not in result.content
+    assert "type: note" not in result.content
+    assert "# Project-Specific AI Rules" in result.content
+    assert "- Demo override." in result.content
+    assert "# Private Rules" in result.content
+
+
+def test_init_project_scaffolds_local_overrides_outside_the_knowledge_tree(
+    tmp_path: Path,
+) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+
+    init_project(project_root)
+
+    assert (project_root / "ai" / "project-rules.md").exists()
+    assert not (project_root / "docs" / "ai" / "project-rules.md").exists()
+
+    manifest = (project_root / "ai.project.toml").read_text(encoding="utf-8")
+    assert '"ai/project-rules.md"' in manifest
+    assert "docs/ai/project-rules.md" not in manifest
+
+def _doctor_project(tmp_path: Path, override_path: str, features: str = "conport") -> Path:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / override_path).parent.mkdir(parents=True, exist_ok=True)
+    (project_root / "ai.project.toml").write_text(
+        _minimal_manifest(override_path, features=features), encoding="utf-8"
+    )
+    (project_root / override_path).write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n", encoding="utf-8"
+    )
+    return project_root
+
+
+def _codes(report: DoctorReport) -> set[str]:
+    return {finding.code for finding in report.findings}
+
+
+def test_doctor_flags_a_rendering_input_inside_the_knowledge_tree(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "docs/ai/project-rules.md")
+
+    report = run_doctor(project_root)
+
+    assert "override-inside-knowledge-tree" in _codes(report)
+    assert report.error_count == 1
+
+
+def test_doctor_accepts_a_rendering_input_outside_the_knowledge_tree(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+
+    report = run_doctor(project_root)
+
+    assert "override-inside-knowledge-tree" not in _codes(report)
+    assert report.error_count == 0
+
+
+def test_doctor_flags_notes_whose_title_and_heading_disagree(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    (project_root / "docs").mkdir()
+    (project_root / "docs" / "note.md").write_text(
+        "---\ntitle: Declared Title\n---\n\n# Different Heading\n\n"
+        "## Observations\n- [fact] x\n\n## Relations\n- relates_to [[Other]]\n",
+        encoding="utf-8",
+    )
+
+    report = run_doctor(project_root)
+
+    assert "note-title-heading-mismatch" in _codes(report)
+    assert report.notes_checked == 1
+
+
+def test_doctor_reports_an_unreadable_note_instead_of_crashing(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    (project_root / "docs").mkdir()
+    (project_root / "docs" / "broken.md").write_bytes(b"# Title\n\xff\xfe not utf-8\n")
+
+    report = run_doctor(project_root)
+
+    assert "note-unreadable" in _codes(report)
+    assert any(
+        finding.severity == SEVERITY_ERROR and finding.code == "note-unreadable"
+        for finding in report.findings
+    )
+
+
+def test_doctor_flags_an_indexer_project_pointed_at_the_repository_root(
+    tmp_path: Path,
+) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md", features="basic-memory")
+    (project_root / "docs").mkdir()
+    indexer_config = tmp_path / "indexer.json"
+    indexer_config.write_text(
+        json.dumps({"projects": {"demo": {"path": str(project_root)}}}), encoding="utf-8"
+    )
+
+    report = run_doctor(project_root, indexer_config=indexer_config)
+
+    assert "indexed-repository-root" in _codes(report)
+
+
+def test_doctor_accepts_an_indexer_project_pointed_at_the_knowledge_tree(
+    tmp_path: Path,
+) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md", features="basic-memory")
+    (project_root / "docs").mkdir()
+    indexer_config = tmp_path / "indexer.json"
+    indexer_config.write_text(
+        json.dumps({"projects": {"demo": {"path": str(project_root / "docs")}}}),
+        encoding="utf-8",
+    )
+
+    report = run_doctor(project_root, indexer_config=indexer_config)
+
+    assert "indexed-repository-root" not in _codes(report)
+    assert "knowledge-tree-not-indexed" not in _codes(report)
+
+
+def test_doctor_skips_indexer_checks_when_the_feature_is_disabled(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    (project_root / "docs").mkdir()
+    indexer_config = tmp_path / "indexer.json"
+    indexer_config.write_text(
+        json.dumps({"projects": {"demo": {"path": str(project_root)}}}), encoding="utf-8"
+    )
+
+    report = run_doctor(project_root, indexer_config=indexer_config)
+
+    assert "indexed-repository-root" not in _codes(report)
+
+
+def _note(project_root: Path, relative_path: str, content: str) -> Path:
+    note_path = project_root / relative_path
+    note_path.parent.mkdir(parents=True, exist_ok=True)
+    note_path.write_text(content, encoding="utf-8")
+    return note_path
+
+
+def test_doctor_flags_a_file_name_against_the_convention(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/decisions/2026-08-20 Решение — брокер очередей.md", "# x\n")
+
+    assert "note-name-against-convention" in _codes(run_doctor(project_root))
+
+
+def test_doctor_accepts_a_dated_ascii_slug(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/decisions/2026-08-20-queue-broker-choice.md", "# x\n")
+    _note(project_root, "docs/README.md", "# x\n")
+
+    assert "note-name-against-convention" not in _codes(run_doctor(project_root))
+
+
+def test_fix_moves_a_rendering_input_out_of_the_tree(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "docs/ai/project-rules.md")
+
+    run_repair(project_root, run_doctor(project_root))
+
+    assert (project_root / "ai" / "project-rules.md").exists()
+    assert not (project_root / "docs" / "ai").exists()
+    manifest = (project_root / "ai.project.toml").read_text(encoding="utf-8")
+    assert '"ai/project-rules.md"' in manifest
+    assert run_doctor(project_root).error_count == 0
+
+
+def test_fix_restores_a_missing_frontmatter_title(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    note = _note(project_root, "docs/note.md", "# Real Heading\n\nbody\n")
+
+    run_repair(project_root, run_doctor(project_root))
+
+    content = note.read_text(encoding="utf-8")
+    assert content.startswith("---\ntitle: Real Heading\n---\n")
+    assert "# Real Heading" in content
+    assert "note-without-frontmatter" not in _codes(run_doctor(project_root))
+
+
+def test_fix_aligns_the_heading_with_the_frontmatter_title(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    note = _note(
+        project_root, "docs/note.md", "---\ntitle: Declared\n---\n\n# Drifted\n\nbody\n"
+    )
+
+    run_repair(project_root, run_doctor(project_root))
+
+    assert "# Declared" in note.read_text(encoding="utf-8")
+    assert "note-title-heading-mismatch" not in _codes(run_doctor(project_root))
+
+
+def test_fix_inserts_a_missing_heading(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    note = _note(project_root, "docs/note.md", "---\ntitle: Declared\n---\n\nbody only\n")
+
+    run_repair(project_root, run_doctor(project_root))
+
+    content = note.read_text(encoding="utf-8")
+    assert "# Declared" in content
+    assert "body only" in content
+
+
+def test_fix_prunes_directories_it_empties(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    (project_root / "docs" / "empty").mkdir(parents=True)
+
+    actions = run_repair(project_root, run_doctor(project_root))
+
+    assert not (project_root / "docs" / "empty").exists()
+    assert any(action.code == "empty-directory" for action in actions)
+
+
+def test_fix_leaves_naming_and_content_findings_alone(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    note = _note(
+        project_root,
+        "docs/decisions/Плохое Имя.md",
+        "---\ntitle: Плохое Имя\n---\n\n# Плохое Имя\n",
+    )
+
+    run_repair(project_root, run_doctor(project_root))
+
+    assert note.exists(), "renaming needs a meaningful slug, so it must not be automated"
+    remaining = _codes(run_doctor(project_root))
+    assert "note-name-against-convention" in remaining
+    assert "note-without-observations" in remaining
+
+
+def test_doctor_leaves_names_alone_outside_the_governed_directories(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    # Living documents and working memory are not canonical dated artifacts, and neither
+    # are conventional files a project is required to name a particular way.
+    _note(project_root, "docs/ai-memory/Статус проекта.md", "# Статус проекта\n")
+    _note(project_root, "docs/MODULE_CONTRACT.md", "# MODULE_CONTRACT\n")
+
+    assert "note-name-against-convention" not in _codes(run_doctor(project_root))
+
+
+def test_manifest_can_redeclare_the_governed_directories(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    manifest = project_root / "ai.project.toml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8")
+        + '\n[basic_memory]\ndated_note_directories = ["reports"]\n',
+        encoding="utf-8",
+    )
+    _note(project_root, "docs/reports/Плохое Имя.md", "# Плохое Имя\n")
+    _note(project_root, "docs/decisions/Тоже Плохое.md", "# Тоже Плохое\n")
+
+    locations = {
+        finding.location
+        for finding in run_doctor(project_root).findings
+        if finding.code == "note-name-against-convention"
+    }
+
+    assert locations == {"docs/reports/Плохое Имя.md"}
+
+
+def test_manifest_can_redeclare_the_knowledge_tree(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    manifest = project_root / "ai.project.toml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8") + '\n[basic_memory]\nknowledge_tree = "knowledge"\n',
+        encoding="utf-8",
+    )
+    _note(project_root, "knowledge/note.md", "---\ntitle: Note\n---\n\n# Note\n")
+
+    report = run_doctor(project_root)
+
+    assert report.knowledge_tree.name == "knowledge"
+    assert report.notes_checked == 1
+
+
+def test_fix_aligns_the_first_level_heading_not_a_deeper_one_that_matches(
+    tmp_path: Path,
+) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    note = _note(
+        project_root,
+        "docs/note.md",
+        "---\ntitle: Declared\n---\n\n## Drifted\n\ntext\n\n# Drifted\n\nbody\n",
+    )
+
+    run_repair(project_root, run_doctor(project_root))
+
+    content = note.read_text(encoding="utf-8")
+    assert "## Drifted" in content, "a deeper heading must survive untouched"
+    assert "# Declared\n" in content
+    assert "note-title-heading-mismatch" not in _codes(run_doctor(project_root))
+
+
+def test_fix_moves_nothing_when_the_manifest_cannot_be_repointed(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "docs/ai/project-rules.md")
+    manifest = project_root / "ai.project.toml"
+    # Valid TOML that the textual repoint cannot match.
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace(
+            '"docs/ai/project-rules.md"', "'docs/ai/project-rules.md'"
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(SyncError):
+        run_repair(project_root, run_doctor(project_root))
+
+    assert (project_root / "docs" / "ai" / "project-rules.md").exists()
+    assert not (project_root / "ai" / "project-rules.md").exists()
+    assert "'docs/ai/project-rules.md'" in manifest.read_text(encoding="utf-8")
+    # The project still renders from its declared path.
+    assert build_rendered_content(project_root).content
+
+
+def test_doctor_accepts_a_localized_sibling_of_a_well_named_note(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/decisions/2026-08-20-queue-broker-choice.md", "# x\n")
+    _note(project_root, "docs/decisions/2026-08-20-queue-broker-choice.ru.md", "# x\n")
+
+    assert "note-name-against-convention" not in _codes(run_doctor(project_root))
+
+
+def test_doctor_accepts_a_relative_project_root(tmp_path: Path, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/note.md", "---\ntitle: Note\n---\n\n# Note\n")
+    monkeypatch.chdir(project_root)
+
+    report = run_doctor(Path("."))
+
+    assert report.notes_checked == 1
+
+
+def test_fix_quotes_a_title_that_would_break_yaml(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    note = _note(project_root, "docs/note.md", "# DECISION: add-basic-memory-feature\n\nbody\n")
+
+    run_repair(project_root, run_doctor(project_root))
+
+    content = note.read_text(encoding="utf-8")
+    assert 'title: "DECISION: add-basic-memory-feature"' in content
+    # And the value survives a round trip through the reader.
+    assert "note-title-heading-mismatch" not in _codes(run_doctor(project_root))
+    assert "note-without-title" not in _codes(run_doctor(project_root))
