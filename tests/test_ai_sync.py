@@ -1727,3 +1727,31 @@ def test_fix_quotes_a_title_that_would_break_yaml(tmp_path: Path) -> None:
     # And the value survives a round trip through the reader.
     assert "note-title-heading-mismatch" not in _codes(run_doctor(project_root))
     assert "note-without-title" not in _codes(run_doctor(project_root))
+
+
+def test_doctor_counts_observations_and_relations_by_syntax_not_by_heading(
+    tmp_path: Path,
+) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(
+        project_root,
+        "docs/note.md",
+        "---\ntitle: Note\n---\n\n# Note\n\n- [decision] Chose one thing over another\n\n"
+        "Related work lives in [[Other Note]].\n",
+    )
+
+    codes = _codes(run_doctor(project_root))
+
+    assert "note-without-observations" not in codes
+    assert "note-without-relations" not in codes
+
+
+def test_doctor_does_not_mistake_a_markdown_link_for_an_observation(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(
+        project_root,
+        "docs/note.md",
+        "---\ntitle: Note\n---\n\n# Note\n\n- [see the guide](guide.md)\n",
+    )
+
+    assert "note-without-observations" in _codes(run_doctor(project_root))

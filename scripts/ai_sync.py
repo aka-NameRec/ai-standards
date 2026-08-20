@@ -28,6 +28,12 @@ DEFAULT_DATED_NOTE_DIRECTORIES = ("decisions", "architecture")
 # A localized sibling such as `<name>.ru.md` keeps the base name, so the language tag is
 # stripped before the name is judged.
 LANGUAGE_SUFFIX_PATTERN = re.compile(r"\.[a-z]{2}$")
+# An observation is `- [category] text`; the negative lookahead keeps ordinary markdown
+# links such as `- [label](url)` from counting as one.
+OBSERVATION_PATTERN = re.compile(r"^\s*[-*]\s*\[[^\]]+\](?!\()", re.MULTILINE)
+# A relation is any wiki link, wherever it appears — a `## Relations` section is a
+# convention for grouping them, not what makes them relations.
+RELATION_PATTERN = re.compile(r"\[\[[^\]]+\]\]")
 DEFAULT_OVERRIDE_DIRECTORY = "ai"
 PROJECT_ROOT_OPTION = typer.Option(..., exists=True, file_okay=False, resolve_path=True)
 OUTPUT_NAME_OPTION: object = typer.Option(...)
@@ -985,7 +991,8 @@ def _audit_note(
             )
         )
 
-    if "## Observations" not in raw_content:
+    _, note_body = _split_frontmatter(raw_content)
+    if not OBSERVATION_PATTERN.search(note_body):
         findings.append(
             DoctorFinding(
                 severity=SEVERITY_WARNING,
@@ -994,7 +1001,7 @@ def _audit_note(
                 message="Note contributes no observations to the knowledge graph.",
             )
         )
-    if "## Relations" not in raw_content:
+    if not RELATION_PATTERN.search(note_body):
         findings.append(
             DoctorFinding(
                 severity=SEVERITY_WARNING,
