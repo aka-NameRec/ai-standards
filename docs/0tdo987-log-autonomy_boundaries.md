@@ -185,4 +185,3 @@
 `0tdo987. (feat) add autonomy boundaries feature.`
 
 Если утверждаешь этот текст, я сразу выполню commit.
-� этот текст, я сразу выполню commit.
