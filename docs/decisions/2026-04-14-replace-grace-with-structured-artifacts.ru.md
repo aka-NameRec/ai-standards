@@ -81,4 +81,4 @@ Accepted
 - [../structured-artifacts-usage.md](../structured-artifacts-usage.md)
 - [../structured-artifacts-usage.ru.md](../structured-artifacts-usage.ru.md)
 - [../../ai.project.toml](../../ai.project.toml)
-- [../ai/project-rules.md](../ai/project-rules.md)
+- [../ai/project-rules.md](../../ai/project-rules.md)

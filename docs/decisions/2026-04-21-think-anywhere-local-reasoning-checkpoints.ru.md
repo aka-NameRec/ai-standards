@@ -76,6 +76,6 @@ Accepted
 
 ## Связанные артефакты
 
-- [../0tdtl1j-log-arxiv.org-2603.29957.md](../0tdtl1j-log-arxiv.org-2603.29957.md)
+- [../0tdtl1j-log-arxiv.org-2603.29957.md](../../temp/0tdtl1j-log-arxiv.org-2603.29957.md)
 - [../reasoning-hygiene-usage.md](../reasoning-hygiene-usage.md)
 - [../autonomy-boundaries-usage.md](../autonomy-boundaries-usage.md)

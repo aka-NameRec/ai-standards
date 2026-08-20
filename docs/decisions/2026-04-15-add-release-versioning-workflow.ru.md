@@ -92,6 +92,6 @@ Workflow оставляет сохранение версии, git commit и с�
 
 - [../../scripts/bump_version.py](../../scripts/bump_version.py)
 - [../../scripts/ai_sync.py](../../scripts/ai_sync.py)
-- [../ai/project-rules.md](../ai/project-rules.md)
+- [../ai/project-rules.md](../../ai/project-rules.md)
 - [../../pyproject.toml](../../pyproject.toml)
 - [../../ai.project.toml](../../ai.project.toml)
