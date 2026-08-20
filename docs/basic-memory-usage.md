@@ -129,6 +129,14 @@ Record: decisions together with the options they rejected; rules of the business
 
 Do not record: restatements of code; implementation detail that the next refactor invalidates; the note's own prose paraphrased into observations; or speculation presented as fact. Name uncertainty as uncertainty instead — that is itself worth recording.
 
+## One Vocabulary Of Categories
+
+The category in an observation is free-form — the indexer fixes no list. Its retrieval story, however, assumes you fixed one: categories are queryable, and `search_notes("[decision]")` is only as complete as the vocabulary is consistent.
+
+Two synonyms, or the same category in two languages, therefore halve every query over them without failing. A base holding both `[requirement]` and `[требование]` answers a search for either with half its requirements and gives no sign that the other half exists.
+
+Fix one closed set per project, in the language the notes themselves are written in, and name it in the project's own rules — the set belongs there rather than in a shared standard, because it follows the project's language and domain. Keep it small: a category nobody can tell apart from its neighbour will be used at random, which costs the same as having none.
+
 ## The Task Is Not A Subject
 
 A task, an issue, or a merge request is a delivery vehicle. Its history already lives in the tracker, and nobody will later look it up as a subject.
