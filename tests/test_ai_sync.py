@@ -1769,3 +1769,60 @@ def test_the_problem_space_tree_is_governed_by_default(tmp_path: Path) -> None:
     }
 
     assert locations == {"docs/domain/Плохое Имя.md"}
+
+
+def test_doctor_names_the_other_roots_that_block_a_global_setting(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md", features="basic-memory")
+    (project_root / "docs").mkdir()
+    other = tmp_path / "other-repo"
+    (other / ".git").mkdir(parents=True)
+    # A workspace umbrella gives itself away the same way, without being a repository.
+    umbrella = tmp_path / "umbrella"
+    umbrella.mkdir()
+    (umbrella / "Makefile").write_text("all:\n", encoding="utf-8")
+    indexer_config = tmp_path / "indexer.json"
+    indexer_config.write_text(
+        json.dumps(
+            {
+                "projects": {
+                    "demo": {"path": str(project_root / "docs")},
+                    "other": {"path": str(other)},
+                    "umbrella": {"path": str(umbrella)},
+                },
+                "disable_permalinks": True,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    findings = run_doctor(project_root, indexer_config=indexer_config).findings
+    by_code = {finding.code: finding for finding in findings}
+
+    assert "other-indexed-repository-roots" in by_code
+    assert "other" in by_code["other-indexed-repository-roots"].message
+    assert "umbrella" in by_code["other-indexed-repository-roots"].message
+    # The blocked setting points at the finding that explains why it is blocked.
+    assert "other-indexed-repository-roots" in by_code["permalinks-disabled"].message
+
+
+def test_doctor_stays_quiet_when_every_other_root_is_a_knowledge_tree(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md", features="basic-memory")
+    (project_root / "docs").mkdir()
+    other_tree = tmp_path / "other-repo" / "docs"
+    other_tree.mkdir(parents=True)
+    indexer_config = tmp_path / "indexer.json"
+    indexer_config.write_text(
+        json.dumps(
+            {
+                "projects": {
+                    "demo": {"path": str(project_root / "docs")},
+                    "other": {"path": str(other_tree)},
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    codes = _codes(run_doctor(project_root, indexer_config=indexer_config))
+
+    assert "other-indexed-repository-roots" not in codes

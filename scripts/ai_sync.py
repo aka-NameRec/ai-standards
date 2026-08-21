@@ -1063,6 +1063,25 @@ def _audit_knowledge_tree(
     return findings, notes_checked
 
 
+def _looks_like_a_knowledge_tree(root: Path) -> bool:
+    """Judge whether an indexed root holds notes or a repository.
+
+    A knowledge tree carries Markdown and nothing else at its top level. A repository or a
+    workspace umbrella gives itself away immediately: a `.git` directory, or build and
+    configuration files sitting beside the documentation.
+    """
+    if (root / ".git").is_dir():
+        return False
+    try:
+        entries = list(root.iterdir())
+    except OSError:
+        return True
+    return not any(
+        entry.is_file() and not entry.name.startswith(".") and entry.suffix != ".md"
+        for entry in entries
+    )
+
+
 def _audit_indexer_config(
     project_root: Path,
     knowledge_tree: Path,
@@ -1086,12 +1105,19 @@ def _audit_indexer_config(
     findings: list[DoctorFinding] = []
     projects = config.get("projects")
     matched_tree = False
+    other_repository_roots: list[str] = []
     if isinstance(projects, dict):
         for name, entry in cast(dict[str, object], projects).items():
             raw_path = entry.get("path") if isinstance(entry, dict) else entry
             if not isinstance(raw_path, str):
                 continue
             indexed_root = Path(raw_path).expanduser().resolve()
+            # Trigger: another project indexes a directory that is itself a repository.
+            # Why: the write-guard flags are global, so those roots decide whether this
+            #      project may turn them off, and a single-project audit is blind to them.
+            # Outcome: name them, turning an open question into a list of roots to narrow.
+            if indexed_root != knowledge_tree and not _looks_like_a_knowledge_tree(indexed_root):
+                other_repository_roots.append(f"{name} -> {indexed_root}")
             if indexed_root == knowledge_tree:
                 matched_tree = True
             elif indexed_root == project_root:
@@ -1118,6 +1144,12 @@ def _audit_indexer_config(
         )
 
     if config.get("disable_permalinks") is True:
+        blocked = (
+            " The setting is global, so it cannot be turned on until every indexed root is "
+            "a knowledge tree; see other-indexed-repository-roots for the ones left."
+            if other_repository_roots
+            else ""
+        )
         findings.append(
             DoctorFinding(
                 severity=SEVERITY_WARNING,
@@ -1126,7 +1158,20 @@ def _audit_indexer_config(
                 message=(
                     "Permalinks are disabled, so 'memory://' addressing and graph traversal "
                     "resolve against nothing and retrieval degrades to plain search. Keep "
-                    "this only as a fallback for a tree that cannot be narrowed yet."
+                    "this only as a fallback for a tree that cannot be narrowed yet." + blocked
+                ),
+            )
+        )
+    if other_repository_roots:
+        findings.append(
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="other-indexed-repository-roots",
+                location=str(indexer_config),
+                message=(
+                    "Other projects index a repository root rather than a knowledge tree, so "
+                    "global indexer settings cannot be changed without affecting them: "
+                    + "; ".join(sorted(other_repository_roots))
                 ),
             )
         )
