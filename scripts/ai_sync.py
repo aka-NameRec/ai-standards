@@ -1116,7 +1116,12 @@ def _audit_indexer_config(
             # Why: the write-guard flags are global, so those roots decide whether this
             #      project may turn them off, and a single-project audit is blind to them.
             # Outcome: name them, turning an open question into a list of roots to narrow.
-            if indexed_root != knowledge_tree and not _looks_like_a_knowledge_tree(indexed_root):
+            # This project's own root is reported separately as indexed-repository-root,
+            # so listing it again among the roots that block a global setting is noise.
+            if (
+                indexed_root not in (knowledge_tree, project_root)
+                and not _looks_like_a_knowledge_tree(indexed_root)
+            ):
                 other_repository_roots.append(f"{name} -> {indexed_root}")
             if indexed_root == knowledge_tree:
                 matched_tree = True
@@ -1225,6 +1230,7 @@ def run_doctor(
 FIXABLE_CODES = frozenset(
     {
         "override-inside-knowledge-tree",
+        "override-carries-frontmatter",
         "note-without-frontmatter",
         "note-without-title",
         "note-without-heading",
@@ -1376,6 +1382,32 @@ def run_repair(
             actions.append(
                 _repair_override_placement(project_root, finding.location, override_directory)
             )
+
+    # Runs after the move, so the leftover block is stripped at the override's new path.
+    # A rendering input has no use for frontmatter: the renderer drops it either way.
+    for finding in report.findings:
+        if finding.code != "override-carries-frontmatter":
+            continue
+        moved = next(
+            (a.description for a in actions if a.location == finding.location), ""
+        )
+        relative_path = (
+            moved.split(" ", 2)[2].split(" and ")[0]
+            if moved.startswith("moved to ")
+            else finding.location
+        )
+        override_path = project_root / relative_path
+        if not override_path.exists():
+            continue
+        block, body = _split_frontmatter(override_path.read_text(encoding="utf-8"))
+        if block is None:
+            continue
+        override_path.write_text(body.lstrip("\n"), encoding="utf-8")
+        actions.append(
+            RepairAction(
+                "override-carries-frontmatter", relative_path, "stripped leftover frontmatter"
+            )
+        )
 
     note_codes: dict[str, set[str]] = {}
     for finding in report.findings:

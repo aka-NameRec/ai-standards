@@ -1826,3 +1826,33 @@ def test_doctor_stays_quiet_when_every_other_root_is_a_knowledge_tree(tmp_path: 
     codes = _codes(run_doctor(project_root, indexer_config=indexer_config))
 
     assert "other-indexed-repository-roots" not in codes
+
+
+def test_doctor_does_not_list_this_project_among_the_blocking_roots(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md", features="basic-memory")
+    (project_root / "docs").mkdir()
+    indexer_config = tmp_path / "indexer.json"
+    indexer_config.write_text(
+        json.dumps({"projects": {"demo": {"path": str(project_root)}}, "disable_permalinks": True}),
+        encoding="utf-8",
+    )
+
+    codes = _codes(run_doctor(project_root, indexer_config=indexer_config))
+
+    # Its own root is already reported as indexed-repository-root.
+    assert "indexed-repository-root" in codes
+    assert "other-indexed-repository-roots" not in codes
+
+
+def test_fix_strips_frontmatter_an_indexer_left_on_a_rendering_input(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "docs/ai/project-rules.md")
+    stamped = project_root / "docs" / "ai" / "project-rules.md"
+    stamped.write_text(
+        "---\ntitle: project-rules\n---\n\n# Project-Specific AI Rules\n", encoding="utf-8"
+    )
+
+    run_repair(project_root, run_doctor(project_root))
+
+    moved = project_root / "ai" / "project-rules.md"
+    assert moved.read_text(encoding="utf-8").startswith("# Project-Specific AI Rules")
+    assert "override-carries-frontmatter" not in _codes(run_doctor(project_root))
