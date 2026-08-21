@@ -473,8 +473,8 @@ Use `code-review` when a project wants:
 
 - which phrasing counts as an unqualified trigger
 - the checked dimensions and their priority order
-- what makes a finding reportable: a real file location, a named violated rule, no invented rules, no padding
-- the default reporting posture and when editing is allowed
+- what makes a finding reportable: a real file location, a named violated rule, a claim read from the code rather than the diff, no invented rules, no padding
+- the default reporting posture, and the narrow class of fixes a reviewer may make without asking
 
 The report shape itself is defined once, by the worked example in [templates/code-review-report.md](templates/code-review-report.md), deployed into each enabling project as `.ai-standards/code-review-report.md` by `sync-templates`. No document restates it, so changing the format is a single-file edit.
 

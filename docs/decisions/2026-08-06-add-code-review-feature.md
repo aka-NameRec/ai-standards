@@ -18,16 +18,24 @@ A bare, unqualified "code review" chat request in a project bootstrapped from `a
 
 No reusable rule combined a natural-language trigger with a report shape fixed across runs, tools, and models. The report additionally needs a tracked task reference when one exists, a short prose lead-in on what changed and how, per-finding severity and a cited violated rule grounded in a real file location, an explicit choice between chat output and a saved file, and full localization to the chat language.
 
+A second input arrived while this feature was still unreleased: a hand-written review workflow that had been in daily use for producing per-repository pull-request descriptions. It had independently converged on the same two-genre report — a prose lead-in about the change, followed by findings — and on one report per repository. It also carried three things this feature did not: a `Verification` section stating what was actually run and, more importantly, what was not; a `Dependencies` section for changes that reach into another repository; and a policy for the narrow class of fixes a reviewer may safely make while reviewing, which this feature needed anyway, because it defines a ✅ marker for fixed findings without ever saying when a fix is allowed. Folding those in before release is cheaper than shipping two shapes and reconciling them later.
+
 ## Decision
 
 `ai-standards` adds `code-review` as an opt-in process feature (`fragments/process/code-review.md`, registered in `registry.toml`).
 
 The feature separates two kinds of content, and that separation is the load-bearing part of this decision:
 
-- **Reusable review standards, stated as rules.** What to check and in what priority; what makes a finding reportable (a concrete file location, a named violated rule, enough detail to act on, no invented rules, no padding); how to treat problems that predate the diff; default to reporting rather than editing.
+- **Reusable review standards, stated as rules.** What to check and in what priority; what makes a finding reportable (a concrete file location, a named violated rule, a claim checked against the code rather than the diff, enough detail to act on, no invented rules, no padding); how to treat problems that predate the diff; reporting as the default, with a bounded exception for fixes whose safety reading alone can establish.
 - **The report shape, stated once as a worked example.** `templates/code-review-report.md` is a filled-in sample review that defines the sections, their order, the per-finding fields, and the severity markers. Prose constraints describing a format are replaced by the format itself. The file is deployed into each project that enables the feature, as `.ai-standards/code-review-report.md`, through the agent-agnostic `INFRA_TEMPLATES` channel that already serves `chroma` — so it needs no `tooling.agents` adapter and the fragment only has to point at it.
 
-Around the example sit six short operating rules: severity markers (🔴 blocking, 🟡 should fix, 🔵 optional, ✅ fixed, with a `→ fixed:` or `→ left as-is:` tail written onto the finding's own line); full localization to the chat language with the wordless markers exempt; chat output by default and a file only on request; a later "resend the report" reclassifying findings already on record instead of re-reviewing from scratch; a task reference that prefers a full link over a bare id whenever the tracker base is knowable — from the session, the project's own rules, or a `tracker_url` entry under `[metadata]` in the manifest, which already renders into the generated file's header, so the host stays with the organisation using the standard rather than in this repository; and one report per repository when a task spans several of them, since each repository gets its own pull request.
+Around the example sit eight short operating rules: severity markers (🔴 blocking, 🟡 should fix, 🔵 optional, ✅ fixed, with a `→ fixed:` or `→ left as-is:` tail written onto the finding's own line); full localization to the chat language with the wordless markers exempt; chat output by default and a file only on request; a later "resend the report" reclassifying findings already on record instead of re-reviewing from scratch; a task reference that prefers a full link over a bare id whenever the tracker base is knowable — from the session, the project's own rules, or a `tracker_url` entry under `[metadata]` in the manifest, which already renders into the generated file's header, so the host stays with the organisation using the standard rather than in this repository; one report per repository when a task spans several of them, since each repository gets its own pull request; `Verification` filled from what was actually run and naming what was not; and `Dependencies` kept only when the change reaches into another repository.
+
+The five checked dimensions get five sections rather than three, so `Reuse`, `Efficiency`, and `Quality` are found by their own headings instead of sharing one. Correctness and conventions still come first, which is what the grouping was protecting.
+
+Reuse and conventions the change got right are named in `How It Was Done`, as prose, not as findings. A finding carries a marker, and a marker has to mean outstanding work for scanning the markers alone to answer what is left to do.
+
+A separate `Fixing While Reviewing` rule bounds the ✅ marker: a fix is allowed without asking only when reading alone establishes that it is safe, with an explicit list on each side — translations, typos, junk in `.gitignore`, and local inconsistencies on one; migrations, lock files, dependencies, build configuration, public contracts, the git index, refactors, and anything needing a test run on the other. Refactors sit on the report-only side deliberately: restructuring is the author's decision, not a defect the reviewer resolves.
 
 The feature is included in the self-hosted manifest and the starter project manifest, and ships with bilingual usage documentation, so downstream projects adopt it through normal manifest composition without any tool-specific setup.
 
@@ -60,6 +68,14 @@ Rejected after the constraint-based version grew to roughly forty lines of imper
 
 Rejected once the deployment path was clear. Inlining costs about twenty-six lines of always-on context in every session of every project that enables the feature, and buys nothing that deployment does not: `INFRA_TEMPLATES` is gated on the feature alone, so the file lands without any adapter declaration. Deployment does introduce two failure modes, and both are handled rather than ignored — a project that has not run `sync-templates` would leave the pointer dangling, so the fragment carries a short fallback ordering and an instruction to say the file is missing; and a locally edited copy is skipped by the sync as unmanaged, which is recorded below as an accepted drift risk.
 
+### Keep the hand-written per-repository workflow as a second, separate shape
+
+Rejected. It would leave two documents claiming the same trigger and the same job, differing in section list and in whether findings carry markers, with nothing deciding which one a given session produces. Both had already converged on the same two genres in one report and on one report per repository, which is the expensive part of the design; the remaining differences were each other's gaps rather than disagreements. Merging before release costs one revision of an unreleased shape. Not merging costs a reconciliation later, against projects that have started pasting one of the two into pull requests.
+
+### Report what the change got right as a ✅ finding
+
+Rejected, although naming correct reuse is worth doing and is now required. ✅ is defined as a finding that was fixed, and the report has no verdict line precisely so that scanning the markers answers what is left to do. A ✅ that sometimes means "fixed" and sometimes "this was already fine" breaks that. Praise is prose and belongs in `How It Was Done`.
+
 ### Blanket-suppress issues found outside the diff
 
 Rejected as too blunt. Silently dropping every out-of-scope finding — the initial normalization of the Codex/Cloudflare "don't blame the diff" guidance — throws away real signal the reviewer already has. Surfacing it with a `(pre-existing)` label keeps the signal without blaming the current change, and an explicit scope narrowing switches it off.
@@ -72,6 +88,8 @@ Rejected as too blunt. Silently dropping every out-of-scope finding — the init
 - the format is defined in one place, so changing it is a single-file edit
 - no tool-specific adapter or setup is required
 - composes cleanly with `review-lenses`, which keeps its own activation and scope
+- the report doubles as a pull-request description, so the same pass serves review and hand-off
+- what was verified, and what was not, is stated rather than left to be assumed
 
 ### Costs Or Tradeoffs
 
@@ -79,6 +97,8 @@ Rejected as too blunt. Silently dropping every out-of-scope finding — the init
 - the report shape is a separate deployed file, so enabling the feature now needs `ai-sync sync-templates` in addition to `render`; the fragment degrades to a fallback ordering when that step is missed
 - a project can edit its deployed copy, which the sync then skips as unmanaged; that allows deliberate local customization at the price of silent drift from the shared shape
 - downstream projects must opt in through their manifest; nothing in the rendering pipeline forces adoption
+- nine sections make a longer report than five; the "None found." convention keeps the empty ones to one line each, but a trivial change still produces a page
+- allowing any fix at all needs a boundary that is a list rather than a principle, and lists have edges an agent can misjudge
 
 ## Affected Modules
 
@@ -98,12 +118,16 @@ Rejected as too blunt. Silently dropping every out-of-scope finding — the init
 ## Invariants And Constraints
 
 - the report shape is defined by `templates/code-review-report.md` and nowhere else. Exactly two places enumerate the full section list, both in the fragment and both unavoidable: the fallback ordering for a project that never synced the template, and the localization mapping. A rule may address a single section by name; no file outside the fragment may enumerate the shape
-- reporting is the default; editing code requires an explicit user request
+- reporting is the default; editing beyond the fixes `Fixing While Reviewing` allows requires an explicit user request, and a refactor is never in that allowance
 - a finding without a concrete file location or without a mapped rule must not be reported
+- a claim about code outside the diff is read from that code before it is written
 - a task reference is never invented; the line is omitted when none is known, and a URL is emitted only when its base is actually knowable
 - a multi-repository change never produces a single combined report; one report per repository, because one report goes into one pull request
 - a pre-existing issue is surfaced and labelled, not silently dropped, unless the user narrowed scope
 - ✅ marks only genuinely fixed findings; one left alone deliberately keeps its coloured marker
+- what the change got right belongs in `How It Was Done`, never as a marked finding, so the markers keep meaning outstanding work
+- `Verification` states what was run and what was not; an unmentioned check reads as a check that passed, so silence there is a defect
+- `Dependencies` is dropped for a self-contained change rather than filled with a placeholder
 - the whole report follows one language per session; the wordless markers are the only exception
 - the default file-save path must not silently promote a report into canonical documentation
 - the feature must stay tool-neutral and must not change `review-lenses` activation or scope
@@ -116,6 +140,7 @@ Rejected as too blunt. Silently dropping every out-of-scope finding — the init
 - usage guides exist in English and Russian and do not restate the format
 - README documents the feature in both languages
 - self-hosted `AGENTS.md` renders successfully with the feature enabled
+- every section of the worked example appears in both the fallback ordering and the localization mapping, asserted by test
 
 ## Related Artifacts
 
