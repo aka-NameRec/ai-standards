@@ -32,6 +32,18 @@ Use that output as the work list instead of walking the tree by hand.
 
 Prefer `edit_note` and `move_note` over direct file writes.
 
+## Rewriting One Document
+
+Repeat per file, with a confirmation each time; do not batch.
+
+1. **Decide the genre first** — discovered from the business, or chosen by the team? A document that does both is split before anything else happens to it.
+2. **Move it to the directory of its genre** with `move_note`, renaming to the convention in the same move. The slug is chosen by a person, never transliterated.
+3. **Fix frontmatter for that genre** — `title` matching the heading, a source and confirmation date for problem space, a status for a decision.
+4. **Leave the prose alone.** Compressing it into bullets destroys the reasoning; a verbatim source is untouched beyond frontmatter and heading.
+5. **Add observations from the document's own text** — only claims someone could disagree with, and only ones the document already makes.
+6. **Add relations to notes that exist** — `implements` from a decision to the rule it serves, `derived_from` from a rule to its source.
+7. **Verify with `ai-sync doctor`.** What remains is a decision, not a defect.
+
 ## Limits
 
 - Never synthesize observations: an observation is a claim about the domain, and paraphrasing prose into one invents statements nobody made.

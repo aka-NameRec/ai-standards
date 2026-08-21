@@ -159,6 +159,16 @@ The habit to avoid is one note per task, per merge request, or per session. It f
 
 Prefer extending an existing document over creating a new one. A new document is justified by a new subject, not by a new task.
 
+## Migrating An Existing Tree
+
+A tree written before these rules is migrated one document at a time, never in a batch. The order within a document matters, because each step constrains the next.
+
+Genre comes first: was this statement discovered from the business, or chosen by the team? Everything else follows from the answer — which directory it lives in, which frontmatter it must carry, whether the code may be reconciled against it. A document that does both is split before anything else happens to it, since its halves answer to different authorities and cannot be reviewed together.
+
+Then the move, with `move_note` so the index follows, renaming to the convention in the same operation. Then frontmatter for that genre. Only then the content, and there the rule is restraint: leave the prose alone, because it is what makes the document worth keeping, and add observations only where the document already makes a claim someone could disagree with. Where it says nothing, say nothing — a gap is a finding to report, not a blank to fill.
+
+Relations come last, and only to notes that exist. A forward reference to a note nobody has written yet is valid and resolves when it appears; inventing that note to satisfy a link is not.
+
 ## Keeping The Base In Shape
 
 Hygiene runs on a cadence, not every session, and the two layers have different rules.

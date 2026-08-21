@@ -61,6 +61,38 @@ Work through the findings in this order, confirming each change:
 
 Prefer `edit_note` and `move_note` over direct file writes, so the index never drifts from disk.
 
+## Rewriting One Document
+
+Migrating an existing tree is this procedure repeated, one file at a time, each with its own
+confirmation. Do not batch it.
+
+**1. Decide the genre before touching anything.** Ask what kind of statement the document makes: was
+this *discovered* from the business, or *chosen* by the team? Discovered goes to the problem-space
+tree; chosen goes to the solution-space trees. A document that does both is split first, and nothing
+else happens until it is — the two halves answer to different authorities and cannot be reviewed
+together.
+
+**2. Move it to the directory of its genre**, with `move_note` so the index follows. Rename to the
+project's file-name convention in the same move; the slug is chosen by a person, not transliterated.
+
+**3. Fix the frontmatter for that genre.** `title` matches the `# ` heading. A problem-space note
+gains its source and the date it was last confirmed against that source; a decision gains its status.
+
+**4. Leave the prose alone.** The body is what makes the document worth keeping, and compressing it
+into bullets destroys the reasoning. A verbatim source is not touched at all beyond frontmatter and
+heading.
+
+**5. Add observations from the document's own text.** Every one must be a claim someone could
+disagree with, and every one must already be stated in the document — an observation invented while
+summarizing is a statement nobody made. Where the document says nothing, say nothing.
+
+**6. Add relations to notes that already exist.** A decision `implements` the rule it serves; a rule
+is `derived_from` the source it came out of. A forward reference to a note that does not exist yet is
+valid and resolves on creation, but inventing the target note is not.
+
+**7. Verify.** `ai-sync doctor` should report the file clean; anything left is a decision, not a
+defect.
+
 ## Limits
 
 **Do not synthesize observations.** An observation is a claim about the domain. Paraphrasing prose into `- [decision] ...` produces confident statements nobody made. Report the gap, propose wording, and let the author accept it.
