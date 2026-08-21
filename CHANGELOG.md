@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- **`DRY` pass in the `review-lenses` feature**: duplication introduced by the reviewed change itself is now a separate pass rather than a corner of the `Reuse` lens, which by its wording ("prefer existing project primitives") never described the case where a single change adds two new copies. The pass also covers one intent expressed two different ways in sibling files, requires reading the surrounding convention before extracting a shared primitive, and calls for a clone detector once the scope grows past a diff. Propagated to the three `simplify-review` adapter templates covering all four agent environments, guarded by a test so an adapter cannot silently lose it, and documented in both usage guides. Rationale: [`docs/decisions/2026-08-21-add-dry-review-pass.md`](docs/decisions/2026-08-21-add-dry-review-pass.md).
+
 ## [2.1.0] — 2026-07-11
 
 ### Added
