@@ -6,7 +6,7 @@
 - Constrain the Basic Memory MCP server to a single project per workspace (for example `bm mcp --project <name>` or the equivalent MCP configuration) so retrieval returns only the current project's artifacts.
 - Disable the Basic Memory MCP server in workspaces that do not have a project, so queries never fall back to a shared default dump.
 - Treat canonical documentation and agent-managed working memory as different layers even when Basic Memory indexes both.
-- Treat `docs/decisions/**`, `docs/architecture/**`, `MODULE_CONTRACT.md`, and equivalent local artifacts as canonical project knowledge.
+- Treat `docs/domain/**`, `docs/decisions/**`, `docs/architecture/**`, `MODULE_CONTRACT.md`, and equivalent local artifacts as canonical project knowledge.
 - Treat `docs/ai-memory/**` and equivalent local note areas as agent-managed working memory rather than canonical truth.
 - Before creating or updating canonical documentation through Basic Memory, search existing canonical documents and working-memory notes to avoid duplicates and surface contradictions.
 - Keep permalink generation enabled once the knowledge tree holds only notes: `memory://` addressing and graph traversal resolve through permalinks, and a project without them degrades to plain search.
@@ -17,6 +17,7 @@
 - Repair an existing tree with one command, `ai-sync doctor --fix`. It reports how the project is wired, applies the repairs that need no judgement — moving rendering inputs out of the tree, restoring missing frontmatter titles and headings, pruning empty directories — and leaves naming and content decisions to review.
 - Do not reimplement checks the indexer already ships. Use `bm orphans` for notes with no relation in either direction, and the schema commands (`infer`, `validate`, `diff`) for per-type field contracts and drift.
 - Keep the two genres of knowledge apart. Problem-space knowledge is the business as it exists: its rules, its language, why a figure is computed the way it is. It is discovered from domain experts and sources, not designed, and it stays true whatever the code does. Solution-space knowledge is what the team chose to build and why, and it dies with the implementation it describes.
+- Give the genres separate homes: problem-space knowledge in `docs/domain/**`, solution-space knowledge in `docs/decisions/**` and `docs/architecture/**`. The path is what an agent sees first, so it is a stronger guard than a `type` buried in frontmatter.
 - Oblige each genre differently. A problem-space note carries its source — who stated the rule, which regulation or agreement, and when it was confirmed — and has no alternatives, because nothing was chosen. A solution-space note carries the options it rejected and the consequences it accepts.
 - Do not split decisions by category. Architectural, design, tooling, and policy decisions share one format; significance decides whether a decision is worth recording, not which category it falls into. The split that matters is between decisions and discovered facts, not among decisions.
 - Link the genres instead of merging them: a decision `implements` the rule it serves, so the reasoning stays traversable from either side. A problem-space rule with nothing implementing it is either unbuilt or dead.

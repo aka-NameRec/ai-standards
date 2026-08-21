@@ -30,6 +30,8 @@ Solution-space knowledge is what the team chose to build and why. A note carries
 
 A decision `implements` the rule it serves, so the reasoning stays traversable from either side, and a rule with nothing implementing it is either unbuilt or dead.
 
+The genres get separate directories rather than only a `type` in frontmatter: problem-space knowledge in `docs/domain/**`, solution-space knowledge in `docs/decisions/**` and `docs/architecture/**`. The path is what an agent sees before it opens a file, and the rule that the code is never the authority on problem-space knowledge has to hold at that moment. A tree with no `domain/` is not a violation — it is a project whose business rules are not written down yet.
+
 Decisions are not split further among themselves: architectural, design, tooling, and policy decisions share one format, and significance decides whether a decision is worth recording rather than which category it falls into.
 
 Three tests govern what is written at all. Prefer stable knowledge over volatile, since requirements outlive design decisions and a document mixing them inherits the shorter life. Assume the knowledge is already in the artifacts and make it explicit where it lives instead of restating it. State an observation only if someone could disagree with it.
@@ -76,6 +78,10 @@ Rejected. Both failure modes above appeared independently across projects using 
 ## Affected Modules
 
 - `fragments/tools/basic-memory.md`
+- `scripts/ai_sync.py`
+- `README.md`
+- `README.ru.md`
+- `templates/project_manifest.toml`
 - `docs/basic-memory-usage.md`
 - `docs/basic-memory-usage.ru.md`
 - `templates/knowledge-tree/audit-knowledge-tree.SKILL.md`

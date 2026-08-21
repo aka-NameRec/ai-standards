@@ -24,7 +24,7 @@ SEVERITY_WARNING = "warning"
 NOTE_NAME_PATTERN = re.compile(r"^(\d{4}-\d{2}-\d{2}-)?[a-z0-9]+(-[a-z0-9]+)*$")
 # The convention claims canonical notes only. Everything else in the tree — living
 # documents, working memory, conventional files like MODULE_CONTRACT.md — is out of scope.
-DEFAULT_DATED_NOTE_DIRECTORIES = ("decisions", "architecture")
+DEFAULT_DATED_NOTE_DIRECTORIES = ("domain", "decisions", "architecture")
 # A localized sibling such as `<name>.ru.md` keeps the base name, so the language tag is
 # stripped before the name is judged.
 LANGUAGE_SUFFIX_PATTERN = re.compile(r"\.[a-z]{2}$")

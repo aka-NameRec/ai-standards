@@ -104,6 +104,10 @@ The two genres carry different obligations:
 
 They are linked, not merged. A decision `implements` the rule it serves, so the reasoning is traversable from either side, and a problem-space rule with nothing implementing it is either unbuilt or dead.
 
+The genres get separate homes, because the path is what an agent sees before it opens anything: problem-space knowledge in `domain/`, solution-space knowledge in `decisions/` and `architecture/`. A `type` in frontmatter says the same thing, but only to a reader who already opened the file, and the rule that matters most — the code is never the authority on problem-space knowledge — has to hold at the moment a file is picked up.
+
+A tree with no `domain/` is not a violation; it is a project whose business rules are still only in someone's head or in a tracker. The directory appears when the first requirement is written down.
+
 Do not split decisions further among themselves. Architectural, design, tooling, and policy decisions share one format — the MADR project generalized its own acronym from "Markdown Architectural Decision Record" to "Markdown Any Decision Record" for exactly this reason, since the category boundaries are fuzzy and significance is what decides whether a decision is worth recording. The split worth making is between decisions and discovered facts, not among decisions.
 
 ## Stable And Volatile Knowledge

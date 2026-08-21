@@ -1755,3 +1755,17 @@ def test_doctor_does_not_mistake_a_markdown_link_for_an_observation(tmp_path: Pa
     )
 
     assert "note-without-observations" in _codes(run_doctor(project_root))
+
+
+def test_the_problem_space_tree_is_governed_by_default(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/domain/Плохое Имя.md", "# Плохое Имя\n")
+    _note(project_root, "docs/domain/2026-08-20-sick-leave-rounding.md", "# x\n")
+
+    locations = {
+        finding.location
+        for finding in run_doctor(project_root).findings
+        if finding.code == "note-name-against-convention"
+    }
+
+    assert locations == {"docs/domain/Плохое Имя.md"}

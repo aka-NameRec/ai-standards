@@ -61,10 +61,10 @@ Two optional manifest settings tune it, both with defaults that suit the layout 
 ```toml
 [basic_memory]
 knowledge_tree = "docs"
-dated_note_directories = ["decisions", "architecture"]
+dated_note_directories = ["domain", "decisions", "architecture"]
 ```
 
-`knowledge_tree` names the directory the notes live in. `dated_note_directories` names the directories whose files the `YYYY-MM-DD-topic-slug.md` convention governs — the canonical dated artifacts. Nothing outside them is judged on its file name, so living documents, working memory, and conventional files keep the names their own conventions give them. The `--knowledge-tree` flag overrides the manifest for a single run.
+`knowledge_tree` names the directory the notes live in. `dated_note_directories` names the directories whose files the `YYYY-MM-DD-topic-slug.md` convention governs — the canonical dated artifacts, which by default are the problem-space tree `domain/` and the solution-space trees `decisions/` and `architecture/`. Nothing outside them is judged on its file name, so living documents, working memory, and conventional files keep the names their own conventions give them. The `--knowledge-tree` flag overrides the manifest for a single run.
 
 `--fix` applies every finding marked `(fixable)`: rendering inputs move out of the knowledge tree and the manifest is repointed, missing frontmatter titles and headings are restored, directories emptied along the way are pruned. It converges in one pass and warns when the project has no git repository to undo it with.
 
