@@ -12,6 +12,7 @@
 - [Использование Reasoning Hygiene в проекте](#использование-reasoning-hygiene-в-проекте)
 - [Использование Autonomy Boundaries в проекте](#использование-autonomy-boundaries-в-проекте)
 - [Использование Review Lenses в проекте](#использование-review-lenses-в-проекте)
+- [Использование Code Review в проекте](#использование-code-review-в-проекте)
 - [Использование Structured Artifacts в проекте](#использование-structured-artifacts-в-проекте)
 - [Использование Session Hygiene в проекте](#использование-session-hygiene-в-проекте)
 - [Использование Basic Memory в проекте](#использование-basic-memory-в-проекте)
@@ -65,7 +66,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project
 Используются четыре слоя:
 
 - `fragments`: прямые базовые правила, которые должны включаться всегда.
-- `features`: опциональные возможности вроде `conport`, `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `structured-artifacts`, `session-hygiene` и `agent-usage-hygiene`.
+- `features`: опциональные возможности вроде `conport`, `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene` и `agent-usage-hygiene`.
 - `stacks`: правила, зависящие от технологии или архитектурного стиля, например `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring` или `spring-data-jpa`.
 - `tooling.agents`: опциональные agent adapters вроде `codex`, `claude`, `kilo` и `cursor` для управляемых локальных workflow templates.
 
@@ -91,6 +92,7 @@ features = [
   "structured-artifacts",
   "session-hygiene",
   "agent-usage-hygiene",
+  "code-review",
 ]
 
 stacks = [
@@ -295,7 +297,13 @@ agents = ["codex", "cursor"]
 - `kilo`: раскладывает управляемые skill templates под `.agents/skills/`
 - `cursor`: раскладывает управляемые rule templates под `.cursor/rules/`
 
-Некоторые templates гейтятся по фиче. Например, включение `chroma` распространяет навык/команду/правило `deploy-ai-knowledge-stack` на объявленных агентов и материализует инфраструктуру код-индекса под `.ai-standards/` (см. [Использование Chroma в проекте](#использование-chroma-в-проекте)). Feature-gated templates синхронизируются только при включённой в манифесте фиче.
+Каждый template гейтится по фиче: он синхронизируется только при включённой в манифесте собственной фиче, поэтому объявление агента никогда не выдаёт проекту adapter для порядка работы, который он не подключал.
+
+- `review-lenses` распространяет навык, команду или правило `simplify-review` на объявленных агентов.
+- `chroma` распространяет `deploy-ai-knowledge-stack` и материализует инфраструктуру код-индекса под `.ai-standards/` (см. [Использование Chroma в проекте](#использование-chroma-в-проекте)).
+- `code-review` материализует шаблон отчёта под `.ai-standards/`.
+
+Templates, попадающие под `.ai-standards/`, являются agent-agnostic: они синхронизируются от одной фичи, независимо от того, объявлено ли что-либо в `tooling.agents`.
 
 Команды:
 
@@ -442,6 +450,32 @@ Constraints:
 - [templates/review-lenses/simplify-review.cursor.mdc](templates/review-lenses/simplify-review.cursor.mdc)
 
 Если подключаемый проект объявляет `tooling.agents`, используйте `sync-templates`, чтобы держать эти adapter templates синхронизированными с текущей версией репозитория вместо ручного копирования.
+
+## Использование Code Review в проекте
+
+`code-review` — это опциональная возможность, превращающая обычный, ничем не уточнённый запрос "code review" в чате в фиксированный workflow с фиксированным форматом вывода, так что результат выглядит одинаково при каждом запуске.
+
+Используйте `code-review`, когда проекту нужны:
+
+- триггер на естественном языке (`code review`, `сделай ревью`, `проверь код` и подобные), который активируется без slash-команды или отдельного skill
+- ревью, покрывающее корректность и соответствие собственным архитектурным, error-handling и стековым правилам проекта, а не только чистку кода
+- устойчивая форма отчёта, одинаковая в любом инструменте, который рендерит `AGENTS.md` или `CLAUDE.md`
+
+`ai-standards` должен хранить переиспользуемую policy:
+
+- какая формулировка считается ничем не уточнённым триггером
+- проверяемые аспекты и порядок их приоритета
+- что делает находку пригодной к сообщению: реальная локация в файле, названное нарушенное правило, никаких выдуманных правил и раздувания
+- поведение по умолчанию «только отчёт» и условия, при которых разрешено править код
+
+Сама форма отчёта задана один раз — заполненным примером в [templates/code-review-report.md](templates/code-review-report.md), который `sync-templates` раскладывает в каждый подключивший проект как `.ai-standards/code-review-report.md`. Её не пересказывает ни один документ, поэтому изменение формата — правка одного файла.
+
+Поскольку триггер и форма отчёта живут прямо в собранных инструкциях, adapter в `tooling.agents` не требуется — workflow ведёт себя одинаково в Claude Code, Codex, Cursor и любом другом инструменте, читающем `AGENTS.md`. Он совместим с `review-lenses` без конфликтов — детали в usage-гайде.
+
+Подробная методика применения находится в:
+
+- английском руководстве: [docs/code-review-usage.md](docs/code-review-usage.md)
+- русском руководстве: [docs/code-review-usage.ru.md](docs/code-review-usage.ru.md)
 
 ## Использование Structured Artifacts в проекте
 

@@ -583,6 +583,75 @@ def test_review_lenses_feature_can_be_rendered(tmp_path: Path) -> None:
     )
 
 
+def test_code_review_feature_can_be_rendered(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK +
+        'fragments = ["core/base", "core/architecture"]\n'
+        'features = ["code-review"]\n'
+        'stacks = ["python"]\n'
+        'local_overrides = ["docs/ai/project-rules.md"]\n'
+        "\n"
+        "[metadata]\n"
+        'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    # Assert on stable identifiers only: the fragment heading, the activation rule, and
+    # the pointer to the file that defines the report shape. Prose wording is deliberately
+    # not asserted, so rewording the guidance does not break this test.
+    assert "## Code Review" in result.content
+    assert ".ai-standards/code-review-report.md" in result.content
+    assert (
+        'Treat a bare, unqualified request such as "code review"' in result.content
+    )
+
+
+def test_report_template_sections_stay_in_sync_with_the_fragment() -> None:
+    """Guard the two places that unavoidably restate the report shape.
+
+    `templates/code-review-report.md` defines the shape, but the fragment has to name the
+    sections twice anyway: once in the fallback ordering used when a project never synced
+    the template, and once in the localization mapping. Renaming a section in the template
+    must therefore fail here rather than silently diverge from those two lists.
+    """
+    template = (REPO_ROOT / "templates" / "code-review-report.md").read_text(encoding="utf-8")
+    fragment = (REPO_ROOT / "fragments" / "process" / "code-review.md").read_text(
+        encoding="utf-8"
+    )
+
+    sections = [
+        line.removeprefix("### ").strip()
+        for line in template.splitlines()
+        if line.startswith("### ")
+    ]
+    assert sections, "the worked example must define the report sections"
+
+    lines = fragment.splitlines()
+    fallback = next(line for line in lines if "fall back to this order" in line)
+    mapping = next(line for line in lines if "For Russian use" in line)
+
+    for section in sections:
+        assert section in fallback, f"{section!r} is missing from the fragment fallback ordering"
+        assert section in mapping, f"{section!r} is missing from the localization mapping"
+
+    assert "Code Review" in mapping
+    assert "Task" in fallback and "Task" in mapping
+
+    # The example teaches the linked form of the task reference, not the bare id.
+    task_line = next(line for line in template.splitlines() if line.startswith("Task:"))
+    assert "http" in task_line, "the worked example must show a task link, not just an id"
+
+
 def test_reasoning_hygiene_feature_can_be_rendered(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()
@@ -1103,8 +1172,9 @@ def test_sync_creates_infra_and_skill_when_chroma_enabled(tmp_path: Path) -> Non
     results = sync_project_templates(project_root)
     statuses = [result.status for result in results]
 
-    # codex(2) + claude(2) + kilo(2) + cursor(2) agent templates + 2 infra = 10
-    assert statuses.count("created") == 10
+    # One deploy-skill per declared agent (4) + 2 chroma infra templates.
+    # simplify-review is gated on review-lenses, which this manifest does not enable.
+    assert statuses.count("created") == 6
     assert (project_root / ".ai-standards" / "scripts" / "code_index.py").exists()
     assert (project_root / ".ai-standards" / "code-index.toml").exists()
     assert (
@@ -1113,19 +1183,119 @@ def test_sync_creates_infra_and_skill_when_chroma_enabled(tmp_path: Path) -> Non
     assert (
         project_root / ".claude/commands/deploy-ai-knowledge-stack.md"
     ).exists()
-    assert (project_root / ".claude/commands/simplify-review.md").exists()
     assert (
         project_root / ".agents/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md"
     ).exists()
     assert (
         project_root / ".cursor/rules/deploy-ai-knowledge-stack.mdc"
     ).exists()
-    assert (
+    assert not (project_root / ".claude/commands/simplify-review.md").exists()
+    assert not (
         project_root / ".agents/skills/review-lenses/simplify-review/SKILL.md"
     ).exists()
     assert "Managed by ai-standards template:" in (
         project_root / ".ai-standards" / "scripts" / "code_index.py"
     ).read_text(encoding="utf-8")
+
+
+def test_sync_skips_simplify_review_when_review_lenses_disabled(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base", "core/architecture"]\n'
+        + 'features = ["code-review"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + 'agents = ["codex", "claude", "kilo", "cursor"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    results = sync_project_templates(project_root)
+
+    # Declaring every agent must not hand the project an adapter for a feature it
+    # never enabled; only the code-review report template belongs here.
+    assert [result.destination_path.name for result in results] == ["code-review-report.md"]
+    assert not (project_root / ".claude").exists()
+    assert not (project_root / ".codex").exists()
+    assert not (project_root / ".cursor").exists()
+    assert not (project_root / ".agents").exists()
+
+
+def test_sync_deploys_code_review_report_template_without_any_agents(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base", "core/architecture"]\n'
+        + 'features = ["code-review"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + "agents = []\n"
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    results = sync_project_templates(project_root)
+
+    # The report template is agent-agnostic: it lands even with no adapters declared.
+    assert [result.status for result in results] == ["created"]
+    report = project_root / ".ai-standards" / "code-review-report.md"
+    assert report.exists()
+    content = report.read_text(encoding="utf-8")
+    assert "Managed by ai-standards template:" in content
+    assert "### What Was Done" in content
+
+
+def test_sync_skips_code_review_report_template_when_feature_disabled(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base", "core/architecture"]\n'
+        + 'features = ["review-lenses"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + "agents = []\n"
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    results = sync_project_templates(project_root)
+
+    assert results == []
+    assert not (project_root / ".ai-standards").exists()
 
 
 def test_sync_skips_chroma_infra_when_feature_disabled(tmp_path: Path) -> None:
