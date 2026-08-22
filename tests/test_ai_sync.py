@@ -611,6 +611,7 @@ def test_code_review_feature_can_be_rendered(tmp_path: Path) -> None:
     # not asserted, so rewording the guidance does not break this test.
     assert "## Code Review" in result.content
     assert ".ai-standards/code-review-report.md" in result.content
+    assert "### Fixing While Reviewing" in result.content
     assert (
         'Treat a bare, unqualified request such as "code review"' in result.content
     )

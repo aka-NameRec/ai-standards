@@ -29,14 +29,31 @@ A bare, unqualified request triggers it: `code review`, `review this`, `сдел
 
 ## What The Review Covers
 
-Five dimensions, reported in priority order: Correctness, Architecture & Conventions, then Reuse, Quality, and Efficiency. Correctness and conventions come first because a review that opens with cleanup suggestions while missing a real bug is not useful.
+Five dimensions, each its own section, reported in priority order: Correctness, Architecture & Conventions, Reuse, Efficiency, Quality. Correctness and conventions come first because a review that opens with cleanup suggestions while missing a real bug is not useful. The three cleanup lenses keep separate headings rather than sharing one, so a reader looking only for duplication does not have to read past readability notes to find it.
 
-Two rules shape what actually gets reported, and both exist to keep the output trustworthy rather than voluminous:
+Three rules shape what actually gets reported, and all three exist to keep the output trustworthy rather than voluminous:
 
 - **Evidence.** A finding needs a concrete file location and a named violated rule. Without either, it is not reported. This mirrors public prompting guidance from production AI review pipelines (see the sources in the project's decision record), which reward evidence-backed findings and penalize speculative ones.
+- **Read the code, not the diff.** Before claiming that something duplicates an existing helper or reuses the wrong primitive, open the file being referred to. The diff shows what changed, not what is already there, and a claim about the surrounding code cannot be checked from it.
 - **No padding.** Fewer high-confidence findings beat a full-looking list. An honestly empty section is a better outcome than a manufactured nitpick.
 
 Problems that predate the diff are still surfaced, marked `(pre-existing)` so they do not read as blame for the current change. Reporting one does not obligate a fix — that decision stays with the author, and it can be tracked as a follow-up instead of expanding the patch.
+
+## What Was Verified, And What Was Not
+
+The report ends with `Verification`: the checks that actually ran, with their commands and results, and an explicit list of what was not checked.
+
+The second half is the part that carries the weight. A report that lists passing backend tests and says nothing about the frontend reads as though the whole change was verified. Naming the gap — "backend tests pass, 34 of them; migrations and the uploader UI not checked" — turns an invisible assumption into a decision the reviewer can make.
+
+`Dependencies` follows, and only when the change actually needs a change in another repository. For a self-contained change the section is dropped rather than filled with "none".
+
+## Fixing While Reviewing
+
+The workflow reports by default, with one narrow exception: a fix whose safety can be established by reading alone, without running anything. Wrong translations, typos, a missing `.gitignore` entry, an import that disagrees with the rest of the file — these are cheaper to fix than to describe, and they become ✅ findings with a `→ fixed:` tail so the fix stays on the record.
+
+Everything else is reported and left alone. Migrations, lock files, dependencies, build configuration, public contracts, the git index, and anything that would need a test run to be sure about. Refactors are on this list too, however obviously correct: choosing to restructure code is the author's decision, not a defect the reviewer gets to resolve.
+
+The order matters. Review first, then fix, then write the report, so the report describes the code as it stands after the fixes rather than as it was found.
 
 ## Task Reference And Multi-Repository Changes
 
@@ -49,7 +66,7 @@ tracker_url = "https://tracker.example.com/browse/"
 
 Keeping that value in the project manifest rather than in `ai-standards` is deliberate: the tracker host belongs to the organisation using the standard, not to the standard itself.
 
-When one task spans several repositories, the workflow produces one report per repository rather than a combined one, because each repository gets its own pull request and each report is pasted into a different description. Those reports name the repository in the heading (`## Code Review — <repository>`), keep file paths relative to that repository's root, and cross-reference the sibling repositories in `How It Was Done`, so a reviewer looking at a single pull request still knows the change is part of a set.
+When one task spans several repositories, the workflow produces one report per repository rather than a combined one, because each repository gets its own pull request and each report is pasted into a different description. Those reports name the repository in the heading (`## Code Review — <repository>`), keep file paths relative to that repository's root, and list the siblings under `Dependencies`, so a reviewer looking at a single pull request still knows the change is part of a set.
 
 ## Relationship To Review Lenses
 
