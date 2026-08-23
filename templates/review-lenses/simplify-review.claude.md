@@ -10,6 +10,13 @@ Review the recent code changes (the current diff, or the files named in $ARGUMEN
 - Prefer existing helpers, shared utilities, and exported primitives over duplicated local code.
 - Suggest or apply reuse only when it makes the resulting code clearer and easier to maintain.
 
+## DRY
+
+- Look inward as well: a change that adds two copies of the same new helper satisfies "prefer existing primitives" while introducing exactly the duplication that should not reach the main branch.
+- One intent expressed two different ways in sibling files counts too — a helper in one module, an equivalent inline expression in the next.
+- Check the surrounding convention before extracting a shared helper. When the convention is to inline the operation, delete the wrapper on both sides instead of promoting it.
+- Reach for a clone detector once the scope grows past the diff to a whole module or repository.
+
 ## Quality
 
 - Preserve behavior, public contracts, readability, and type safety.

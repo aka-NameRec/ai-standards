@@ -34,6 +34,15 @@ Run this workflow after implementation or when the user explicitly asks for clea
 - Reduce noise and verbosity when readability does not get worse.
 - Do not turn readable code into code golf.
 
+## DRY
+
+Run this as its own pass rather than as a side effect of the `Reuse` lens. `Reuse` asks whether the author rewrote something the project already had, and that wording misses code duplicated wholesale inside a single change: both copies are new, so neither is an existing primitive.
+
+- Look for functions, constants, filters, data classes, or input normalization added by this change in more than one file. Literal copies first.
+- Look for one intent expressed two different ways in sibling files, such as a helper in one module and an equivalent inline expression in the next. Harder to spot, and it leaves two competing conventions behind.
+- Check how the surrounding code solves the same problem before proposing a shared helper. When the convention is to inline the operation, the fix is to delete the wrapper on both sides, not to move it into a shared module.
+- Run a clone detector and triage its output when the scope is a whole module, package, or repository rather than a diff. Report each group by the smallest primitive that would replace it, and separate genuine clones from repetition a framework requires, such as routing entry points or generated code.
+
 ## Conflict Resolution
 
 - If `Quality` and `Efficiency` conflict, choose `Quality`.
