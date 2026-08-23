@@ -17,6 +17,7 @@ features = [
   "structured-artifacts",
   "session-hygiene",
   "agent-usage-hygiene",
+  "code-review",
 ]
 stacks = [
   "python",

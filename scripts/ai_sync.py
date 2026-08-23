@@ -77,6 +77,7 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             agent="codex",
             source_relative_path="templates/review-lenses/simplify-review.SKILL.md",
             destination_relative_path=".codex/skills/review-lenses/simplify-review/SKILL.md",
+            feature="review-lenses",
         ),
         AgentTemplate(
             agent="codex",
@@ -90,6 +91,7 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             agent="cursor",
             source_relative_path="templates/review-lenses/simplify-review.cursor.mdc",
             destination_relative_path=".cursor/rules/simplify-review.mdc",
+            feature="review-lenses",
         ),
         AgentTemplate(
             agent="cursor",
@@ -103,6 +105,7 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             agent="claude",
             source_relative_path="templates/review-lenses/simplify-review.claude.md",
             destination_relative_path=".claude/commands/simplify-review.md",
+            feature="review-lenses",
         ),
         AgentTemplate(
             agent="claude",
@@ -116,6 +119,7 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             agent="kilo",
             source_relative_path="templates/review-lenses/simplify-review.SKILL.md",
             destination_relative_path=".agents/skills/review-lenses/simplify-review/SKILL.md",
+            feature="review-lenses",
         ),
         AgentTemplate(
             agent="kilo",
@@ -141,6 +145,12 @@ INFRA_TEMPLATES: tuple[AgentTemplate, ...] = (
         source_relative_path="templates/ai-infrastructure/code-index.toml",
         destination_relative_path=".ai-standards/code-index.toml",
         feature="chroma",
+    ),
+    AgentTemplate(
+        agent="",
+        source_relative_path="templates/code-review-report.md",
+        destination_relative_path=".ai-standards/code-review-report.md",
+        feature="code-review",
     ),
 )
 
