@@ -70,6 +70,20 @@ Expected output:
 
 This mode should usually be triggered manually, not automatically in CI.
 
+## DRY
+
+`Reuse` and `DRY` sound like the same lens, and treating them as one is why duplication kept passing review.
+
+`Reuse` looks outward: did the author rewrite something the project already had? `DRY` looks inward, at duplication the reviewed change brings with it. When a change adds two copies of the same new helper in two files, neither copy is an existing primitive, so the `Reuse` wording reads as satisfied while the duplication is exactly the kind that should not reach the main branch. Running `DRY` as its own pass is what closes that gap.
+
+The pass applies at every scope, down to a single small diff — which is also where duplication is cheapest to remove, because nothing depends on either copy yet.
+
+Duplication here is not only literal copies. One intent expressed two different ways in sibling files counts as well: a helper function in one module and an equivalent inline expression in the next. Besides being a copy, it leaves two competing conventions for a single decision, and the next change has to pick one of them.
+
+The fix is not automatically extraction. Before promoting duplicated new code into a shared primitive, check how the surrounding code solves the same problem. When the established convention is to inline the operation, the correct fix is to delete the wrapper on both sides rather than move it into a shared module and make the deviation permanent.
+
+Once the scope grows past a diff to a whole module, package, or repository, reading stops being enough — it follows the diff, the largest files, or the hot paths, and clones are usually small, stable, untouched for months, and outside all three. Run a clone detector over the surface and triage its output. Report each group by the smallest primitive that would replace it — a shared helper, a factory, a registry entry — because a bare list of similar files is not an actionable finding. Some repetition is structural rather than accidental: routing entry points, generated code, and per-entity registration files often must exist once per entity, and belong in the report as a trade-off, not as a defect.
+
 ## Typical Development Scenarios
 
 ### After Initial Implementation

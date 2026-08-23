@@ -4,6 +4,19 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- **`code-review` feature**: a bare "code review" request now runs a review against the project's assembled rules and prints a report of a fixed shape. The shape is defined once, by the worked example in `templates/code-review-report.md`, which `sync-templates` deploys to `.ai-standards/code-review-report.md` through the agent-agnostic template channel — no `tooling.agents` adapter required. Findings carry severity markers (🔴 🟡 🔵 ✅), a cited file location, and the rule they violate. Ships with bilingual usage guides and a decision record. Contributed by **tsinana** ([#6](https://github.com/aka-NameRec/ai-standards/pull/6)).
+- **`Verification` and `Dependencies` sections in the code-review report**: the report states which checks actually ran, with their results, and explicitly names what was not checked, because a silently omitted line reads as a check that passed. `Dependencies` is kept only when the change requires a change in another repository. Both were normalized from a hand-written per-repository review workflow that had been in daily use alongside the feature.
+- **`Fixing While Reviewing` policy**: the ✅ marker previously existed without a rule saying when a fix is allowed. Fixes whose safety reading alone establishes — translations, typos, junk in `.gitignore`, local inconsistencies — are made and recorded as ✅ findings; migrations, lock files, dependencies, build configuration, public contracts, the git index, refactors, and anything needing a test run are reported and left alone.
+- **`DRY` pass in the `review-lenses` feature**: duplication introduced by the reviewed change itself is now a separate pass rather than a corner of the `Reuse` lens, which by its wording ("prefer existing project primitives") never described the case where a single change adds two new copies. The pass also covers one intent expressed two different ways in sibling files, requires reading the surrounding convention before extracting a shared primitive, and calls for a clone detector once the scope grows past a diff. Propagated to the three `simplify-review` adapter templates covering all four agent environments, guarded by a test so an adapter cannot silently lose it, and documented in both usage guides. Rationale: [`docs/decisions/2026-08-21-add-dry-review-pass.md`](docs/decisions/2026-08-21-add-dry-review-pass.md).
+
+### Changed
+
+- **The code-review report has five finding sections instead of three**: `Reuse`, `Efficiency`, and `Quality` get their own headings rather than sharing one, while `Correctness` and `Architecture & Conventions` keep their priority positions. Findings are also now required to be checked against the code rather than against the diff, and what the change got right is named in `How It Was Done` rather than as a marked finding, so scanning the markers keeps answering what is left to do.
+
 ## [2.1.0] — 2026-07-11
 
 ### Added

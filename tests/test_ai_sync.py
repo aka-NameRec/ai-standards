@@ -590,6 +590,7 @@ def test_review_lenses_feature_can_be_rendered(tmp_path: Path) -> None:
         "Quality over Efficiency when safety, readability, or correctness is at risk."
         in result.content
     )
+    assert "### DRY" in result.content
 
 
 def test_code_review_feature_can_be_rendered(tmp_path: Path) -> None:
@@ -620,6 +621,7 @@ def test_code_review_feature_can_be_rendered(tmp_path: Path) -> None:
     # not asserted, so rewording the guidance does not break this test.
     assert "## Code Review" in result.content
     assert ".ai-standards/code-review-report.md" in result.content
+    assert "### Fixing While Reviewing" in result.content
     assert (
         'Treat a bare, unqualified request such as "code review"' in result.content
     )
@@ -1856,3 +1858,26 @@ def test_fix_strips_frontmatter_an_indexer_left_on_a_rendering_input(tmp_path: P
     moved = project_root / "ai" / "project-rules.md"
     assert moved.read_text(encoding="utf-8").startswith("# Project-Specific AI Rules")
     assert "override-carries-frontmatter" not in _codes(run_doctor(project_root))
+
+
+def test_dry_pass_reaches_the_fragment_and_every_simplify_review_adapter() -> None:
+    """Guard the propagation, not the wording.
+
+    Each `simplify-review` adapter restates the workflow in its own voice rather than
+    copying the fragment, so the four texts cannot be compared to each other. What must
+    not happen is an adapter losing the `DRY` pass entirely while the fragment keeps it.
+    """
+    surfaces = [
+        REPO_ROOT / "fragments" / "process" / "review-lenses.md",
+        REPO_ROOT / "templates" / "review-lenses" / "simplify-review.SKILL.md",
+        REPO_ROOT / "templates" / "review-lenses" / "simplify-review.claude.md",
+        REPO_ROOT / "templates" / "review-lenses" / "simplify-review.cursor.mdc",
+    ]
+
+    for surface in surfaces:
+        headings = [
+            line.lstrip("#").strip()
+            for line in surface.read_text(encoding="utf-8").splitlines()
+            if line.startswith("#")
+        ]
+        assert "DRY" in headings, f"{surface.name} has no DRY section"

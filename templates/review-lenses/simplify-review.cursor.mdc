@@ -18,6 +18,13 @@ Use this rule when the user asks for cleanup, simplification, deduplication, or 
 - Prefer existing helpers, shared utilities, and exported primitives over duplicated local code.
 - Suggest or apply reuse only when it makes the resulting code clearer and easier to maintain.
 
+## DRY
+
+- Check the change for duplication it introduces itself, not only for primitives it failed to reuse. Two new copies added by one change are easy to miss, because neither of them is an existing primitive.
+- Count one intent expressed two different ways in sibling files as duplication too, such as a helper in one module and an equivalent inline expression in the next.
+- Before extracting duplicated new code into a shared helper, check how the surrounding code solves the same problem; when the convention is to inline it, delete the wrapper instead of promoting it.
+- On a module- or repository-sized scope, run a clone detector and triage its output instead of waiting for clones to surface while reading.
+
 ## Quality
 
 - Preserve behavior, public contracts, readability, and type safety.
