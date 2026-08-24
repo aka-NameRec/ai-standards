@@ -586,6 +586,8 @@ Use `basic-memory` when a project benefits from reusable rules for:
 - Basic Memory is a retrieval and indexing layer, not the canonical source of truth
 - canonical documentation and working memory must stay distinct
 - a project points Basic Memory at a dedicated knowledge tree, never at a repository root, and keeps rendering inputs outside it
+- knowledge notes follow the two-genre model: problem-space knowledge is discovered from sources in `docs/domain/**`, solution-space knowledge is chosen in `docs/decisions/**` and `docs/architecture/**`, and the genres are linked rather than merged
+- tree health is audited in two halves: `ai-sync doctor` detects and repairs what needs no judgement, while the feature-gated `audit-knowledge-tree` skill handles classification, naming, and content decisions one file at a time
 - permalinks stay enabled on a clean tree, because `memory://` addressing and graph traversal resolve through them
 - ordinary edits may rely on auto-sync, while repository boundary events and interrupted indexing require status checks and targeted reindex
 
@@ -593,6 +595,13 @@ Detailed operational guidance lives in:
 
 - English guide: [docs/basic-memory-usage.md](docs/basic-memory-usage.md)
 - Russian guide: [docs/basic-memory-usage.ru.md](docs/basic-memory-usage.ru.md)
+
+Related task documents on the knowledge-tree method:
+
+- Knowledge genres and the role of `docs/domain/**`: [docs/tasks/0tk9qoy-knowledge-genres.md](docs/tasks/0tk9qoy-knowledge-genres.md) (RU: [0tk9qoy-knowledge-genres.ru.md](docs/tasks/0tk9qoy-knowledge-genres.ru.md))
+- The `ai-sync doctor` audit command: [docs/tasks/0tk9qpd-ai-sync-doctor.md](docs/tasks/0tk9qpd-ai-sync-doctor.md) (RU: [0tk9qpd-ai-sync-doctor.ru.md](docs/tasks/0tk9qpd-ai-sync-doctor.ru.md))
+- The `audit-knowledge-tree` skill: [docs/tasks/0tk9qpt-audit-knowledge-tree.md](docs/tasks/0tk9qpt-audit-knowledge-tree.md) (RU: [0tk9qpt-audit-knowledge-tree.ru.md](docs/tasks/0tk9qpt-audit-knowledge-tree.ru.md))
+- Decision on historical chat exports (`docs/archive/**`, excluded from the tree, searchable through a Chroma collection): [docs/decisions/2026-08-24-archive-history-in-docs-tree.md](docs/decisions/2026-08-24-archive-history-in-docs-tree.md)
 
 ## Using Chroma In a Project
 

@@ -578,6 +578,8 @@ ConPort остаётся полезным для transient operational context �
 - Basic Memory — это retrieval и indexing layer, а не canonical source of truth
 - canonical documentation и working memory должны оставаться разделёнными
 - проект указывает Basic Memory на выделенное дерево знаний, а не на корень репозитория, и держит rendering inputs вне него
+- заметки знаний следуют двухжанровой модели: знание problem space открывается из источников в `docs/domain/**`, знание solution space выбирается в `docs/decisions/**` и `docs/architecture/**`; жанры связываются, а не сливаются
+- здоровье дерева аудируется двумя половинами: `ai-sync doctor` обнаруживает и чинит то, что не требует суждения, а гейтованный фичей скилл `audit-knowledge-tree` ведёт классификацию, именование и решения о содержимом по одному файлу за раз
 - на чистом дереве permalinks остаются включёнными: через них разрешаются адресация `memory://` и обход графа
 - обычные edits могут полагаться на auto-sync, а repository boundary events и interrupted indexing требуют status checks и targeted reindex
 
@@ -585,6 +587,13 @@ ConPort остаётся полезным для transient operational context �
 
 - английском руководстве: [docs/basic-memory-usage.md](docs/basic-memory-usage.md)
 - русском руководстве: [docs/basic-memory-usage.ru.md](docs/basic-memory-usage.ru.md)
+
+Связанные документы задач о методике дерева знаний:
+
+- Жанры знаний и роль `docs/domain/**`: [docs/tasks/0tk9qoy-knowledge-genres.ru.md](docs/tasks/0tk9qoy-knowledge-genres.ru.md) (EN: [0tk9qoy-knowledge-genres.md](docs/tasks/0tk9qoy-knowledge-genres.md))
+- Команда аудита `ai-sync doctor`: [docs/tasks/0tk9qpd-ai-sync-doctor.ru.md](docs/tasks/0tk9qpd-ai-sync-doctor.ru.md) (EN: [0tk9qpd-ai-sync-doctor.md](docs/tasks/0tk9qpd-ai-sync-doctor.md))
+- Скилл `audit-knowledge-tree`: [docs/tasks/0tk9qpt-audit-knowledge-tree.ru.md](docs/tasks/0tk9qpt-audit-knowledge-tree.ru.md) (EN: [0tk9qpt-audit-knowledge-tree.md](docs/tasks/0tk9qpt-audit-knowledge-tree.md))
+- Решение об исторических экспортах чатов (`docs/archive/**`, вне индексируемого дерева, поиск через коллекцию Chroma): [docs/decisions/2026-08-24-archive-history-in-docs-tree.ru.md](docs/decisions/2026-08-24-archive-history-in-docs-tree.ru.md)
 
 ## Использование Chroma в проекте
 
