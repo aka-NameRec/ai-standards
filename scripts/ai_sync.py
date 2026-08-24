@@ -469,10 +469,31 @@ def _seed_manifest_release_version(project_root: Path) -> None:
     manifest_path.write_text(content, encoding="utf-8")
 
 
-def _build_managed_template_content(source_relative_path: str, raw_content: str) -> str:
-    marker_block = (
-        f"<!-- {MANAGED_TEMPLATE_MARKER_PREFIX} {source_relative_path} -->\n"
-        "<!-- Do not edit manually unless you remove this marker. -->\n"
+HTML_MARKER_SUFFIXES = frozenset({".md", ".mdc", ".html"})
+
+
+def _build_managed_marker(source_relative_path: str, destination_suffix: str) -> str:
+    """Build the marker with a comment syntax the destination file can parse.
+
+    Hash comments are the default: every non-Markdown template managed today is
+    source or configuration text where an HTML comment is a syntax error.
+    """
+    if destination_suffix in HTML_MARKER_SUFFIXES:
+        return (
+            f"<!-- {MANAGED_TEMPLATE_MARKER_PREFIX} {source_relative_path} -->\n"
+            "<!-- Do not edit manually unless you remove this marker. -->\n"
+        )
+    return (
+        f"# {MANAGED_TEMPLATE_MARKER_PREFIX} {source_relative_path}\n"
+        "# Do not edit manually unless you remove this marker.\n"
+    )
+
+
+def _build_managed_template_content(
+    source_relative_path: str, destination_relative_path: str, raw_content: str
+) -> str:
+    marker_block = _build_managed_marker(
+        source_relative_path, Path(destination_relative_path).suffix.lower()
     )
     frontmatter_delimiter = "---\n"
     if raw_content.startswith(frontmatter_delimiter):
@@ -486,6 +507,17 @@ def _build_managed_template_content(source_relative_path: str, raw_content: str)
                 + "\n"
                 + raw_content[insertion_index:].lstrip("\n")
             )
+    if raw_content.startswith("#!"):
+        shebang_end = raw_content.find("\n")
+        if shebang_end == -1:
+            return raw_content + "\n\n" + marker_block
+        insertion_index = shebang_end + 1
+        return (
+            raw_content[:insertion_index]
+            + marker_block
+            + "\n"
+            + raw_content[insertion_index:].lstrip("\n")
+        )
     return marker_block + "\n" + raw_content
 
 
@@ -497,7 +529,9 @@ def _sync_agent_template(project_root: Path, template: AgentTemplate) -> Templat
     repo_root = _repo_root()
     source_path = repo_root / template.source_relative_path
     raw_content = source_path.read_text(encoding="utf-8")
-    managed_content = _build_managed_template_content(template.source_relative_path, raw_content)
+    managed_content = _build_managed_template_content(
+        template.source_relative_path, template.destination_relative_path, raw_content
+    )
     destination_path = project_root / template.destination_relative_path
 
     if not destination_path.exists():

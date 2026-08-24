@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 from scripts.ai_sync import (
@@ -9,6 +10,7 @@ from scripts.ai_sync import (
     CLAUDE_BRIDGE_MARKER,
     DEFAULT_OUTPUT_NAME,
     SyncError,
+    _build_managed_template_content,
     build_rendered_content,
     init_claude_bridge,
     init_project,
@@ -1056,6 +1058,78 @@ def test_sync_project_templates_skips_unmanaged_local_changes(tmp_path: Path) ->
 
     assert [result.status for result in results] == ["skipped-unmanaged"]
     assert destination.read_text(encoding="utf-8") == "# custom local rule\n"
+
+
+def test_managed_marker_keeps_toml_parseable() -> None:
+    managed = _build_managed_template_content(
+        "templates/ai-infrastructure/code-index.toml",
+        ".ai-standards/code-index.toml",
+        'workspace = ".."\n\n[[collection]]\nname = "code"\nroots = ["src"]\n',
+    )
+
+    assert managed.startswith("# Managed by ai-standards template:")
+    assert "<!--" not in managed
+    assert tomllib.loads(managed)["workspace"] == ".."
+
+
+def test_managed_marker_keeps_python_compilable_and_shebang_first() -> None:
+    source = "#!/usr/bin/env -S uv run --script\nprint(\"ok\")\n"
+
+    managed = _build_managed_template_content(
+        "templates/ai-infrastructure/scripts/code_index.py",
+        ".ai-standards/scripts/code_index.py",
+        source,
+    )
+
+    lines = managed.splitlines()
+    assert lines[0] == "#!/usr/bin/env -S uv run --script"
+    assert lines[1] == "# Managed by ai-standards template: templates/ai-infrastructure/scripts/code_index.py"
+    compile(managed, "code_index.py", "exec")
+
+
+def test_managed_marker_keeps_html_form_for_markdown_destinations() -> None:
+    managed = _build_managed_template_content(
+        "templates/review-lenses/simplify-review.SKILL.md",
+        ".codex/skills/review-lenses/simplify-review/SKILL.md",
+        "# Simplify Review\n",
+    )
+
+    assert managed.startswith("<!-- Managed by ai-standards template:")
+    assert "# Managed by ai-standards template:" not in managed
+
+
+def test_sync_deploys_parseable_chroma_infra_templates(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK +
+        'fragments = ["core/base"]\n'
+        'features = ["chroma"]\n'
+        'stacks = ["python"]\n'
+        'local_overrides = ["docs/ai/project-rules.md"]\n'
+        "\n"
+        "[tooling]\n"
+        "agents = []\n"
+        "\n"
+        "[metadata]\n"
+        'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    sync_project_templates(project_root)
+
+    index_toml = project_root / ".ai-standards" / "code-index.toml"
+    index_py = project_root / ".ai-standards" / "scripts" / "code_index.py"
+    assert tomllib.loads(index_toml.read_text(encoding="utf-8"))["workspace"] == ".."
+    python_source = index_py.read_text(encoding="utf-8")
+    assert python_source.startswith("#!/usr/bin/env")
+    compile(python_source, "code_index.py", "exec")
 
 
 def test_unknown_agent_in_manifest_raises_sync_error(tmp_path: Path) -> None:
