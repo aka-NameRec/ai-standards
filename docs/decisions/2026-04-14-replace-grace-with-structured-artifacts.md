@@ -81,4 +81,4 @@ Rejected because it keeps mixed signals in README, templates, and project bootst
 - [../structured-artifacts-usage.md](../structured-artifacts-usage.md)
 - [../structured-artifacts-usage.ru.md](../structured-artifacts-usage.ru.md)
 - [../../ai.project.toml](../../ai.project.toml)
-- [../ai/project-rules.md](../ai/project-rules.md)
+- [../ai/project-rules.md](../../ai/project-rules.md)

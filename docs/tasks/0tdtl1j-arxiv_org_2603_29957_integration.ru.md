@@ -18,5 +18,5 @@
 
 ## Связанные артефакты
 
-- [../0tdtl1j-log-arxiv.org-2603.29957.md](../0tdtl1j-log-arxiv.org-2603.29957.md)
+- [../0tdtl1j-log-arxiv.org-2603.29957.md](../../temp/0tdtl1j-log-arxiv.org-2603.29957.md)
 - [../decisions/2026-04-21-think-anywhere-local-reasoning-checkpoints.ru.md](../decisions/2026-04-21-think-anywhere-local-reasoning-checkpoints.ru.md)

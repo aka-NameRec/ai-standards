@@ -46,7 +46,8 @@ Invariant: the three vector/data stores (ConPort internal vectors, Chroma code i
 
 - Create the BM project BEFORE any resolve or search call: `bm project add <name> <docs-path>`. Expect and handle an "already exists" race idempotently.
 - Never run `db reset` as a recovery step. It is destructive and unnecessary.
-- Set `ensure_frontmatter_on_sync=false` for existing Git-tracked documentation unless the project explicitly wants frontmatter injection.
+- Point the project at a dedicated knowledge tree, never at a repository root: a root-level project indexes vendored files and build artifacts as notes.
+- Leave permalink generation enabled; `memory://` addressing and graph traversal resolve through permalinks. Set `ensure_frontmatter_on_sync=false` together with `disable_permalinks=true` only as a fallback for a legacy tree that cannot be narrowed yet.
 - Force LOCAL mode: leave `cloud_api_key` null and ensure the MCP server uses local routing, so `search_notes` never fails with "Cloud routing requested but no credentials found".
 - Build the index: `bm reindex --full -p <name>`.
 - Constrain the MCP server to this project per-workspace (`bm mcp --project <name>` or the equivalent MCP configuration), so retrieval returns only this project's artifacts.

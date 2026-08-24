@@ -100,5 +100,5 @@ Rejected because `pyproject.toml` already provides the appropriate `tool.*` name
 
 - [../../scripts/bump_version.py](../../scripts/bump_version.py)
 - [../../scripts/ai_sync.py](../../scripts/ai_sync.py)
-- [../ai/project-rules.md](../ai/project-rules.md)
+- [../ai/project-rules.md](../../ai/project-rules.md)
 - [../../pyproject.toml](../../pyproject.toml)

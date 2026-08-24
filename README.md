@@ -4,6 +4,7 @@
 
 - [Layout](#layout)
 - [Quick Start](#quick-start)
+- [Auditing A Project](#auditing-a-project)
 - [Claude Code Integration](#claude-code-integration)
 - [Manifest-Only Configuration](#manifest-only-configuration)
 - [Project-Specific Rules](#project-specific-rules)
@@ -40,7 +41,34 @@ uv run ai-sync init-project --project-root /path/to/project
 uv run ai-sync render --project-root /path/to/project
 uv run ai-sync check --project-root /path/to/project
 uv run ai-sync sync-templates --project-root /path/to/project
+uv run ai-sync doctor --project-root /path/to/project
 ```
+
+## Auditing A Project
+
+`doctor` reports how a project is wired for Markdown knowledge retrieval, so the mechanical part of an audit is deterministic and CI-able rather than a judgement call:
+
+```bash
+uv run ai-sync doctor --project-root /path/to/project
+uv run ai-sync doctor --project-root /path/to/project --knowledge-tree docs
+uv run ai-sync doctor --project-root /path/to/project --fix
+```
+
+It checks that rendering inputs live outside the knowledge tree, that notes carry a `title` matching their heading and contribute observations and relations, and — when the `basic-memory` feature is enabled — that the indexer points at the knowledge tree rather than the repository root and has not silently given up permalinks. Findings marked `ERROR` set a non-zero exit code; warnings do not.
+
+Two optional manifest settings tune it, both with defaults that suit the layout this repository recommends:
+
+```toml
+[basic_memory]
+knowledge_tree = "docs"
+dated_note_directories = ["domain", "decisions", "architecture"]
+```
+
+`knowledge_tree` names the directory the notes live in. `dated_note_directories` names the directories whose files the `YYYY-MM-DD-topic-slug.md` convention governs — the canonical dated artifacts, which by default are the problem-space tree `domain/` and the solution-space trees `decisions/` and `architecture/`. Nothing outside them is judged on its file name, so living documents, working memory, and conventional files keep the names their own conventions give them. The `--knowledge-tree` flag overrides the manifest for a single run.
+
+`--fix` applies every finding marked `(fixable)`: rendering inputs move out of the knowledge tree and the manifest is repointed, missing frontmatter titles and headings are restored, directories emptied along the way are pruned. It converges in one pass and warns when the project has no git repository to undo it with.
+
+What `--fix` deliberately leaves alone needs a decision rather than a rule — renaming a file demands a meaningful slug, and an observation is a claim about the domain that cannot be paraphrased out of prose. Projects enabling `basic-memory` receive the `audit-knowledge-tree` skill through `sync-templates`; it consumes this report and walks the findings one file at a time, on confirmation.
 
 ## Claude Code Integration
 
@@ -106,11 +134,11 @@ stacks = [
 ]
 
 local_overrides = [
-  "docs/ai/project-rules.md",
+  "ai/project-rules.md",
 ]
 
 optional_local_overrides = [
-  "docs/ai/private-rules.local.md",
+  "ai/private-rules.local.md",
 ]
 
 [tooling]
@@ -257,29 +285,30 @@ project/
   AGENTS.md
   .codex/skills/review-lenses/simplify-review/SKILL.md
   .cursor/rules/simplify-review.mdc
-  docs/ai/project-rules.md
-  docs/ai/private-rules.local.md
+  ai/project-rules.md
+  ai/private-rules.local.md
 ```
 
 Use the manifest to compose both shared and project-local rules:
 
 ```toml
 local_overrides = [
-  "docs/ai/project-rules.md",
+  "ai/project-rules.md",
 ]
 
 optional_local_overrides = [
-  "docs/ai/private-rules.local.md",
+  "ai/private-rules.local.md",
 ]
 ```
 
 Guidance:
 
-- Put team-visible, repository-specific rules into `docs/ai/project-rules.md`.
-- Create `docs/ai/private-rules.local.md` only on machines where you need it.
+- Put team-visible, repository-specific rules into `ai/project-rules.md`.
+- Create `ai/private-rules.local.md` only on machines where you need it.
 - Do not move project-only rules into `~/workspace/ai-standards`.
 - Keep reusable stack, process, and tool rules in this repository instead.
-- Add `docs/ai/private-rules.local.md` to the downstream project's `.gitignore`.
+- Add `ai/private-rules.local.md` to the downstream project's `.gitignore`.
+- Keep both files outside any tree indexed by a knowledge base such as Basic Memory. They are concatenated verbatim into `AGENTS.md`, so frontmatter an indexer writes into them would surface in the generated file.
 
 `optional_local_overrides` are skipped if the file does not exist, so local private rules do not block rendering.
 
@@ -556,7 +585,8 @@ Use `basic-memory` when a project benefits from reusable rules for:
 
 - Basic Memory is a retrieval and indexing layer, not the canonical source of truth
 - canonical documentation and working memory must stay distinct
-- projects should prefer `ensure_frontmatter_on_sync=false` unless they explicitly want Basic Memory-managed frontmatter
+- a project points Basic Memory at a dedicated knowledge tree, never at a repository root, and keeps rendering inputs outside it
+- permalinks stay enabled on a clean tree, because `memory://` addressing and graph traversal resolve through them
 - ordinary edits may rely on auto-sync, while repository boundary events and interrupted indexing require status checks and targeted reindex
 
 Detailed operational guidance lives in:
