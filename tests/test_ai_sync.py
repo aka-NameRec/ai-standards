@@ -1142,6 +1142,72 @@ def test_sync_deploys_parseable_chroma_infra_templates(tmp_path: Path) -> None:
     compile(python_source, "code_index.py", "exec")
 
 
+def test_sync_deploys_capture_knowledge_adapters_when_feature_enabled(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK +
+        'fragments = ["core/base"]\n'
+        'features = ["knowledge-capture"]\n'
+        'stacks = ["python"]\n'
+        'local_overrides = ["docs/ai/project-rules.md"]\n'
+        "\n"
+        "[tooling]\n"
+        'agents = ["codex", "cursor", "claude", "kilo"]\n'
+        "\n"
+        "[metadata]\n"
+        'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    sync_project_templates(project_root)
+
+    for adapter in (
+        ".codex/skills/knowledge-capture/capture-knowledge/SKILL.md",
+        ".agents/skills/knowledge-capture/capture-knowledge/SKILL.md",
+        ".claude/commands/capture-knowledge.md",
+        ".cursor/rules/capture-knowledge.mdc",
+    ):
+        content = (project_root / adapter).read_text(encoding="utf-8")
+        assert "зафиксируй знания стандартным образом" in content, adapter
+
+
+def test_capture_knowledge_feature_renders_only_its_pointer_fragment(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+    (project_root / "ai").mkdir()
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK +
+        'fragments = ["core/base"]\n'
+        'features = ["knowledge-capture"]\n'
+        'stacks = ["python"]\n'
+        'local_overrides = ["ai/project-rules.md"]\n'
+        "\n"
+        "[metadata]\n"
+        'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    result = build_rendered_content(project_root)
+
+    assert result.fragment_ids == ["core/base", "process/knowledge-capture", "stacks/python"]
+    assert "зафиксируй знания стандартным образом" in result.content
+
+
 def test_unknown_agent_in_manifest_raises_sync_error(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()

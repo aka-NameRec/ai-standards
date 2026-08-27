@@ -10,6 +10,7 @@ code-review = ["process/code-review"]
 structured-artifacts = ["process/structured-artifacts"]
 session-hygiene = ["process/session-hygiene"]
 agent-usage-hygiene = ["process/agent-usage-hygiene"]
+knowledge-capture = ["process/knowledge-capture"]
 
 [stacks]
 layered-architecture = ["stacks/layered-architecture"]

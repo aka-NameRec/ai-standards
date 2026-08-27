@@ -116,6 +116,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             destination_relative_path=".codex/skills/knowledge-tree/audit-knowledge-tree/SKILL.md",
             feature="basic-memory",
         ),
+        AgentTemplate(
+            agent="codex",
+            source_relative_path="templates/knowledge-capture/capture-knowledge.SKILL.md",
+            destination_relative_path=".codex/skills/knowledge-capture/capture-knowledge/SKILL.md",
+            feature="knowledge-capture",
+        ),
     ),
     "cursor": (
         AgentTemplate(
@@ -135,6 +141,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/knowledge-tree/audit-knowledge-tree.cursor.mdc",
             destination_relative_path=".cursor/rules/audit-knowledge-tree.mdc",
             feature="basic-memory",
+        ),
+        AgentTemplate(
+            agent="cursor",
+            source_relative_path="templates/knowledge-capture/capture-knowledge.cursor.mdc",
+            destination_relative_path=".cursor/rules/capture-knowledge.mdc",
+            feature="knowledge-capture",
         ),
     ),
     "claude": (
@@ -156,6 +168,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             destination_relative_path=".claude/commands/audit-knowledge-tree.md",
             feature="basic-memory",
         ),
+        AgentTemplate(
+            agent="claude",
+            source_relative_path="templates/knowledge-capture/capture-knowledge.claude.md",
+            destination_relative_path=".claude/commands/capture-knowledge.md",
+            feature="knowledge-capture",
+        ),
     ),
     "kilo": (
         AgentTemplate(
@@ -175,6 +193,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/knowledge-tree/audit-knowledge-tree.SKILL.md",
             destination_relative_path=".agents/skills/knowledge-tree/audit-knowledge-tree/SKILL.md",
             feature="basic-memory",
+        ),
+        AgentTemplate(
+            agent="kilo",
+            source_relative_path="templates/knowledge-capture/capture-knowledge.SKILL.md",
+            destination_relative_path=".agents/skills/knowledge-capture/capture-knowledge/SKILL.md",
+            feature="knowledge-capture",
         ),
     ),
 }
