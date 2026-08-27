@@ -20,6 +20,7 @@ features = [
   "session-hygiene",
   "agent-usage-hygiene",
   "code-review",
+  "knowledge-capture",
 ]
 
 stacks = [
