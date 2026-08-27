@@ -1,3 +1,8 @@
+---
+title: 'DECISION: separate-release-version-from-python-package-version'
+permalink: ai-standards/decisions/2026-04-18-separate-release-version-from-python-package-version.ru
+---
+
 # DECISION: separate-release-version-from-python-package-version
 
 Англоязычный оригинал: [2026-04-18-separate-release-version-from-python-package-version.md](2026-04-18-separate-release-version-from-python-package-version.md)
@@ -100,5 +105,5 @@ Self-hosted manifest по-прежнему использует:
 
 - [../../scripts/bump_version.py](../../scripts/bump_version.py)
 - [../../scripts/ai_sync.py](../../scripts/ai_sync.py)
-- [../ai/project-rules.md](../ai/project-rules.md)
+- [../ai/project-rules.md](../../ai/project-rules.md)
 - [../../pyproject.toml](../../pyproject.toml)

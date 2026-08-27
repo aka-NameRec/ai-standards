@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-chroma-and-ai-infrastructure-deployment'
+permalink: ai-standards/decisions/2026-07-10-add-chroma-and-ai-infrastructure-deployment
+---
+
 # DECISION: add-chroma-and-ai-infrastructure-deployment
 
 Russian localized version: [2026-07-10-add-chroma-and-ai-infrastructure-deployment.ru.md](2026-07-10-add-chroma-and-ai-infrastructure-deployment.ru.md)

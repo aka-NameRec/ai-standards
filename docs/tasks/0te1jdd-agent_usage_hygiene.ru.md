@@ -1,3 +1,8 @@
+---
+title: 'Задача 0te1jdd: agent usage hygiene'
+permalink: ai-standards/tasks/0te1jdd-agent-usage-hygiene.ru
+---
+
 # Задача 0te1jdd: agent usage hygiene
 
 Англоязычный оригинал: [0te1jdd-agent_usage_hygiene.md](0te1jdd-agent_usage_hygiene.md)

@@ -1,3 +1,8 @@
+---
+title: Review Lenses Usage Guide
+permalink: ai-standards/review-lenses-usage
+---
+
 # Review Lenses Usage Guide
 
 Russian localized version: [review-lenses-usage.ru.md](review-lenses-usage.ru.md)

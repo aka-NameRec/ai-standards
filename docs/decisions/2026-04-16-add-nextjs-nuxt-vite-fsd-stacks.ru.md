@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-nextjs-nuxt-vite-fsd-stacks'
+permalink: ai-standards/decisions/2026-04-16-add-nextjs-nuxt-vite-fsd-stacks.ru
+---
+
 # DECISION: add-nextjs-nuxt-vite-fsd-stacks
 
 Англоязычный оригинал: [2026-04-16-add-nextjs-nuxt-vite-fsd-stacks.md](2026-04-16-add-nextjs-nuxt-vite-fsd-stacks.md)

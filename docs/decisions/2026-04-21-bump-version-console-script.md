@@ -1,3 +1,8 @@
+---
+title: 'DECISION: bump-version-console-script'
+permalink: ai-standards/decisions/2026-04-21-bump-version-console-script
+---
+
 # DECISION: bump-version-console-script
 
 Russian localized version: [2026-04-21-bump-version-console-script.ru.md](2026-04-21-bump-version-console-script.ru.md)
@@ -73,4 +78,4 @@ Rejected because the implementation already lives comfortably as a module and th
 
 - [../../scripts/bump_version.py](../../scripts/bump_version.py)
 - [../../tests/test_bump_version.py](../../tests/test_bump_version.py)
-- [../2026-04-18-separate-release-version-from-python-package-version.md](../2026-04-18-separate-release-version-from-python-package-version.md)
+- [../2026-04-18-separate-release-version-from-python-package-version.md](2026-04-18-separate-release-version-from-python-package-version.md)

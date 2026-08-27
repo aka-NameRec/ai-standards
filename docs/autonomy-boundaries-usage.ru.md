@@ -1,3 +1,8 @@
+---
+title: Autonomy Boundaries Usage Guide
+permalink: ai-standards/autonomy-boundaries-usage.ru
+---
+
 # Autonomy Boundaries Usage Guide
 
 Англоязычный оригинал: [autonomy-boundaries-usage.md](autonomy-boundaries-usage.md)

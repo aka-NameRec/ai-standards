@@ -1,3 +1,8 @@
+---
+title: 'DECISION: bump-version-console-script'
+permalink: ai-standards/decisions/2026-04-21-bump-version-console-script.ru
+---
+
 # DECISION: bump-version-console-script
 
 Англоязычный оригинал: [2026-04-21-bump-version-console-script.md](2026-04-21-bump-version-console-script.md)
@@ -73,4 +78,4 @@ Expose release workflow как console script `bump-version` и оставить
 
 - [../../scripts/bump_version.py](../../scripts/bump_version.py)
 - [../../tests/test_bump_version.py](../../tests/test_bump_version.py)
-- [../2026-04-18-separate-release-version-from-python-package-version.md](../2026-04-18-separate-release-version-from-python-package-version.md)
+- [../2026-04-18-separate-release-version-from-python-package-version.md](2026-04-18-separate-release-version-from-python-package-version.md)

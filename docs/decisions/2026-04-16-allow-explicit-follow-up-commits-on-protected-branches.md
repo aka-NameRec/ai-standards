@@ -1,3 +1,8 @@
+---
+title: 'DECISION: allow-explicit-follow-up-commits-on-protected-branches'
+permalink: ai-standards/decisions/2026-04-16-allow-explicit-follow-up-commits-on-protected-branches
+---
+
 # DECISION: allow-explicit-follow-up-commits-on-protected-branches
 
 Russian localized version: [2026-04-16-allow-explicit-follow-up-commits-on-protected-branches.ru.md](2026-04-16-allow-explicit-follow-up-commits-on-protected-branches.ru.md)

@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-code-review-feature'
+permalink: ai-standards/decisions/2026-08-06-add-code-review-feature.ru
+---
+
 # DECISION: add-code-review-feature
 
 Англоязычный оригинал: [2026-08-06-add-code-review-feature.md](2026-08-06-add-code-review-feature.md)

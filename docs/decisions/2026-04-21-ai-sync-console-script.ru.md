@@ -1,3 +1,8 @@
+---
+title: 'DECISION: ai-sync-console-script'
+permalink: ai-standards/decisions/2026-04-21-ai-sync-console-script.ru
+---
+
 # DECISION: ai-sync-console-script
 
 Англоязычный оригинал: [2026-04-21-ai-sync-console-script.md](2026-04-21-ai-sync-console-script.md)

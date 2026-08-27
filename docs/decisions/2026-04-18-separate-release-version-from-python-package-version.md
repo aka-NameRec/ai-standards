@@ -1,3 +1,8 @@
+---
+title: 'DECISION: separate-release-version-from-python-package-version'
+permalink: ai-standards/decisions/2026-04-18-separate-release-version-from-python-package-version
+---
+
 # DECISION: separate-release-version-from-python-package-version
 
 Russian localized version: [2026-04-18-separate-release-version-from-python-package-version.ru.md](2026-04-18-separate-release-version-from-python-package-version.ru.md)
@@ -100,5 +105,5 @@ Rejected because `pyproject.toml` already provides the appropriate `tool.*` name
 
 - [../../scripts/bump_version.py](../../scripts/bump_version.py)
 - [../../scripts/ai_sync.py](../../scripts/ai_sync.py)
-- [../ai/project-rules.md](../ai/project-rules.md)
+- [../ai/project-rules.md](../../ai/project-rules.md)
 - [../../pyproject.toml](../../pyproject.toml)

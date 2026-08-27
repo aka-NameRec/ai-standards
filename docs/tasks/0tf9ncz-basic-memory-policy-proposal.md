@@ -1,3 +1,8 @@
+---
+title: 'Task 0tf9ncz: basic memory policy proposal'
+permalink: ai-standards/tasks/0tf9ncz-basic-memory-policy-proposal
+---
+
 # Task 0tf9ncz: basic memory policy proposal
 
 Russian localized version: [0tf9ncz-basic-memory-policy-proposal.ru.md](0tf9ncz-basic-memory-policy-proposal.ru.md)

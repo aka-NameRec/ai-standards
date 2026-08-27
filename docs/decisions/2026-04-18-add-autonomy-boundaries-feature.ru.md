@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-autonomy-boundaries-feature'
+permalink: ai-standards/decisions/2026-04-18-add-autonomy-boundaries-feature.ru
+---
+
 # DECISION: add-autonomy-boundaries-feature
 
 Англоязычный оригинал: [2026-04-18-add-autonomy-boundaries-feature.md](2026-04-18-add-autonomy-boundaries-feature.md)

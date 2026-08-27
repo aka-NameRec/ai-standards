@@ -1,3 +1,8 @@
+---
+title: Reasoning Hygiene Usage Guide
+permalink: ai-standards/reasoning-hygiene-usage
+---
+
 # Reasoning Hygiene Usage Guide
 
 Russian localized version: [reasoning-hygiene-usage.ru.md](reasoning-hygiene-usage.ru.md)

@@ -1,3 +1,8 @@
+---
+title: Руководство по применению review-lenses
+permalink: ai-standards/review-lenses-usage.ru
+---
+
 # Руководство по применению review-lenses
 
 Англоязычный оригинал: [review-lenses-usage.md](review-lenses-usage.md)

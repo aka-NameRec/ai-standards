@@ -4,6 +4,7 @@
 
 - [Структура](#структура)
 - [Быстрый старт](#быстрый-старт)
+- [Аудит проекта](#аудит-проекта)
 - [Интеграция с Claude Code](#интеграция-с-claude-code)
 - [Конфигурация только через манифест](#конфигурация-только-через-манифест)
 - [Правила, специфичные для проекта](#правила-специфичные-для-проекта)
@@ -40,7 +41,34 @@ uv run ai-sync init-project --project-root /path/to/project
 uv run ai-sync render --project-root /path/to/project
 uv run ai-sync check --project-root /path/to/project
 uv run ai-sync sync-templates --project-root /path/to/project
+uv run ai-sync doctor --project-root /path/to/project
 ```
+
+## Аудит проекта
+
+`doctor` показывает, как проект подключён к retrieval по Markdown, чтобы механическая часть аудита была детерминированной и пригодной для CI, а не вопросом суждения:
+
+```bash
+uv run ai-sync doctor --project-root /path/to/project
+uv run ai-sync doctor --project-root /path/to/project --knowledge-tree docs
+uv run ai-sync doctor --project-root /path/to/project --fix
+```
+
+Он проверяет, что rendering inputs лежат вне дерева знаний, что у заметок есть `title`, совпадающий с заголовком, и что они дают observations и relations, а при включённой feature `basic-memory` — что индексатор указывает на дерево знаний, а не на корень репозитория, и что permalinks не отключены молча. Находки уровня `ERROR` дают ненулевой exit code, warnings — нет.
+
+Два необязательных ключа манифеста её настраивают, оба с дефолтами под рекомендуемую этим репозиторием раскладку:
+
+```toml
+[basic_memory]
+knowledge_tree = "docs"
+dated_note_directories = ["domain", "decisions", "architecture"]
+```
+
+`knowledge_tree` называет каталог, в котором живут заметки. `dated_note_directories` называет каталоги, чьи файлы подчиняются конвенции `YYYY-MM-DD-topic-slug.md`, — канонические датированные артефакты: по умолчанию дерево problem space `domain/` и деревья solution space `decisions/` и `architecture/`. Всё за их пределами по имени файла не судится, поэтому живые документы, рабочая память и общепринятые файлы сохраняют имена, которые им дают их собственные конвенции. Флаг `--knowledge-tree` переопределяет манифест на один запуск.
+
+`--fix` применяет все находки, помеченные `(fixable)`: rendering inputs переезжают из дерева знаний, манифест перенаправляется, восстанавливаются отсутствующие frontmatter title и заголовки, опустевшие каталоги удаляются. Сходится за один проход и предупреждает, если у проекта нет git-репозитория, которым это можно откатить.
+
+То, что `--fix` сознательно не трогает, требует решения, а не правила: переименование требует осмысленного слага, а observation — это утверждение о предметной области, его нельзя вывести пересказом прозы. Проекты, включившие `basic-memory`, получают через `sync-templates` скилл `audit-knowledge-tree`: он берёт этот отчёт и проходит находки по одному файлу, с подтверждением.
 
 ## Интеграция с Claude Code
 
@@ -102,11 +130,11 @@ stacks = [
 ]
 
 local_overrides = [
-  "docs/ai/project-rules.md",
+  "ai/project-rules.md",
 ]
 
 optional_local_overrides = [
-  "docs/ai/private-rules.local.md",
+  "ai/private-rules.local.md",
 ]
 
 [tooling]
@@ -253,29 +281,30 @@ project/
   AGENTS.md
   .codex/skills/review-lenses/simplify-review/SKILL.md
   .cursor/rules/simplify-review.mdc
-  docs/ai/project-rules.md
-  docs/ai/private-rules.local.md
+  ai/project-rules.md
+  ai/private-rules.local.md
 ```
 
 Используйте манифест, чтобы собирать и общие, и проектные правила:
 
 ```toml
 local_overrides = [
-  "docs/ai/project-rules.md",
+  "ai/project-rules.md",
 ]
 
 optional_local_overrides = [
-  "docs/ai/private-rules.local.md",
+  "ai/private-rules.local.md",
 ]
 ```
 
 Рекомендации:
 
-- Командные и специфичные для репозитория правила кладите в `docs/ai/project-rules.md`.
-- `docs/ai/private-rules.local.md` создавайте только на тех машинах, где он нужен.
+- Командные и специфичные для репозитория правила кладите в `ai/project-rules.md`.
+- `ai/private-rules.local.md` создавайте только на тех машинах, где он нужен.
 - Не переносите правила одного проекта в `~/workspace/ai-standards`.
 - Переиспользуемые правила для стеков, процессов и инструментов держите в этом репозитории.
-- Добавьте `docs/ai/private-rules.local.md` в `.gitignore` подключаемого проекта.
+- Добавьте `ai/private-rules.local.md` в `.gitignore` подключаемого проекта.
+- Держите оба файла вне дерева, индексируемого базой знаний вроде Basic Memory. Они дословно конкатенируются в `AGENTS.md`, поэтому frontmatter, вписанный в них индексатором, окажется в сгенерированном файле.
 
 `optional_local_overrides` пропускаются, если файл отсутствует, поэтому локальные приватные правила не блокируют сборку.
 
@@ -548,13 +577,23 @@ ConPort остаётся полезным для transient operational context �
 
 - Basic Memory — это retrieval и indexing layer, а не canonical source of truth
 - canonical documentation и working memory должны оставаться разделёнными
-- проектам следует предпочитать `ensure_frontmatter_on_sync=false`, если только они явно не хотят Basic Memory-managed frontmatter
+- проект указывает Basic Memory на выделенное дерево знаний, а не на корень репозитория, и держит rendering inputs вне него
+- заметки знаний следуют двухжанровой модели: знание problem space открывается из источников в `docs/domain/**`, знание solution space выбирается в `docs/decisions/**` и `docs/architecture/**`; жанры связываются, а не сливаются
+- здоровье дерева аудируется двумя половинами: `ai-sync doctor` обнаруживает и чинит то, что не требует суждения, а гейтованный фичей скилл `audit-knowledge-tree` ведёт классификацию, именование и решения о содержимом по одному файлу за раз
+- на чистом дереве permalinks остаются включёнными: через них разрешаются адресация `memory://` и обход графа
 - обычные edits могут полагаться на auto-sync, а repository boundary events и interrupted indexing требуют status checks и targeted reindex
 
 Подробная методика применения находится в:
 
 - английском руководстве: [docs/basic-memory-usage.md](docs/basic-memory-usage.md)
 - русском руководстве: [docs/basic-memory-usage.ru.md](docs/basic-memory-usage.ru.md)
+
+Связанные документы задач о методике дерева знаний:
+
+- Жанры знаний и роль `docs/domain/**`: [docs/tasks/0tk9qoy-knowledge-genres.ru.md](docs/tasks/0tk9qoy-knowledge-genres.ru.md) (EN: [0tk9qoy-knowledge-genres.md](docs/tasks/0tk9qoy-knowledge-genres.md))
+- Команда аудита `ai-sync doctor`: [docs/tasks/0tk9qpd-ai-sync-doctor.ru.md](docs/tasks/0tk9qpd-ai-sync-doctor.ru.md) (EN: [0tk9qpd-ai-sync-doctor.md](docs/tasks/0tk9qpd-ai-sync-doctor.md))
+- Скилл `audit-knowledge-tree`: [docs/tasks/0tk9qpt-audit-knowledge-tree.ru.md](docs/tasks/0tk9qpt-audit-knowledge-tree.ru.md) (EN: [0tk9qpt-audit-knowledge-tree.md](docs/tasks/0tk9qpt-audit-knowledge-tree.md))
+- Решение об исторических экспортах чатов (`docs/archive/**`, вне индексируемого дерева, поиск через коллекцию Chroma): [docs/decisions/2026-08-24-archive-history-in-docs-tree.ru.md](docs/decisions/2026-08-24-archive-history-in-docs-tree.ru.md)
 
 ## Использование Chroma в проекте
 

@@ -1,3 +1,8 @@
+---
+title: Structured Artifacts Usage Guide
+permalink: ai-standards/structured-artifacts-usage
+---
+
 # Structured Artifacts Usage Guide
 
 Russian localized version: [structured-artifacts-usage.ru.md](structured-artifacts-usage.ru.md)

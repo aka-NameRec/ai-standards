@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-release-versioning-workflow'
+permalink: ai-standards/decisions/2026-04-15-add-release-versioning-workflow.ru
+---
+
 # DECISION: add-release-versioning-workflow
 
 Англоязычный оригинал: [2026-04-15-add-release-versioning-workflow.md](2026-04-15-add-release-versioning-workflow.md)
@@ -92,6 +97,6 @@ Workflow оставляет сохранение версии, git commit и с�
 
 - [../../scripts/bump_version.py](../../scripts/bump_version.py)
 - [../../scripts/ai_sync.py](../../scripts/ai_sync.py)
-- [../ai/project-rules.md](../ai/project-rules.md)
+- [../ai/project-rules.md](../../ai/project-rules.md)
 - [../../pyproject.toml](../../pyproject.toml)
 - [../../ai.project.toml](../../ai.project.toml)

@@ -1,3 +1,8 @@
+---
+title: 'DECISION: extract-layered-architecture-and-merge-django-style'
+permalink: ai-standards/decisions/2026-04-16-extract-layered-architecture-and-merge-django-style.ru
+---
+
 # DECISION: extract-layered-architecture-and-merge-django-style
 
 Русская локализованная версия. Англоязычный оригинал: [2026-04-16-extract-layered-architecture-and-merge-django-style.md](2026-04-16-extract-layered-architecture-and-merge-django-style.md)

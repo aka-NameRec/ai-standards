@@ -1,3 +1,8 @@
+---
+title: Руководство по Session Hygiene
+permalink: ai-standards/session-hygiene-usage.ru
+---
+
 # Руководство по Session Hygiene
 
 Англоязычный оригинал: [session-hygiene-usage.md](session-hygiene-usage.md)

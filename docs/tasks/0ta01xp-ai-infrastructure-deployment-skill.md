@@ -1,3 +1,8 @@
+---
+title: 0ta01xp — AI infrastructure deployment skill and Chroma standard
+permalink: ai-standards/tasks/0ta01xp-ai-infrastructure-deployment-skill
+---
+
 # 0ta01xp — AI infrastructure deployment skill and Chroma standard
 
 Russian localized version: [0ta01xp-ai-infrastructure-deployment-skill.ru.md](0ta01xp-ai-infrastructure-deployment-skill.ru.md)

@@ -1,3 +1,8 @@
+---
+title: 'DECISION: replace-grace-with-structured-artifacts'
+permalink: ai-standards/decisions/2026-04-14-replace-grace-with-structured-artifacts
+---
+
 # DECISION: replace-grace-with-structured-artifacts
 
 Russian localized version: [2026-04-14-replace-grace-with-structured-artifacts.ru.md](2026-04-14-replace-grace-with-structured-artifacts.ru.md)
@@ -81,4 +86,4 @@ Rejected because it keeps mixed signals in README, templates, and project bootst
 - [../structured-artifacts-usage.md](../structured-artifacts-usage.md)
 - [../structured-artifacts-usage.ru.md](../structured-artifacts-usage.ru.md)
 - [../../ai.project.toml](../../ai.project.toml)
-- [../ai/project-rules.md](../ai/project-rules.md)
+- [../ai/project-rules.md](../../ai/project-rules.md)

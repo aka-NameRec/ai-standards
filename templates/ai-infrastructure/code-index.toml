@@ -28,7 +28,13 @@ exclude_globs = [
 
 # Declare one [[collection]] per logical code area. `roots` are relative to the
 # project root. Replace the example below with the project's own collections.
+# A project keeping chat history in docs/archive declares an opt-in collection for
+# it (see the archive decision): routine queries target the code collections only.
 
 [[collection]]
 name = "project-code"
 roots = ["."]
+
+# [[collection]]
+# name = "project-history"
+# roots = ["docs/archive"]

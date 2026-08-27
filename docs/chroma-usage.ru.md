@@ -1,3 +1,8 @@
+---
+title: Руководство по использованию Chroma
+permalink: ai-standards/chroma-usage.ru
+---
+
 # Руководство по использованию Chroma
 
 Англоязычная оригинальная версия: [chroma-usage.md](chroma-usage.md)

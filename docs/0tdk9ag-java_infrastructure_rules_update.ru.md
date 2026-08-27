@@ -1,3 +1,8 @@
+---
+title: 'План Изменений: Обновление Правил Java-Инфраструктуры'
+permalink: ai-standards/0tdk9ag-java-infrastructure-rules-update.ru
+---
+
 # План Изменений: Обновление Правил Java-Инфраструктуры
 
 Англоязычный оригинал: [0tdk9ag-java_infrastructure_rules_update.md](0tdk9ag-java_infrastructure_rules_update.md)
