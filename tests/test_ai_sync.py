@@ -15,7 +15,6 @@ from scripts.ai_sync import (
     SEVERITY_ERROR,
     DoctorReport,
     SyncError,
-    SyncError,
     _build_managed_template_content,
     _strip_frontmatter,
     build_rendered_content,
@@ -1092,8 +1091,9 @@ def test_managed_marker_keeps_python_compilable_and_shebang_first() -> None:
     )
 
     lines = managed.splitlines()
+    expected_source = "templates/ai-infrastructure/scripts/code_index.py"
     assert lines[0] == "#!/usr/bin/env -S uv run --script"
-    assert lines[1] == "# Managed by ai-standards template: templates/ai-infrastructure/scripts/code_index.py"
+    assert lines[1] == f"# Managed by ai-standards template: {expected_source}"
     compile(managed, "code_index.py", "exec")
 
 
