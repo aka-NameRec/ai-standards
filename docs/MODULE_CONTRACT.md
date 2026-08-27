@@ -1,4 +1,9 @@
-# MODULE_CONTRACT.md — scripts/ai_sync.py
+---
+title: 'Module Contract: scripts/ai_sync.py'
+permalink: ai-standards/module-contract
+---
+
+# Module Contract: scripts/ai_sync.py
 
 Module: `scripts/ai_sync.py`, exposed as the `ai-sync` CLI (render, update, init-project, sync-templates, init-claude-bridge, doctor).
 
@@ -42,3 +47,14 @@ The single rendering and template-deployment tool of this repository, plus the d
 - `uv run pytest` (unit and structural tests), `uv run mypy scripts/`
 - `uv run ai-sync render --project-root .` leaves a clean worktree (idempotency)
 - `uv run ai-sync doctor --project-root .` reports zero errors
+
+## Observations
+
+- [fact] The module renders `AGENTS.md`, deploys managed templates, and audits knowledge-tree wiring; rendering inputs are stripped of their own frontmatter before concatenation.
+- [fact] `--fix` applies only repairs that follow from a rule — moving rendering inputs, restoring titles and headings, pruning empty directories — and refuses renames and note-content edits.
+- [decision] Managed markers match the destination syntax (`<!-- -->` for Markdown-like destinations, `#` otherwise), and a shebang stays the first line.
+
+## Relations
+
+- relates_to [[Knowledge Stack Roles]]
+- localized counterpart of [[Модульный контракт: scripts/ai_sync.py]]
