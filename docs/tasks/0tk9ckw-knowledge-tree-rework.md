@@ -19,6 +19,8 @@ Russian version: [0tk9ckw-knowledge-tree-rework.ru.md](0tk9ckw-knowledge-tree-re
 
 **Audit applied (0tk9t95):** `ai-sync doctor` found 264 warnings / 0 errors; `--fix` gave 90 notes frontmatter titles (permalinks stamped by the running Basic Memory sync); the skill's judgment half added Observations/Relations to the eight session documents and renamed one Russian H1 to fix a duplicate-title collision. Remaining: 158 warnings (78 notes without observations, 80 without relations) — deferred to periodic hygiene by design, since observation synthesis is forbidden to batch.
 
+**Archive decision implemented:** chat exports moved `temp/` → `docs/archive/`; `doctor` skips the archive when auditing notes and warns (`archive-not-excluded`) when `.bmignore` does not exclude it; `-log-` rule globs updated to `docs/**/*-log-*.md`; chroma template documents the opt-in history collection.
+
 **Cockpit side:** `git-updater` Basic Memory path narrowed from the repository root to `docs` (registry commit `dd4be88`; adapter re-created the project entry; retrieval verified).
 
 ## Findings Left for Hygiene
@@ -29,10 +31,7 @@ Russian version: [0tk9ckw-knowledge-tree-rework.ru.md](0tk9ckw-knowledge-tree-re
 
 ## Pending
 
-- Commit of the 90-file audit result (awaiting approval; tree is intentionally left uncommitted).
-- Implementation of the archive decision on this branch: move `temp/` logs to `docs/archive/`, add the `.bmignore` check and archive skip to `doctor`, fix the `-log-` glob to `docs/**/*-log-*.md`.
-- One line in `~/.basic-memory/.bmignore` (`archive/`) when the first archive lands.
-- Push of `main` (marker fix) and of this branch; release and downstream re-render; devcats `.ai-standards/` migration unblocked by the marker fix.
+- Push of `main` (marker fix) and of this branch (needs explicit user approval); release and downstream re-render; devcats `.ai-standards/` migration unblocked by the marker fix.
 
 ## Observations
 

@@ -12,13 +12,13 @@ Russian localized version: [project-rules.ru.md](project-rules.ru.md)
 - Preserve links between English originals and Russian localized equivalents where practical.
 - Use only repository-relative paths in links to repository files inside maintained documentation.
 - Do not use absolute local filesystem paths such as `/home/...` in repository documentation links.
-- Do not create Russian or English equivalents for files under `docs/` whose names contain `-log-`.
-- Treat `docs/*-log-*.md` files as chat exports that must remain in their original language and original form.
+- Do not create Russian or English equivalents for chat exports anywhere under `docs/`; historical exports live in `docs/archive/**`.
+- Treat chat exports — files whose names contain `-log-`, kept in `docs/archive/**` — as verbatim sources that must remain in their original language and original form.
 
 ## Documentation Scope
 
 - This synchronization rule applies to `README.md` and maintained documentation in `docs/`.
-- Files under `docs/` with `-log-` in the name are excluded from the bilingual synchronization rule.
+- Files under `docs/` with `-log-` in the name are excluded from the bilingual synchronization rule; they live in `docs/archive/**`.
 - Templates, generated files, and historical artifacts outside `docs/` are not automatically in scope unless the user asks for localization.
 
 ## Workflow

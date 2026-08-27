@@ -18,6 +18,7 @@ MANAGED_TEMPLATE_MARKER_PREFIX = "Managed by ai-standards template:"
 FRONTMATTER_DELIMITER = "---\n"
 DEFAULT_KNOWLEDGE_TREE = "docs"
 DEFAULT_INDEXER_CONFIG = Path.home() / ".basic-memory" / "config.json"
+ARCHIVE_DIRECTORY_NAME = "archive"
 SEVERITY_ERROR = "error"
 SEVERITY_WARNING = "warning"
 # A canonical note file name: a lowercase ASCII slug, optionally date-prefixed.
@@ -1038,7 +1039,10 @@ def _audit_knowledge_tree(
     }
 
     findings: list[DoctorFinding] = []
+    archive_dir = knowledge_tree / ARCHIVE_DIRECTORY_NAME
     for directory in sorted(knowledge_tree.rglob("*")):
+        if _is_inside(directory, archive_dir):
+            continue
         if directory.is_dir() and not any(directory.iterdir()):
             findings.append(
                 DoctorFinding(
@@ -1052,6 +1056,8 @@ def _audit_knowledge_tree(
     notes_checked = 0
     for note_path in sorted(knowledge_tree.rglob("*.md")):
         if note_path.resolve() in declared_overrides:
+            continue
+        if _is_inside(note_path, archive_dir):
             continue
         notes_checked += 1
         relative_path = note_path.relative_to(project_root).as_posix()
@@ -1180,7 +1186,48 @@ def _audit_indexer_config(
                 ),
             )
         )
+
+    archive_dir = knowledge_tree / ARCHIVE_DIRECTORY_NAME
+    if not archive_dir.is_dir():
+        return findings
+    bmignore_path = indexer_config.parent / ".bmignore"
+    if not _archive_is_excluded(bmignore_path):
+        findings.append(
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="archive-not-excluded",
+                location=f"{bmignore_path}:patterns",
+                message=(
+                    f"The archive at {archive_dir} holds verbatim sources that stay out of the "
+                    "graph, but no '.bmignore' pattern excludes it. Add 'archive/' beside "
+                    f"{indexer_config}, or sync will index transcripts into the graph."
+                ),
+            )
+        )
     return findings
+
+
+def _load_bmignore_patterns(path: Path) -> list[str]:
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return []
+    return [line.strip() for line in lines if line.strip() and not line.strip().startswith("#")]
+
+
+def _archive_is_excluded(bmignore_path: Path) -> bool:
+    """Check that a `.bmignore` carries an exclusion the sync matcher will honour.
+
+    The knowledge-tree matcher ignores a directory when some path segment equals
+    the pattern name, so `archive/`, `archive`, `archive/*` and their
+    root-anchored forms all exclude the subtree at any depth, while
+    `archivefoo/` does not.
+    """
+    for pattern in _load_bmignore_patterns(bmignore_path):
+        normalized = pattern.strip("/")
+        if normalized.split("/")[0] == ARCHIVE_DIRECTORY_NAME:
+            return True
+    return False
 
 
 def run_doctor(

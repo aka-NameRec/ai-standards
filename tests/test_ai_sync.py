@@ -1521,6 +1521,49 @@ def test_doctor_skips_indexer_checks_when_the_feature_is_disabled(tmp_path: Path
     assert "indexed-repository-root" not in _codes(report)
 
 
+def test_doctor_skips_the_archive_subtree(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/note.md", "---\ntitle: Note\n---\n\n# Note\n")
+    _note(
+        project_root,
+        "docs/archive/20260101-log-old.md",
+        "# Old Chat Log\n\nraw transcript prose nobody summarized into observations\n",
+    )
+
+    report = run_doctor(project_root)
+
+    assert report.notes_checked == 1
+    assert [f for f in report.findings if "docs/archive" in f.location] == []
+    assert "note-without-frontmatter" not in _codes(report)
+
+
+def test_doctor_flags_an_archive_missing_from_bmignore(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md", features="basic-memory")
+    (project_root / "docs" / "archive").mkdir(parents=True)
+    indexer_config = tmp_path / "indexer.json"
+    indexer_config.write_text(
+        json.dumps({"projects": {"demo": {"path": str(project_root / "docs")}}}),
+        encoding="utf-8",
+    )
+
+    assert "archive-not-excluded" in _codes(run_doctor(project_root, indexer_config=indexer_config))
+
+
+def test_doctor_accepts_archive_excluded_via_bmignore(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md", features="basic-memory")
+    (project_root / "docs" / "archive").mkdir(parents=True)
+    indexer_config = tmp_path / "indexer.json"
+    indexer_config.write_text(
+        json.dumps({"projects": {"demo": {"path": str(project_root / "docs")}}}),
+        encoding="utf-8",
+    )
+    (indexer_config.parent / ".bmignore").write_text("*.tmp\narchive/\n", encoding="utf-8")
+
+    report = run_doctor(project_root, indexer_config=indexer_config)
+
+    assert "archive-not-excluded" not in _codes(report)
+
+
 def _note(project_root: Path, relative_path: str, content: str) -> Path:
     note_path = project_root / relative_path
     note_path.parent.mkdir(parents=True, exist_ok=True)
