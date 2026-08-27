@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-session-hygiene-feature'
+permalink: ai-standards/decisions/2026-04-25-add-session-hygiene-feature
+---
+
 # DECISION: add-session-hygiene-feature
 
 Russian localized version: [2026-04-25-add-session-hygiene-feature.ru.md](2026-04-25-add-session-hygiene-feature.ru.md)

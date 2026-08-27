@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-tanstack-query-stack'
+permalink: ai-standards/decisions/2026-04-16-add-tanstack-query-stack.ru
+---
+
 # DECISION: add-tanstack-query-stack
 
 Англоязычный оригинал: [2026-04-16-add-tanstack-query-stack.md](2026-04-16-add-tanstack-query-stack.md)

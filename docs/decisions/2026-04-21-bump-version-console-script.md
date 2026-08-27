@@ -1,3 +1,8 @@
+---
+title: 'DECISION: bump-version-console-script'
+permalink: ai-standards/decisions/2026-04-21-bump-version-console-script
+---
+
 # DECISION: bump-version-console-script
 
 Russian localized version: [2026-04-21-bump-version-console-script.ru.md](2026-04-21-bump-version-console-script.ru.md)

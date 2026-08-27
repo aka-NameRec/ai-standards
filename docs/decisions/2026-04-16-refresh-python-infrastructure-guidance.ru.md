@@ -1,3 +1,8 @@
+---
+title: 'DECISION: refresh-python-infrastructure-guidance'
+permalink: ai-standards/decisions/2026-04-16-refresh-python-infrastructure-guidance.ru
+---
+
 # DECISION: refresh-python-infrastructure-guidance
 
 Англоязычный оригинал: [2026-04-16-refresh-python-infrastructure-guidance.md](2026-04-16-refresh-python-infrastructure-guidance.md)

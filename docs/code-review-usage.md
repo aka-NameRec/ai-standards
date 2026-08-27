@@ -1,3 +1,8 @@
+---
+title: Code Review Usage Guide
+permalink: ai-standards/code-review-usage
+---
+
 # Code Review Usage Guide
 
 Russian localized version: [code-review-usage.ru.md](code-review-usage.ru.md)

@@ -1,3 +1,8 @@
+---
+title: 'Задача 0tdtl1j: интеграция arxiv.org 2603.29957'
+permalink: ai-standards/tasks/0tdtl1j-arxiv-org-2603-29957-integration.ru
+---
+
 # Задача 0tdtl1j: интеграция arxiv.org 2603.29957
 
 ## Статус

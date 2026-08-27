@@ -1,4 +1,9 @@
-# DECISION: archive-history-in-docs-tree
+---
+title: 'РЕШЕНИЕ: archive-history-in-docs-tree'
+permalink: ai-standards/decisions/2026-08-24-archive-history-in-docs-tree.ru
+---
+
+# РЕШЕНИЕ: archive-history-in-docs-tree
 
 English version: [2026-08-24-archive-history-in-docs-tree.md](2026-08-24-archive-history-in-docs-tree.md)
 
@@ -74,3 +79,16 @@ Accepted
 - Запись в игнорируемые пути отвергается сообщением "matches Basic Memory ignore rules".
 - Вложенный проект Basic Memory отвергается сообщением "Projects cannot share directory trees", что исключает архив-проект внутри дерева.
 - Конфигурация «коллекция на корень» проверена по воркспейсу devcats (`devcats-broadleaf-code`, `devcats-mkt-backend-code`, …) и шаблону `code-index.toml`, поставляемому с фичей chroma.
+
+## Observations
+
+- [decision] Исторические экспорты чатов живут в `docs/archive/**` — внутри дерева знаний, под версионным контролем.
+- [decision] Basic Memory исключает поддерево архива паттерном `archive/` в `.bmignore`; форма `archive/*` не исключает ничего, потому что при рекурсивном обходе матчер видит сам подкаталог.
+- [decision] Chroma индексирует `docs/archive` отдельной коллекцией, а кодовые коллекции объявляют явные корни, его не накрывающие.
+- [tradeoff] `.bmignore` разрешается на уровне машины и исключает каждый каталог с именем `archive` в каждом проекте Basic Memory, поэтому `doctor` обязан показать расхождение, когда проект действительно хочет индексировать свой `archive/`.
+- [tradeoff] Вики-ссылки в архив не резолвятся в графе Basic Memory; документы используют относительные Markdown-ссылки, ценой проходимости графа.
+
+## Relations
+
+- relates_to [[DECISION: basic-memory-knowledge-tree-boundary]]
+- локальная версия [[DECISION: archive-history-in-docs-tree]]

@@ -1,3 +1,8 @@
+---
+title: 'Task 0tdtl1j: arxiv.org 2603.29957 integration'
+permalink: ai-standards/tasks/0tdtl1j-arxiv-org-2603-29957-integration
+---
+
 # Task 0tdtl1j: arxiv.org 2603.29957 integration
 
 ## Status

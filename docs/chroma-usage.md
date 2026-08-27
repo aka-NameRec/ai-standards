@@ -1,3 +1,8 @@
+---
+title: Chroma Usage Guide
+permalink: ai-standards/chroma-usage
+---
+
 # Chroma Usage Guide
 
 Russian localized version: [chroma-usage.ru.md](chroma-usage.ru.md)

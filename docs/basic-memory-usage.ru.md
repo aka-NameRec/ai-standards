@@ -1,3 +1,8 @@
+---
+title: Руководство по Basic Memory
+permalink: ai-standards/basic-memory-usage.ru
+---
+
 # Руководство по Basic Memory
 
 Англоязычный оригинал: [basic-memory-usage.md](basic-memory-usage.md)

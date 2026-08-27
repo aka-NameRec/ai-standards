@@ -1,3 +1,8 @@
+---
+title: ConPort Usage Guide
+permalink: ai-standards/conport-usage
+---
+
 # ConPort Usage Guide
 
 Russian localized version: [conport-usage.ru.md](conport-usage.ru.md)

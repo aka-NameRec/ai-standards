@@ -1,3 +1,8 @@
+---
+title: 'DECISION: archive-history-in-docs-tree'
+permalink: ai-standards/decisions/2026-08-24-archive-history-in-docs-tree
+---
+
 # DECISION: archive-history-in-docs-tree
 
 Russian localized version: [2026-08-24-archive-history-in-docs-tree.ru.md](2026-08-24-archive-history-in-docs-tree.ru.md)
@@ -74,3 +79,16 @@ Rejected. Chat exports are project history; git is where the project keeps histo
 - Writes into ignored paths are rejected with "matches Basic Memory ignore rules".
 - A nested Basic Memory project is rejected with "Projects cannot share directory trees", which rules out an in-tree archive project.
 - Collection-per-root configuration is verified against the devcats workspace (`devcats-broadleaf-code`, `devcats-mkt-backend-code`, …) and the `code-index.toml` template shipped with the chroma feature.
+
+## Observations
+
+- [decision] Historical chat exports live in `docs/archive/**`, inside the knowledge tree and under version control.
+- [decision] Basic Memory excludes the archive subtree through the `.bmignore` pattern `archive/`; the `archive/*` form excludes nothing, because the matcher sees the subdirectory itself during a recursive scan.
+- [decision] Chroma indexes `docs/archive` as a dedicated collection, while code collections declare explicit roots that do not cover it.
+- [tradeoff] `.bmignore` is resolved per machine and excludes every directory named `archive` in every Basic Memory project, so `doctor` must surface the divergence when a project genuinely wants its own `archive/` indexed.
+- [tradeoff] Wiki-links into the archive do not resolve in the Basic Memory graph; documents use relative Markdown links instead, at the cost of graph traversability.
+
+## Relations
+
+- relates_to [[DECISION: basic-memory-knowledge-tree-boundary]]
+- localized counterpart of [[РЕШЕНИЕ: archive-history-in-docs-tree]]

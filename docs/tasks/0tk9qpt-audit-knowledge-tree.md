@@ -1,3 +1,8 @@
+---
+title: 'The audit-knowledge-tree Skill: Judgment-Bearing Tree Repair'
+permalink: ai-standards/tasks/0tk9qpt-audit-knowledge-tree
+---
+
 # The audit-knowledge-tree Skill: Judgment-Bearing Tree Repair
 
 Task: `0tk9qpt` · Branch: `feature/0tk9ckw-archive-history-in-docs-tree` · 2026-08-24
@@ -74,3 +79,15 @@ its report stops converging or when a human wants the tree's *content* reviewed.
 The skill ends by stating what was repaired, what was proposed and declined,
 and what was skipped and why. A finding deliberately left alone is a result,
 not an omission.
+
+## Observations
+
+- [fact] The skill takes the `doctor` remainder as its work list and adds graph-level findings from `bm orphans` and `bm doctor`.
+- [fact] Repair proceeds one file at a time with per-file confirmation, and batch repair is forbidden.
+- [fact] The skill must not synthesize observations, rewrite verbatim sources, or delete notes.
+
+## Relations
+
+- relates_to [[DECISION: basic-memory-knowledge-tree-boundary]]
+- relates_to [[ai-sync doctor: Deterministic Knowledge-Tree Audit]]
+- localized counterpart of [[Скилл audit-knowledge-tree: ремонт дерева знаний, требующий суждения]]

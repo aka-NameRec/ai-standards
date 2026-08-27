@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-basic-memory-feature'
+permalink: ai-standards/decisions/2026-05-19-add-basic-memory-feature
+---
+
 # DECISION: add-basic-memory-feature
 
 Russian localized version: [2026-05-19-add-basic-memory-feature.ru.md](2026-05-19-add-basic-memory-feature.ru.md)

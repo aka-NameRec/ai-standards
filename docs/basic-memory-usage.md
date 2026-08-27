@@ -1,3 +1,8 @@
+---
+title: Basic Memory Usage Guide
+permalink: ai-standards/basic-memory-usage
+---
+
 # Basic Memory Usage Guide
 
 Russian localized version: [basic-memory-usage.ru.md](basic-memory-usage.ru.md)

@@ -1,3 +1,8 @@
+---
+title: 'ai-sync doctor: детерминированный аудит дерева знаний'
+permalink: ai-standards/tasks/0tk9qpd-ai-sync-doctor.ru
+---
+
 # ai-sync doctor: детерминированный аудит дерева знаний
 
 Задача: `0tk9qpd` · Ветка: `feature/0tk9ckw-archive-history-in-docs-tree` · 2026-08-24
@@ -92,3 +97,15 @@ ai-sync doctor --project-root <path> --fix            # механическая
 проверять, что активный `.bmignore` несёт исключение `archive/` — граница это
 одна конвенционная строка конфигурации, и потерянная строка иначе молча выльет
 транскрипты обратно в граф.
+
+## Observations
+
+- [fact] `doctor` всегда проверяет размещение рендер-входов и здоровье заметок, а при включённой фиче `basic-memory` — проводку индексора; конфиг индексора читается, но не пишется.
+- [fact] Ошибки дают ненулевой код выхода, поэтому команда может стоять воротами CI.
+- [fact] `--fix` выносит рендер-входы, восстанавливает заголовки и `title`, снимает штампнутый индексатором frontmatter и удаляет опустевшие каталоги; переименования и правки содержимого исключены.
+
+## Relations
+
+- relates_to [[DECISION: basic-memory-knowledge-tree-boundary]]
+- relates_to [[Скилл audit-knowledge-tree: ремонт дерева знаний, требующий суждения]]
+- локальная версия [[ai-sync doctor: Deterministic Knowledge-Tree Audit]]

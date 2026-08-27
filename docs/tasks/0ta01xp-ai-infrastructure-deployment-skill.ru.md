@@ -1,3 +1,8 @@
+---
+title: 0ta01xp — Навык развёртывания AI-инфраструктуры и стандарт Chroma
+permalink: ai-standards/tasks/0ta01xp-ai-infrastructure-deployment-skill.ru
+---
+
 # 0ta01xp — Навык развёртывания AI-инфраструктуры и стандарт Chroma
 
 Англоязычная оригинальная версия: [0ta01xp-ai-infrastructure-deployment-skill.md](0ta01xp-ai-infrastructure-deployment-skill.md)

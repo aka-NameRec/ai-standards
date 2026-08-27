@@ -1,3 +1,8 @@
+---
+title: 'DECISION: think-anywhere-local-reasoning-checkpoints'
+permalink: ai-standards/decisions/2026-04-21-think-anywhere-local-reasoning-checkpoints.ru
+---
+
 # DECISION: think-anywhere-local-reasoning-checkpoints
 
 Англоязычный оригинал: [2026-04-21-think-anywhere-local-reasoning-checkpoints.md](2026-04-21-think-anywhere-local-reasoning-checkpoints.md)

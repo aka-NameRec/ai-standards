@@ -1,3 +1,8 @@
+---
+title: 'Task 0te1u0e: session hygiene'
+permalink: ai-standards/tasks/0te1u0e-session-hygiene
+---
+
 # Task 0te1u0e: session hygiene
 
 Russian localized version: [0te1u0e-session_hygiene.ru.md](0te1u0e-session_hygiene.ru.md)

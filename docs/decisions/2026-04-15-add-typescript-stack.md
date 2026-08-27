@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-typescript-stack'
+permalink: ai-standards/decisions/2026-04-15-add-typescript-stack
+---
+
 # DECISION: add-typescript-stack
 
 Russian localized version: [2026-04-15-add-typescript-stack.ru.md](2026-04-15-add-typescript-stack.ru.md)

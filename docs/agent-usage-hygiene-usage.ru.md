@@ -1,3 +1,8 @@
+---
+title: Руководство по Agent Usage Hygiene
+permalink: ai-standards/agent-usage-hygiene-usage.ru
+---
+
 # Руководство по Agent Usage Hygiene
 
 Англоязычный оригинал: [agent-usage-hygiene-usage.md](agent-usage-hygiene-usage.md)

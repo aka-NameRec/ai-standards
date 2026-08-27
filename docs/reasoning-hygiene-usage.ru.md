@@ -1,3 +1,8 @@
+---
+title: Руководство по применению reasoning-hygiene
+permalink: ai-standards/reasoning-hygiene-usage.ru
+---
+
 # Руководство по применению reasoning-hygiene
 
 Англоязычный оригинал: [reasoning-hygiene-usage.md](reasoning-hygiene-usage.md)

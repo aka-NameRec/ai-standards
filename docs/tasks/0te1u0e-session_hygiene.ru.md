@@ -1,3 +1,8 @@
+---
+title: 'Задача 0te1u0e: session hygiene'
+permalink: ai-standards/tasks/0te1u0e-session-hygiene.ru
+---
+
 # Задача 0te1u0e: session hygiene
 
 Англоязычный оригинал: [0te1u0e-session_hygiene.md](0te1u0e-session_hygiene.md)

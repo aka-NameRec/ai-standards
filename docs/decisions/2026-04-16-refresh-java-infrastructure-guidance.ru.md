@@ -1,3 +1,8 @@
+---
+title: 'DECISION: refresh-java-infrastructure-guidance'
+permalink: ai-standards/decisions/2026-04-16-refresh-java-infrastructure-guidance.ru
+---
+
 # DECISION: refresh-java-infrastructure-guidance
 
 Англоязычный оригинал: [2026-04-16-refresh-java-infrastructure-guidance.md](2026-04-16-refresh-java-infrastructure-guidance.md)

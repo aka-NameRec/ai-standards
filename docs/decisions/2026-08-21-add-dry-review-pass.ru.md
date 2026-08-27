@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-dry-review-pass'
+permalink: ai-standards/decisions/2026-08-21-add-dry-review-pass.ru
+---
+
 # DECISION: add-dry-review-pass
 
 Англоязычный оригинал: [2026-08-21-add-dry-review-pass.md](2026-08-21-add-dry-review-pass.md)

@@ -1,3 +1,8 @@
+---
+title: 'Task 0te1jdd: agent usage hygiene'
+permalink: ai-standards/tasks/0te1jdd-agent-usage-hygiene
+---
+
 # Task 0te1jdd: agent usage hygiene
 
 Russian localized version: [0te1jdd-agent_usage_hygiene.ru.md](0te1jdd-agent_usage_hygiene.ru.md)

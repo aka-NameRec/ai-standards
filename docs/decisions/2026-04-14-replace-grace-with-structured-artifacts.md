@@ -1,3 +1,8 @@
+---
+title: 'DECISION: replace-grace-with-structured-artifacts'
+permalink: ai-standards/decisions/2026-04-14-replace-grace-with-structured-artifacts
+---
+
 # DECISION: replace-grace-with-structured-artifacts
 
 Russian localized version: [2026-04-14-replace-grace-with-structured-artifacts.ru.md](2026-04-14-replace-grace-with-structured-artifacts.ru.md)

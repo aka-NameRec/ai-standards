@@ -1,3 +1,8 @@
+---
+title: '0thzm41 — Proposal: Graphify integration into ai-standards'
+permalink: ai-standards/tasks/0thzm41-proposal-graphify-integration
+---
+
 # 0thzm41 — Proposal: Graphify integration into ai-standards
 
 Russian localized version: [0thzm41-proposal-graphify-integration.ru.md](0thzm41-proposal-graphify-integration.ru.md)

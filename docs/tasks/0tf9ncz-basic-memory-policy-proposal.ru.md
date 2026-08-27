@@ -1,3 +1,8 @@
+---
+title: 'Задача 0tf9ncz: предложение по политике Basic Memory'
+permalink: ai-standards/tasks/0tf9ncz-basic-memory-policy-proposal.ru
+---
+
 # Задача 0tf9ncz: предложение по политике Basic Memory
 
 Англоязычный оригинал: [0tf9ncz-basic-memory-policy-proposal.md](0tf9ncz-basic-memory-policy-proposal.md)

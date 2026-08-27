@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-agent-usage-hygiene-feature'
+permalink: ai-standards/decisions/2026-04-25-add-agent-usage-hygiene-feature
+---
+
 # DECISION: add-agent-usage-hygiene-feature
 
 Russian localized version: [2026-04-25-add-agent-usage-hygiene-feature.ru.md](2026-04-25-add-agent-usage-hygiene-feature.ru.md)

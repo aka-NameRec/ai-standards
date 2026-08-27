@@ -1,3 +1,8 @@
+---
+title: 'DECISION: refresh-react-vue-guidance'
+permalink: ai-standards/decisions/2026-04-16-refresh-react-vue-guidance.ru
+---
+
 # DECISION: refresh-react-vue-guidance
 
 Англоязычный оригинал: [2026-04-16-refresh-react-vue-guidance.md](2026-04-16-refresh-react-vue-guidance.md)

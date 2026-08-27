@@ -1,3 +1,8 @@
+---
+title: Session Hygiene Usage Guide
+permalink: ai-standards/session-hygiene-usage
+---
+
 # Session Hygiene Usage Guide
 
 Russian localized version: [session-hygiene-usage.ru.md](session-hygiene-usage.ru.md)

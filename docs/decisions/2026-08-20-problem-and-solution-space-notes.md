@@ -1,3 +1,8 @@
+---
+title: 'DECISION: problem-and-solution-space-notes'
+permalink: ai-standards/decisions/2026-08-20-problem-and-solution-space-notes
+---
+
 # DECISION: problem-and-solution-space-notes
 
 Russian localized version: [2026-08-20-problem-and-solution-space-notes.ru.md](2026-08-20-problem-and-solution-space-notes.ru.md)

@@ -1,3 +1,8 @@
+---
+title: 'Change Plan: Java Infrastructure Rules Update'
+permalink: ai-standards/0tdk9ag-java-infrastructure-rules-update
+---
+
 # Change Plan: Java Infrastructure Rules Update
 
 Russian localized version: [0tdk9ag-java_infrastructure_rules_update.ru.md](0tdk9ag-java_infrastructure_rules_update.ru.md)

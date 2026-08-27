@@ -1,3 +1,8 @@
+---
+title: 'ai-sync doctor: Deterministic Knowledge-Tree Audit'
+permalink: ai-standards/tasks/0tk9qpd-ai-sync-doctor
+---
+
 # ai-sync doctor: Deterministic Knowledge-Tree Audit
 
 Task: `0tk9qpd` · Branch: `feature/0tk9ckw-archive-history-in-docs-tree` · 2026-08-24
@@ -91,3 +96,15 @@ Per the [archive decision](../decisions/2026-08-24-archive-history-in-docs-tree.
 that the active `.bmignore` carries the `archive/` exclusion — the boundary is
 one conventional config line, and a lost line would otherwise silently pour
 transcripts back into the graph.
+
+## Observations
+
+- [fact] `doctor` audits rendering-input placement and note health always, and indexer wiring when the `basic-memory` feature is enabled; the indexer config is read, never written.
+- [fact] Errors produce a non-zero exit code, so the command can gate CI.
+- [fact] `--fix` moves rendering inputs, restores titles and headings, strips indexer-stamped frontmatter, and prunes empty directories; it refuses renames and content edits.
+
+## Relations
+
+- relates_to [[DECISION: basic-memory-knowledge-tree-boundary]]
+- relates_to [[The audit-knowledge-tree Skill: Judgment-Bearing Tree Repair]]
+- localized counterpart of [[ai-sync doctor: детерминированный аудит дерева знаний]]

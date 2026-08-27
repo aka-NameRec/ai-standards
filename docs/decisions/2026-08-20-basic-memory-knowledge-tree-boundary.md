@@ -1,3 +1,8 @@
+---
+title: 'DECISION: basic-memory-knowledge-tree-boundary'
+permalink: ai-standards/decisions/2026-08-20-basic-memory-knowledge-tree-boundary
+---
+
 # DECISION: basic-memory-knowledge-tree-boundary
 
 Russian localized version: [2026-08-20-basic-memory-knowledge-tree-boundary.ru.md](2026-08-20-basic-memory-knowledge-tree-boundary.ru.md)

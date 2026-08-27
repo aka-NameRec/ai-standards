@@ -1,3 +1,8 @@
+---
+title: 'Скилл audit-knowledge-tree: ремонт дерева знаний, требующий суждения'
+permalink: ai-standards/tasks/0tk9qpt-audit-knowledge-tree.ru
+---
+
 # Скилл audit-knowledge-tree: ремонт дерева знаний, требующий суждения
 
 Задача: `0tk9qpt` · Ветка: `feature/0tk9ckw-archive-history-in-docs-tree` · 2026-08-24
@@ -77,3 +82,15 @@
 Скилл завершается перечислением: что починено, что предложено и отклонено, что
 пропущено и почему. Находка, сознательно оставленная как есть, — результат, а
 не упущение.
+
+## Observations
+
+- [fact] Скилл берёт остаток `doctor` как список работ и добавляет находки уровня графа из `bm orphans` и `bm doctor`.
+- [fact] Ремонт идёт по одному файлу за раз с подтверждением каждого; чинить пачкой запрещено.
+- [fact] Скилл не должен синтезировать наблюдения, переписывать дословные источники и удалять заметки.
+
+## Relations
+
+- relates_to [[DECISION: basic-memory-knowledge-tree-boundary]]
+- relates_to [[ai-sync doctor: детерминированный аудит дерева знаний]]
+- локальная версия [[The audit-knowledge-tree Skill: Judgment-Bearing Tree Repair]]

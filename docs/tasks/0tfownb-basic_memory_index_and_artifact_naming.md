@@ -1,3 +1,8 @@
+---
+title: 'Task 0tfownb: basic memory index and artifact naming'
+permalink: ai-standards/tasks/0tfownb-basic-memory-index-and-artifact-naming
+---
+
 # Task 0tfownb: basic memory index and artifact naming
 
 Russian localized version: [0tfownb-basic_memory_index_and_artifact_naming.ru.md](0tfownb-basic_memory_index_and_artifact_naming.ru.md)

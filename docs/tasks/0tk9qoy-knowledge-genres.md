@@ -1,3 +1,8 @@
+---
+title: 'Knowledge Genres: Applying the Two-Genre Model'
+permalink: ai-standards/tasks/0tk9qoy-knowledge-genres
+---
+
 # Knowledge Genres: Applying the Two-Genre Model
 
 Task: `0tk9qoy` · Branch: `feature/0tk9ckw-archive-history-in-docs-tree` · 2026-08-24
@@ -99,3 +104,16 @@ The genres are linked, not merged:
 | An agent "discovers" a rule from code | It has not — confirm with a human or a verbatim source first |
 | No `docs/domain/` exists | Not a violation: the project's business rules are simply not written down yet |
 | A task finishes | Usually no note at all; durable content folds into the document owning the subject |
+
+## Observations
+
+- [fact] Problem-space knowledge in `docs/domain/**` is discovered from humans or verbatim sources; the agent records it only together with its source, and a note without one is a defect.
+- [fact] An agent must not derive domain truth from the code; a code-derived statement becomes domain knowledge only after a human or a verbatim source confirms it.
+- [fact] In `docs/decisions/**` the agent drafts the record and the human makes the choice; rejected alternatives are mandatory.
+- [fact] A `docs/domain/**` document outranks the code, while a `docs/decisions/**` document does not.
+
+## Relations
+
+- relates_to [[DECISION: problem-and-solution-space-notes]]
+- relates_to [[ai-sync doctor: Deterministic Knowledge-Tree Audit]]
+- localized counterpart of [[Жанры знаний: применение двухжанровой модели]]

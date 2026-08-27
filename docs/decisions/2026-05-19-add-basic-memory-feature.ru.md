@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-basic-memory-feature'
+permalink: ai-standards/decisions/2026-05-19-add-basic-memory-feature.ru
+---
+
 # DECISION: add-basic-memory-feature
 
 Англоязычный оригинал: [2026-05-19-add-basic-memory-feature.md](2026-05-19-add-basic-memory-feature.md)

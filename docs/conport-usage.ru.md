@@ -1,3 +1,8 @@
+---
+title: Руководство по использованию ConPort
+permalink: ai-standards/conport-usage.ru
+---
+
 # Руководство по использованию ConPort
 
 Англоязычная оригинальная версия: [conport-usage.md](conport-usage.md)

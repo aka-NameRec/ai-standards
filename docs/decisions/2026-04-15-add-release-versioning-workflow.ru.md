@@ -1,3 +1,8 @@
+---
+title: 'DECISION: add-release-versioning-workflow'
+permalink: ai-standards/decisions/2026-04-15-add-release-versioning-workflow.ru
+---
+
 # DECISION: add-release-versioning-workflow
 
 Англоязычный оригинал: [2026-04-15-add-release-versioning-workflow.md](2026-04-15-add-release-versioning-workflow.md)

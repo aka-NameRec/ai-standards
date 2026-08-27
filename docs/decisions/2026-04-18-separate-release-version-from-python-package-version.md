@@ -1,3 +1,8 @@
+---
+title: 'DECISION: separate-release-version-from-python-package-version'
+permalink: ai-standards/decisions/2026-04-18-separate-release-version-from-python-package-version
+---
+
 # DECISION: separate-release-version-from-python-package-version
 
 Russian localized version: [2026-04-18-separate-release-version-from-python-package-version.ru.md](2026-04-18-separate-release-version-from-python-package-version.ru.md)

@@ -1,3 +1,8 @@
+---
+title: Руководство по применению code-review
+permalink: ai-standards/code-review-usage.ru
+---
+
 # Руководство по применению code-review
 
 Англоязычный оригинал: [code-review-usage.md](code-review-usage.md)
