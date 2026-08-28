@@ -17,6 +17,7 @@ features = [
   "reasoning-hygiene",
   "autonomy-boundaries",
   "structured-artifacts",
+  "module-contract-gate",
   "session-hygiene",
   "agent-usage-hygiene",
   "code-review",

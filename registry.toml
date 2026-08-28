@@ -8,6 +8,7 @@ autonomy-boundaries = ["process/autonomy-boundaries"]
 review-lenses = ["process/review-lenses"]
 code-review = ["process/code-review"]
 structured-artifacts = ["process/structured-artifacts"]
+module-contract-gate = ["process/structured-artifacts", "process/module-contract-gate"]
 session-hygiene = ["process/session-hygiene"]
 agent-usage-hygiene = ["process/agent-usage-hygiene"]
 knowledge-capture = ["process/knowledge-capture"]
@@ -23,6 +24,7 @@ basic-memory = "2.0.0"
 chroma = "2.1.0"
 code-review = "2.2.0"
 knowledge-capture = "2.2.0"
+module-contract-gate = "2.2.0"
 
 [stacks]
 layered-architecture = ["stacks/layered-architecture"]
