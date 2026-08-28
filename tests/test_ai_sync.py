@@ -731,6 +731,49 @@ def test_module_contract_gate_fragment_keeps_its_guarantees() -> None:
     assert "`Autonomy Boundaries`" in flat
 
 
+def test_response_language_style_feature_can_be_rendered(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK +
+        'fragments = ["core/base", "core/architecture"]\n'
+        'features = ["response-language-style"]\n'
+        'stacks = ["python"]\n'
+        'local_overrides = ["docs/ai/project-rules.md"]\n'
+        "\n"
+        "[metadata]\n"
+        'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    # Assert on stable identifiers only: the fragment heading and the two rules the
+    # feature exists for. Prose wording is deliberately not asserted.
+    assert "## Response Language Style" in result.content
+    assert "write natural Russian" in result.content
+    assert "срок" in result.content
+    assert "дедлайн" in result.content
+
+
+def test_response_language_style_fragment_keeps_its_rules() -> None:
+    fragment = (
+        REPO_ROOT / "fragments" / "process" / "response-language-style.md"
+    ).read_text(encoding="utf-8")
+    flat = " ".join(fragment.split())
+
+    assert 'prefer "срок" over "дедлайн", "согласование" over "апрув"' in flat
+    assert "must not appear without an immediate explanation" in flat
+    assert "expand them with a short Russian explanation" in flat
+    assert "not code, identifiers, or commit messages" in flat
+
+
 def test_reasoning_hygiene_feature_can_be_rendered(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()

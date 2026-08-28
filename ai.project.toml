@@ -10,6 +10,7 @@ fragments = [
 ]
 
 features = [
+  "response-language-style",
   "conport",
   "basic-memory",
   "chroma",

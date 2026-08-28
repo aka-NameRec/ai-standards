@@ -1,4 +1,5 @@
 [features]
+response-language-style = ["process/response-language-style"]
 conport = ["tools/conport"]
 basic-memory = ["tools/basic-memory"]
 chroma = ["tools/chroma"]
@@ -20,6 +21,7 @@ knowledge-capture = ["process/knowledge-capture"]
 # new. A value pointing at the unreleased version must match the version the
 # next release actually receives; adjust it during `bump-version` if needed.
 [feature_meta]
+response-language-style = "2.2.0"
 basic-memory = "2.0.0"
 chroma = "2.1.0"
 code-review = "2.2.0"
