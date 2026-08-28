@@ -1142,6 +1142,20 @@ def test_sync_deploys_parseable_chroma_infra_templates(tmp_path: Path) -> None:
     compile(python_source, "code_index.py", "exec")
 
 
+def test_code_review_fragment_names_module_contracts() -> None:
+    fragment = (
+        REPO_ROOT / "fragments" / "process" / "code-review.md"
+    ).read_text(encoding="utf-8")
+    template = (
+        REPO_ROOT / "templates" / "code-review-report.md"
+    ).read_text(encoding="utf-8")
+
+    assert "MODULE_CONTRACT.md" in fragment
+    assert "docs/architecture/**" in fragment
+    assert "(no contract)" in fragment
+    assert "violates: MODULE_CONTRACT.md" in template
+
+
 def test_sync_deploys_capture_knowledge_adapters_when_feature_enabled(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()
@@ -1350,7 +1364,7 @@ def test_sync_creates_infra_and_skill_when_chroma_enabled(tmp_path: Path) -> Non
     ).read_text(encoding="utf-8")
 
 
-def test_sync_skips_simplify_review_when_review_lenses_disabled(tmp_path: Path) -> None:
+def test_sync_deploys_standard_review_adapters_when_code_review_enabled(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()
     (project_root / "docs" / "ai").mkdir(parents=True)
@@ -1376,13 +1390,21 @@ def test_sync_skips_simplify_review_when_review_lenses_disabled(tmp_path: Path) 
 
     results = sync_project_templates(project_root)
 
-    # Declaring every agent must not hand the project an adapter for a feature it
-    # never enabled; only the code-review report template belongs here.
-    assert [result.destination_path.name for result in results] == ["code-review-report.md"]
-    assert not (project_root / ".claude").exists()
-    assert not (project_root / ".codex").exists()
-    assert not (project_root / ".cursor").exists()
-    assert not (project_root / ".agents").exists()
+    # Declaring every agent hands the project the standard-review adapters for the
+    # enabled code-review feature, plus the code-review report template.
+    assert [result.destination_path.name for result in results] == [
+        "SKILL.md",
+        "standard-code-review.md",
+        "SKILL.md",
+        "standard-code-review.mdc",
+        "code-review-report.md",
+    ]
+    for result in results:
+        content = result.destination_path.read_text(encoding="utf-8")
+        if result.destination_path.name != "code-review-report.md":
+            assert "standard code review" in content, result.destination_path
+    deployed = {result.destination_path.as_posix() for result in results}
+    assert not any("simplify-review" in path for path in deployed)
 
 
 def test_sync_deploys_code_review_report_template_without_any_agents(tmp_path: Path) -> None:

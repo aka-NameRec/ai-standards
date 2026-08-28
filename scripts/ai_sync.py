@@ -118,6 +118,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="codex",
+            source_relative_path="templates/code-review/standard-code-review.SKILL.md",
+            destination_relative_path=".codex/skills/code-review/standard-code-review/SKILL.md",
+            feature="code-review",
+        ),
+        AgentTemplate(
+            agent="codex",
             source_relative_path="templates/knowledge-capture/capture-knowledge.SKILL.md",
             destination_relative_path=".codex/skills/knowledge-capture/capture-knowledge/SKILL.md",
             feature="knowledge-capture",
@@ -141,6 +147,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/knowledge-tree/audit-knowledge-tree.cursor.mdc",
             destination_relative_path=".cursor/rules/audit-knowledge-tree.mdc",
             feature="basic-memory",
+        ),
+        AgentTemplate(
+            agent="cursor",
+            source_relative_path="templates/code-review/standard-code-review.cursor.mdc",
+            destination_relative_path=".cursor/rules/standard-code-review.mdc",
+            feature="code-review",
         ),
         AgentTemplate(
             agent="cursor",
@@ -170,6 +182,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="claude",
+            source_relative_path="templates/code-review/standard-code-review.claude.md",
+            destination_relative_path=".claude/commands/standard-code-review.md",
+            feature="code-review",
+        ),
+        AgentTemplate(
+            agent="claude",
             source_relative_path="templates/knowledge-capture/capture-knowledge.claude.md",
             destination_relative_path=".claude/commands/capture-knowledge.md",
             feature="knowledge-capture",
@@ -193,6 +211,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/knowledge-tree/audit-knowledge-tree.SKILL.md",
             destination_relative_path=".agents/skills/knowledge-tree/audit-knowledge-tree/SKILL.md",
             feature="basic-memory",
+        ),
+        AgentTemplate(
+            agent="kilo",
+            source_relative_path="templates/code-review/standard-code-review.SKILL.md",
+            destination_relative_path=".agents/skills/code-review/standard-code-review/SKILL.md",
+            feature="code-review",
         ),
         AgentTemplate(
             agent="kilo",
