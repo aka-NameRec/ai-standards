@@ -21,6 +21,7 @@
 - [Using Agent Usage Hygiene In a Project](#using-agent-usage-hygiene-in-a-project)
 - [Project Flow](#project-flow)
 - [Versioning](#versioning)
+- [Updating A Deployment](#updating-a-deployment)
 - [Current Stack Fragments](#current-stack-fragments)
 
 Centralized AI instruction infrastructure for project-specific `AGENTS.md` generation.
@@ -673,6 +674,12 @@ The renderer embeds the current `ai-standards` release metadata from `pyproject.
 `tool.ai-standards`
 and the project-local version metadata from `ai.project.toml` into the generated file
 header.
+
+`ai-sync check` fails when `ai_standards_version` disagrees with the standards source in use, `render` and `update` echo a warning, and `doctor` reports the drift — a deployment cannot silently move off the version it claims to pin.
+
+## Updating A Deployment
+
+The `update-ai-standards` skill serves ai-standards itself and deploys to every declared agent in `[tooling].agents` without a feature toggle. One request — «обнови ai-standards» or "update ai-standards" — brings the deployment to the latest release: enabled features re-render silently, features added since the pinned version are announced using the `[feature_meta]` metadata in `registry.toml` with a recommendation against the project's stacks, and only the features the user confirms are enabled. English guide: [docs/standards-update-usage.md](docs/standards-update-usage.md)
 
 For this repository's release workflow:
 

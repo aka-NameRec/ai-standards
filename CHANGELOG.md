@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Upgrade Notes
+
+This release ships the `update-ai-standards` skill, which makes every later update a one-phrase request. To adopt it on an existing deployment:
+
+1. Bring your ai-standards checkout to this release, then run `uv run ai-sync render --project-root <project>` and `uv run ai-sync sync-templates --project-root <project>`. The skill deploys to every declared agent in `[tooling].agents` without a feature toggle.
+2. Set `ai_standards_version` in `ai.project.toml` to this release. `ai-sync check` now fails while the pin disagrees with the source in use, so a skipped step shows up as drift instead of passing silently.
+3. From the next update on, the whole procedure is one request — «обнови ai-standards» / "update ai-standards": the skill refreshes enabled features, announces what is new since the pinned version, and enables only what you confirm.
+
 ### Added
 
 - **`code-review` feature**: a bare "code review" request now runs a review against the project's assembled rules and prints a report of a fixed shape. The shape is defined once, by the worked example in `templates/code-review-report.md`, which `sync-templates` deploys to `.ai-standards/code-review-report.md` through the agent-agnostic template channel — no `tooling.agents` adapter required. Findings carry severity markers (🔴 🟡 🔵 ✅), a cited file location, and the rule they violate. Ships with bilingual usage guides and a decision record. Contributed by **tsinana** ([#6](https://github.com/aka-NameRec/ai-standards/pull/6)).
@@ -14,6 +22,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`standard-code-review` skill**: deploys with the `code-review` feature to the declared agents and packages the review workflow into one procedure — the `code-review` passes, the full lens set including the two extra DRY rules, and an architecture-and-contracts check that reconciles changed modules with their `MODULE_CONTRACT.md` and the records under `docs/architecture/**`. One pass, one report; `review-lenses` keeps its cleanup-and-fix role.
 - **`Fixing While Reviewing` policy**: the ✅ marker previously existed without a rule saying when a fix is allowed. Fixes whose safety reading alone establishes — translations, typos, junk in `.gitignore`, local inconsistencies — are made and recorded as ✅ findings; migrations, lock files, dependencies, build configuration, public contracts, the git index, refactors, and anything needing a test run are reported and left alone.
 - **`DRY` pass in the `review-lenses` feature**: duplication introduced by the reviewed change itself is now a separate pass rather than a corner of the `Reuse` lens, which by its wording ("prefer existing project primitives") never described the case where a single change adds two new copies. The pass also covers one intent expressed two different ways in sibling files, requires reading the surrounding convention before extracting a shared primitive, and calls for a clone detector once the scope grows past a diff. Propagated to the three `simplify-review` adapter templates covering all four agent environments, guarded by a test so an adapter cannot silently lose it, and documented in both usage guides. Rationale: [`docs/decisions/2026-08-21-add-dry-review-pass.md`](docs/decisions/2026-08-21-add-dry-review-pass.md).
+- **`update-ai-standards` skill**: deploys with every ai-standards deployment that declares agents — no feature toggle, because the skill maintains ai-standards itself rather than a project process. One request («обнови ai-standards» / "update ai-standards") brings the deployment to the latest release: the maintained checkout is refreshed, already-enabled features re-render silently, features added since the pinned version are announced with recommendations against the project's stacks, and only the features the user confirms are enabled. Rationale: [`docs/decisions/2026-08-28-standards-update-workflow.md`](docs/decisions/2026-08-28-standards-update-workflow.md).
+- **Feature discovery metadata** (`[feature_meta]` in `registry.toml`): records the release that introduced each feature, so the update skill computes what is new for a project mechanically instead of parsing changelog prose. Features that predate the changelog carry no entry and are never announced as new; entries pointing at this release must be reconciled with the actual release number during `bump-version`.
+- **Pin drift is reported, not silent**: `ai-sync check` fails when `ai_standards_version` in the manifest disagrees with the standards source in use, `render` and `update` echo a warning, and `doctor` reports `standards-version-drift`. The rendered header already recorded what was actually used; now the mismatch is impossible to miss.
 
 ### Changed
 
