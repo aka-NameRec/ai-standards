@@ -18,8 +18,10 @@ from scripts.ai_sync import (
     _build_managed_template_content,
     _strip_frontmatter,
     build_rendered_content,
+    check,
     init_claude_bridge,
     init_project,
+    render,
     run_doctor,
     run_repair,
     sync_project_templates,
@@ -1002,7 +1004,8 @@ def test_sync_project_templates_creates_agent_adapters_from_manifest(tmp_path: P
 
     results = sync_project_templates(project_root)
 
-    assert [result.status for result in results] == ["created", "created"]
+    # simplify-review for both agents, plus the always-deployed update skill.
+    assert [result.status for result in results] == ["created"] * 4
     codex_skill = project_root / ".codex/skills/review-lenses/simplify-review/SKILL.md"
     cursor_rule = project_root / ".cursor/rules/simplify-review.mdc"
     assert codex_skill.exists()
@@ -1043,7 +1046,8 @@ def test_sync_project_templates_updates_plain_copied_template(tmp_path: Path) ->
 
     results = sync_project_templates(project_root)
 
-    assert [result.status for result in results] == ["updated"]
+    # The pre-copied simplify-review rule updates in place; the update skill is new.
+    assert [result.status for result in results] == ["updated", "created"]
     assert "Managed by ai-standards template:" in destination.read_text(encoding="utf-8")
 
 
@@ -1076,7 +1080,8 @@ def test_sync_project_templates_skips_unmanaged_local_changes(tmp_path: Path) ->
 
     results = sync_project_templates(project_root)
 
-    assert [result.status for result in results] == ["skipped-unmanaged"]
+    # The unmanaged rule stays untouched; the update skill still deploys.
+    assert [result.status for result in results] == ["skipped-unmanaged", "created"]
     assert destination.read_text(encoding="utf-8") == "# custom local rule\n"
 
 
@@ -1349,9 +1354,10 @@ def test_sync_creates_infra_and_skill_when_chroma_enabled(tmp_path: Path) -> Non
     results = sync_project_templates(project_root)
     statuses = [result.status for result in results]
 
-    # One deploy-skill per declared agent (4) + 2 chroma infra templates.
+    # One deploy-skill per declared agent (4), the always-deployed update skill
+    # per declared agent (4), and 2 chroma infra templates.
     # simplify-review is gated on review-lenses, which this manifest does not enable.
-    assert statuses.count("created") == 6
+    assert statuses.count("created") == 10
     assert (project_root / ".ai-standards" / "scripts" / "code_index.py").exists()
     assert (project_root / ".ai-standards" / "code-index.toml").exists()
     assert (
@@ -1402,20 +1408,140 @@ def test_sync_deploys_standard_review_adapters_when_code_review_enabled(tmp_path
     results = sync_project_templates(project_root)
 
     # Declaring every agent hands the project the standard-review adapters for the
-    # enabled code-review feature, plus the code-review report template.
+    # enabled code-review feature, the always-deployed update skill, and the
+    # code-review report template.
     assert [result.destination_path.name for result in results] == [
         "SKILL.md",
+        "SKILL.md",
         "standard-code-review.md",
+        "update-ai-standards.md",
+        "SKILL.md",
         "SKILL.md",
         "standard-code-review.mdc",
+        "update-ai-standards.mdc",
         "code-review-report.md",
     ]
     for result in results:
         content = result.destination_path.read_text(encoding="utf-8")
-        if result.destination_path.name != "code-review-report.md":
+        destination = result.destination_path.as_posix()
+        if destination.endswith("code-review-report.md"):
+            continue
+        if "update-ai-standards" in destination:
+            assert "update ai-standards" in content.lower(), result.destination_path
+        else:
             assert "standard code review" in content, result.destination_path
     deployed = {result.destination_path.as_posix() for result in results}
     assert not any("simplify-review" in path for path in deployed)
+
+
+def test_sync_deploys_update_skill_adapters_regardless_of_features(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["conport"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + 'agents = ["codex", "kilo"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    results = sync_project_templates(project_root)
+
+    # The update skill maintains ai-standards itself, so it ships with any
+    # deployment that declares agents, whatever features the manifest enables.
+    assert [result.status for result in results] == ["created", "created"]
+    for destination in (
+        project_root / ".codex/skills/standards-update/update-ai-standards/SKILL.md",
+        project_root / ".agents/skills/standards-update/update-ai-standards/SKILL.md",
+    ):
+        content = destination.read_text(encoding="utf-8")
+        assert "update ai-standards" in content.lower(), destination
+        assert "Never enable a feature without the user's explicit confirmation" in content
+
+
+def test_check_fails_when_manifest_pin_drifts_from_the_source(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK.replace(
+            f'ai_standards_version = "{CURRENT_AI_STANDARDS_VERSION}"',
+            'ai_standards_version = "0.0.1"',
+        )
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["conport"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+
+    with pytest.raises(SyncError) as excinfo:
+        check(project_root=project_root)
+
+    message = str(excinfo.value)
+    assert "0.0.1" in message
+    assert CURRENT_AI_STANDARDS_VERSION in message
+    assert "update-ai-standards" in message
+
+
+def test_render_warns_when_manifest_pin_drifts_from_the_source(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK.replace(
+            f'ai_standards_version = "{CURRENT_AI_STANDARDS_VERSION}"',
+            'ai_standards_version = "0.0.1"',
+        )
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["conport"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    render(project_root=project_root)
+
+    output = capsys.readouterr().out
+    assert "Warning:" in output
+    assert "0.0.1" in output
+
+
+def test_registry_feature_meta_references_known_features() -> None:
+    registry = tomllib.loads((REPO_ROOT / "registry.toml").read_text(encoding="utf-8"))
+
+    features = registry["features"]
+    feature_meta = registry["feature_meta"]
+
+    unknown = set(feature_meta) - set(features)
+    assert not unknown, f"feature_meta names unknown features: {sorted(unknown)}"
 
 
 def test_sync_deploys_code_review_report_template_without_any_agents(tmp_path: Path) -> None:
@@ -1509,8 +1635,9 @@ def test_sync_skips_chroma_infra_when_feature_disabled(tmp_path: Path) -> None:
 
     results = sync_project_templates(project_root)
 
-    # Only simplify-review for codex and kilo; deploy skill and infra are gated.
-    assert [result.status for result in results] == ["created", "created"]
+    # simplify-review for codex and kilo, plus the always-deployed update skill;
+    # deploy skill and infra are gated.
+    assert [result.status for result in results] == ["created"] * 4
     assert not (project_root / ".ai-standards").exists()
     assert not (project_root / ".codex" / "skills" / "ai-infrastructure").exists()
 

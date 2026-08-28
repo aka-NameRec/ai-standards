@@ -12,6 +12,18 @@ session-hygiene = ["process/session-hygiene"]
 agent-usage-hygiene = ["process/agent-usage-hygiene"]
 knowledge-capture = ["process/knowledge-capture"]
 
+# Version of the ai-standards release that introduced each feature. The
+# update-ai-standards skill uses these values to announce what is new for a
+# project whose deployment pins an older release. Features introduced before
+# the changelog exists (pre-2.0.0) have no entry and are never announced as
+# new. A value pointing at the unreleased version must match the version the
+# next release actually receives; adjust it during `bump-version` if needed.
+[feature_meta]
+basic-memory = "2.0.0"
+chroma = "2.1.0"
+code-review = "2.2.0"
+knowledge-capture = "2.2.0"
+
 [stacks]
 layered-architecture = ["stacks/layered-architecture"]
 backend-layered-architecture = ["stacks/backend-layered-architecture"]

@@ -128,6 +128,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             destination_relative_path=".codex/skills/knowledge-capture/capture-knowledge/SKILL.md",
             feature="knowledge-capture",
         ),
+        AgentTemplate(
+            agent="codex",
+            source_relative_path="templates/standards-update/update-ai-standards.SKILL.md",
+            destination_relative_path=".codex/skills/standards-update/update-ai-standards/SKILL.md",
+            feature=None,
+        ),
     ),
     "cursor": (
         AgentTemplate(
@@ -159,6 +165,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/knowledge-capture/capture-knowledge.cursor.mdc",
             destination_relative_path=".cursor/rules/capture-knowledge.mdc",
             feature="knowledge-capture",
+        ),
+        AgentTemplate(
+            agent="cursor",
+            source_relative_path="templates/standards-update/update-ai-standards.cursor.mdc",
+            destination_relative_path=".cursor/rules/update-ai-standards.mdc",
+            feature=None,
         ),
     ),
     "claude": (
@@ -192,6 +204,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             destination_relative_path=".claude/commands/capture-knowledge.md",
             feature="knowledge-capture",
         ),
+        AgentTemplate(
+            agent="claude",
+            source_relative_path="templates/standards-update/update-ai-standards.claude.md",
+            destination_relative_path=".claude/commands/update-ai-standards.md",
+            feature=None,
+        ),
     ),
     "kilo": (
         AgentTemplate(
@@ -223,6 +241,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/knowledge-capture/capture-knowledge.SKILL.md",
             destination_relative_path=".agents/skills/knowledge-capture/capture-knowledge/SKILL.md",
             feature="knowledge-capture",
+        ),
+        AgentTemplate(
+            agent="kilo",
+            source_relative_path="templates/standards-update/update-ai-standards.SKILL.md",
+            destination_relative_path=".agents/skills/standards-update/update-ai-standards/SKILL.md",
+            feature=None,
         ),
     ),
 }
@@ -288,6 +312,18 @@ def _load_release_metadata(repo_root: Path) -> ReleaseMetadata:
             "release_date",
             "pyproject.tool.ai-standards",
         ),
+    )
+
+
+def _version_drift_message(pinned: str, in_use: str) -> str | None:
+    """Describe a mismatch between the manifest pin and the standards source in use."""
+
+    if pinned == in_use:
+        return None
+    return (
+        f"Manifest pins ai-standards {pinned}, but the standards source in use is {in_use}. "
+        "Run the update-ai-standards skill, or set ai_standards_version in ai.project.toml "
+        "to the source version and re-render."
     )
 
 
@@ -732,6 +768,12 @@ def render(
 
     result = build_rendered_content(project_root=project_root, output_name=output_name)
     write_rendered_content(result)
+    drift = _version_drift_message(
+        _load_manifest(project_root).ai_standards_version,
+        _load_release_metadata(_repo_root()).version,
+    )
+    if drift:
+        typer.echo(f"Warning: {drift}")
     typer.echo(f"Rendered {result.output_path}")
 
 
@@ -744,6 +786,12 @@ def update(
 
     result = build_rendered_content(project_root=project_root, output_name=output_name)
     write_rendered_content(result)
+    drift = _version_drift_message(
+        _load_manifest(project_root).ai_standards_version,
+        _load_release_metadata(_repo_root()).version,
+    )
+    if drift:
+        typer.echo(f"Warning: {drift}")
     typer.echo(f"Updated {result.output_path}")
 
 
@@ -753,6 +801,13 @@ def check(
     output_name: Annotated[str, OUTPUT_NAME_OPTION] = DEFAULT_OUTPUT_NAME,
 ) -> None:
     """Check that the generated file matches the current manifest and standards."""
+
+    drift = _version_drift_message(
+        _load_manifest(project_root).ai_standards_version,
+        _load_release_metadata(_repo_root()).version,
+    )
+    if drift:
+        raise SyncError(drift)
 
     result = build_rendered_content(project_root=project_root, output_name=output_name)
     ensure_generated_file(result)
@@ -1597,6 +1652,13 @@ def doctor(
 
     report = run_doctor(project_root, knowledge_tree, indexer_config)
     _echo_findings(report)
+
+    drift = _version_drift_message(
+        _load_manifest(project_root).ai_standards_version,
+        _load_release_metadata(_repo_root()).version,
+    )
+    if drift:
+        typer.echo(f"warn [standards-version-drift] ai.project.toml: {drift}")
 
     if not fix:
         if any(finding.code in FIXABLE_CODES for finding in report.findings):
