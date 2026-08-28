@@ -1,12 +1,14 @@
 <!--
 This file is the single definition of the code-review report shape. It is a worked example, not a
 skeleton: reproduce its sections, their order, and the fields on every finding. Translate every word
-into the language the session is being held in; the 🔴 🟡 🔵 ✅ markers carry no words and stay as they
-are. The rules that govern what belongs in a finding live in the rendered `AGENTS.md`, under
-`Code Review`.
+into the language the session is being held in; the 🔴 🟡 🔵 ✅ markers and the `ai-standards` version
+line carry no translatable words and stay as they are. The rules that govern what belongs in a
+finding live in the rendered `AGENTS.md`, under `Code Review`.
 -->
 
 ## Code Review
+
+ai-standards 2.1.0
 
 Task: ALS-4821 — https://tracker.example.com/browse/ALS-4821
 
