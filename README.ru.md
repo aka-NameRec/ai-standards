@@ -15,6 +15,7 @@
 - [Использование Review Lenses в проекте](#использование-review-lenses-в-проекте)
 - [Использование Code Review в проекте](#использование-code-review-в-проекте)
 - [Использование Structured Artifacts в проекте](#использование-structured-artifacts-в-проекте)
+- [Использование гейта обнаружения модульных контрактов в проекте](#использование-гейта-обнаружения-модульных-контрактов-в-проекте)
 - [Использование Session Hygiene в проекте](#использование-session-hygiene-в-проекте)
 - [Использование Basic Memory в проекте](#использование-basic-memory-в-проекте)
 - [Использование Chroma в проекте](#использование-chroma-в-проекте)
@@ -536,6 +537,17 @@ Constraints:
 - [templates/module-contract.md](templates/module-contract.md)
 - [templates/decision-record.md](templates/decision-record.md)
 - [templates/module-map.md](templates/module-map.md)
+
+## Использование гейта обнаружения модульных контрактов в проекте
+
+Фича `module-contract-gate` добавляет обязанность момента написания кода: перед изменением производственного кода агент обязан выполнить discovery модульных контрактов — канонические контракты читаются из репозитория, Basic Memory только индексирует, покрытие определяется по каждому затрагиваемому файлу, повторный discovery — по заданным триггерам, плюс короткая контрактная заметка в итоговом резюме. Discovery пропорционален: проект, не объявляющий контрактных артефактов, завершает discovery этим результатом. Это композит в реестре, несущий и `structured-artifacts`; включайте сразу после `structured-artifacts` в манифесте, чтобы раздел встал рядом с Module Contracts.
+
+Подробное практическое руководство:
+
+- Русский гид: [docs/module-contract-gate-usage.ru.md](docs/module-contract-gate-usage.ru.md)
+- English guide: [docs/module-contract-gate-usage.md](docs/module-contract-gate-usage.md)
+
+Обоснование и отклонённые варианты размещения: [docs/decisions/2026-08-28-module-contract-gate-feature-placement.md](docs/decisions/2026-08-28-module-contract-gate-feature-placement.md)
 
 ## Использование Session Hygiene в проекте
 

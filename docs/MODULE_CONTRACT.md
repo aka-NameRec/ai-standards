@@ -5,7 +5,7 @@ permalink: ai-standards/module-contract
 
 # Module Contract: scripts/ai_sync.py
 
-Module: `scripts/ai_sync.py`, exposed as the `ai-sync` CLI (render, update, init-project, sync-templates, init-claude-bridge, doctor).
+Module: `scripts/ai_sync.py`, exposed as the `ai-sync` CLI (render, update, check, init-project, sync-templates, init-claude-bridge, doctor).
 
 ## Ownership
 
@@ -27,7 +27,7 @@ The single rendering and template-deployment tool of this repository, plus the d
 ## Outputs
 
 - rendered `AGENTS.md` (and the Claude bridge import)
-- deployed managed templates: agent adapters under `.codex/`, `.cursor/`, `.claude/`, `.agents/`; infrastructure under `.ai-standards/`
+- deployed managed templates: agent adapters under `.codex/`, `.cursor/`, `.claude/`, `.agents/` — including the always-deployed `update-ai-standards` adapters whenever agents are declared; infrastructure under `.ai-standards/`
 - `doctor` reports (errors exit non-zero, suitable for CI) and `--fix` filesystem repairs
 
 ## Invariants
@@ -37,6 +37,7 @@ The single rendering and template-deployment tool of this repository, plus the d
 - `--fix` only applies repairs that follow from a rule: moves rendering inputs out of the tree and repoints the manifest, restores titles/headings, strips indexer-stamped frontmatter, prunes empty directories. It warns when git cannot undo it.
 - Detection of managed files is format-agnostic (marker text prefix, any comment syntax).
 - Existing projects keep rendering from their declared override paths; scaffolding changes affect only new projects.
+- Version pins cannot drift silently: `check` fails while the manifest `ai_standards_version` disagrees with the standards source in use, `render`/`update` echo a warning, and `doctor` reports `standards-version-drift`.
 
 ## Failure boundaries
 

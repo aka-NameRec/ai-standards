@@ -7,7 +7,7 @@ permalink: ai-standards/module-contract.ru
 
 Английская версия: [MODULE_CONTRACT.md](MODULE_CONTRACT.md)
 
-Модуль: `scripts/ai_sync.py`, доступный как CLI `ai-sync` (render, update, init-project, sync-templates, init-claude-bridge, doctor).
+Модуль: `scripts/ai_sync.py`, доступный как CLI `ai-sync` (render, update, check, init-project, sync-templates, init-claude-bridge, doctor).
 
 ## Ownership
 
@@ -29,7 +29,7 @@ permalink: ai-standards/module-contract.ru
 ## Outputs
 
 - отрендеренный `AGENTS.md` (и импорт для моста Claude)
-- развёрнутые управляемые шаблоны: адаптеры агентов в `.codex/`, `.cursor/`, `.claude/`, `.agents/`; инфраструктура в `.ai-standards/`
+- развёрнутые управляемые шаблоны: адаптеры агентов в `.codex/`, `.cursor/`, `.claude/`, `.agents/` — включая всегда развёртываемые адаптеры `update-ai-standards` при объявленных агентах; инфраструктура в `.ai-standards/`
 - отчёты `doctor` (ошибки дают ненулевой код выхода — пригодно для CI) и файловые ремонты `--fix`
 
 ## Инварианты
@@ -39,6 +39,7 @@ permalink: ai-standards/module-contract.ru
 - `--fix` применяет только ремонты, следующие из правила: выносит рендер-входы из дерева и переприцеливает манифест, восстанавливает заголовки, снимает штампнутый индексатором frontmatter, удаляет опустевшие каталоги. Предупреждает, когда git не сможет отменить правку.
 - Обнаружение управляемых файлов формат-агностично (префикс текста маркера при любом синтаксисе комментария).
 - Существующие проекты продолжают рендер из объявленных путей; изменения скаффолда затрагивают только новые проекты.
+- Пины версий не дрейфуют молча: `check` падает, пока `ai_standards_version` манифеста расходится с используемым исходником стандартов, `render`/`update` выводят предупреждение, `doctor` сообщает `standards-version-drift`.
 
 ## Failure boundaries
 

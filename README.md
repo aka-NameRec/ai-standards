@@ -15,6 +15,7 @@
 - [Using Review Lenses In a Project](#using-review-lenses-in-a-project)
 - [Using Code Review In a Project](#using-code-review-in-a-project)
 - [Using Structured Artifacts In a Project](#using-structured-artifacts-in-a-project)
+- [Using Module Contract Discovery Gate In a Project](#using-module-contract-discovery-gate-in-a-project)
 - [Using Session Hygiene In a Project](#using-session-hygiene-in-a-project)
 - [Using Basic Memory In a Project](#using-basic-memory-in-a-project)
 - [Using Chroma In a Project](#using-chroma-in-a-project)
@@ -544,6 +545,17 @@ Ready-to-copy downstream templates:
 - [templates/module-contract.md](templates/module-contract.md)
 - [templates/decision-record.md](templates/decision-record.md)
 - [templates/module-map.md](templates/module-map.md)
+
+## Using Module Contract Discovery Gate In a Project
+
+The `module-contract-gate` feature adds a write-time duty: before changing production code, the agent must complete module-contract discovery — canonical contracts read from the repository, Basic Memory as an index only, coverage decided per touched file, re-discovery on defined triggers, and a short contract note in the implementation summary. Discovery is proportional: a project that declares no contract artifacts completes discovery with that result. It is a registry composite that carries `structured-artifacts`; enable it right after `structured-artifacts` in the manifest so the rendered section lands next to Module Contracts.
+
+Detailed operational guidance lives in:
+
+- English guide: [docs/module-contract-gate-usage.md](docs/module-contract-gate-usage.md)
+- Russian guide: [docs/module-contract-gate-usage.ru.md](docs/module-contract-gate-usage.ru.md)
+
+Rationale and rejected placements: [docs/decisions/2026-08-28-module-contract-gate-feature-placement.md](docs/decisions/2026-08-28-module-contract-gate-feature-placement.md)
 
 ## Using Session Hygiene In a Project
 
