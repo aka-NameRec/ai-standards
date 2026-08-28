@@ -1,3 +1,8 @@
+---
+title: 'Bug: ai-sync managed-marker breaks Python and TOML templates'
+permalink: ai-standards/artifacts/2026-08-03-ai-sync-managed-marker-breaks-py-toml
+---
+
 # Bug: ai-sync managed-marker breaks Python and TOML templates
 
 Status: fixed — upstream fix landed 2026-08-24 as option 1 (per-destination

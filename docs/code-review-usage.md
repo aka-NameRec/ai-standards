@@ -86,9 +86,17 @@ When one task spans several repositories, the workflow produces one report per r
 
 Enabling `review-lenses` does not change what a bare "code review" request does, and asking explicitly for a review-lenses pass does not go through the `code-review` report shape. See [review-lenses-usage.md](review-lenses-usage.md) for its own guidance and its adapter templates.
 
+### The Standard Review Skill
+
+When the `code-review` feature is enabled, `sync-templates` also deploys the feature-gated `standard-code-review` skill to the declared agents. It packages the workflow above into one procedure: the `code-review` passes, the full lens set including the two extra DRY rules (the surrounding-convention check and the clone-detector pass), and an architecture-and-contracts check that reconciles changed modules with their `MODULE_CONTRACT.md` and the accepted records under `docs/architecture/**` — a changed major module with no contract is reported as a `(no contract)` note. The output is one report in the fixed shape, in the chat language.
+
+Activate it by asking for «стандартный code review», "standard code review", or «сделай ревью по стандарту». A bare "code review" request keeps the base workflow; the skill is the superset.
+
 ## CI Integration
 
 Prefer `review-lenses` in `review-only` mode for automated, non-interactive review; it is already documented for that purpose and ships adapter templates. Reserve `code-review` for interactive sessions where a developer types the request directly.
+
+When the project also deploys the `standard-code-review` skill, the CI gate can run it instead: the same non-interactive posture, plus correctness, architecture and contract checks, plus the fixed report shape. `review-lenses` `review-only` remains the minimal cleanup-only signal.
 
 ## Relationship To Other Quality Mechanisms
 

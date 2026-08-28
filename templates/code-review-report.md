@@ -24,6 +24,7 @@ reuses the existing `Money` primitive rather than comparing raw decimals.
 
 ### Architecture & Conventions
 - 🟡 payments_uploading.py:15 — the file is parsed inside the view instead of the service layer — violates: django-service-layer → left as-is: not blocking, moving it out in a follow-up
+- 🟡 payments_uploading.py:22 — the change re-exports `load_workbook` from the service layer, which the module contract lists under non-goals — violates: MODULE_CONTRACT.md — Non-goals → left as-is: the re-export goes away together with the wrapper in the follow-up noted above
 
 ### Reuse
 - 🟡 payments_uploading.py:71, imports_uploading.py:64 — this change adds the same new `_read_sheet` wrapper to both modules; neither copy is an existing primitive, so nothing was under-reused, but the duplication is new — violates: DRY → left as-is: sibling modules call `load_workbook` inline, so the wrapper should be dropped on both sides rather than shared, and that is a separate patch

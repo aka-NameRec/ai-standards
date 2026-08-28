@@ -507,7 +507,7 @@ Use `code-review` when a project wants:
 
 The report shape itself is defined once, by the worked example in [templates/code-review-report.md](templates/code-review-report.md), deployed into each enabling project as `.ai-standards/code-review-report.md` by `sync-templates`. No document restates it, so changing the format is a single-file edit.
 
-Because the trigger and the report shape live in the rendered instructions themselves, no `tooling.agents` adapter is required; the workflow behaves the same in Claude Code, Codex, Cursor, and any other `AGENTS.md`-reading tool. It composes with `review-lenses` without conflict — see the relationship notes in the usage guide.
+Because the trigger and the report shape live in the rendered instructions themselves, no `tooling.agents` adapter is required; the workflow behaves the same in Claude Code, Codex, Cursor, and any other `AGENTS.md`-reading tool. It composes with `review-lenses` without conflict — see the relationship notes in the usage guide. A feature-gated `standard-code-review` skill packages the workflow with the full lens passes and an architecture-and-contracts check behind one activator («стандартный code review»).
 
 Detailed operational guidance lives in:
 

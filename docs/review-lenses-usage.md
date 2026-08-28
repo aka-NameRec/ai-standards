@@ -130,6 +130,8 @@ Use `review-only` mode in CI when you want:
 
 CI should report, not silently rewrite code.
 
+When the project also enables `code-review`, its `standard-code-review` skill is the superset CI gate: the same non-interactive posture plus correctness, architecture and contract checks, and the fixed report shape. `review-only` remains the minimal cleanup-only signal.
+
 ## Activation Model
 
 `review-lenses` is policy, not an autonomous background process.
