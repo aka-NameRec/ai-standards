@@ -75,3 +75,14 @@ Deferred to the standards-update workflow decision. New features may be recommen
 
 - promote the draft into the `module-contract-gate` feature (placement accepted here; implementation pending)
 - define the standards-update workflow — what a bare "update ai-standards" request does: refresh enabled features, digest new features since the pinned version, confirm per feature before enabling. Separate decision record to follow.
+
+## Observations
+
+- [decision] The module-contract discovery gate ships as the opt-in `module-contract-gate` feature, not as an extension of `structured-artifacts`.
+- [decision] The gate's strict rule stays near-verbatim; Task Start becomes proportional, and Basic Memory steps stay conditional on the feature being enabled.
+- [fact] Render order of `AGENTS.md` sections follows the manifest `features` list order, so the gate lands directly after Module Contracts when listed right after `structured-artifacts`.
+
+## Relations
+
+- relates_to [[DECISION: standards-update-workflow]]
+- relates_to [[0tkgosq — Standard Code Review Skill and Contract Checks]]

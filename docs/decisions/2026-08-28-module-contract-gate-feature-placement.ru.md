@@ -75,3 +75,14 @@ English source of truth: [2026-08-28-module-contract-gate-feature-placement.md](
 
 - продвинуть черновик в фичу `module-contract-gate` (размещение принято здесь; реализация впереди)
 - определить workflow обновления стандарта — что делает голый запрос «обнови ai-standards»: обновление включённых фич, дайджест новых фич с момента зафиксированной версии, подтверждение по каждой перед включением. Отдельная запись решения последует.
+
+## Observations
+
+- [decision] Гейт обнаружения модульных контрактов выходит как opt-in фича `module-contract-gate`, а не как расширение `structured-artifacts`.
+- [decision] Строгое правило гейта сохраняется почти дословно; Task Start становится пропорциональным, а шаги Basic Memory остаются условными — при включённой фиче.
+- [fact] Порядок разделов собранного `AGENTS.md` следует порядку списка `features` в манифесте, поэтому гейт встаёт сразу после Module Contracts, если указан сразу после `structured-artifacts`.
+
+## Relations
+
+- relates_to [[РЕШЕНИЕ: standards-update-workflow]]
+- relates_to [[0tkgosq — Скилл стандартного code review и проверки контрактов]]
