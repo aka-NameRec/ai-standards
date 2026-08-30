@@ -29,8 +29,8 @@ from scripts.ai_sync import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-CURRENT_AI_STANDARDS_VERSION = "2.2.0"
-CURRENT_RELEASE_DATE = "2026-08-28"
+CURRENT_AI_STANDARDS_VERSION = "2.2.1"
+CURRENT_RELEASE_DATE = "2026-08-30"
 MANIFEST_RELEASE_BLOCK = (
     f'ai_standards_version = "{CURRENT_AI_STANDARDS_VERSION}"\n'
     f'project_version = "{CURRENT_AI_STANDARDS_VERSION}"\n'
