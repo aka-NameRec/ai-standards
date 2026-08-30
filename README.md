@@ -693,6 +693,34 @@ header.
 
 The `update-ai-standards` skill serves ai-standards itself and deploys to every declared agent in `[tooling].agents` without a feature toggle. One request — «обнови ai-standards» or "update ai-standards" — brings the deployment to the latest release: enabled features re-render silently, features added since the pinned version are announced using the `[feature_meta]` metadata in `registry.toml` with a recommendation against the project's stacks, and only the features the user confirms are enabled. English guide: [docs/standards-update-usage.md](docs/standards-update-usage.md)
 
+### Standard Install And Update Prompts
+
+Give your agent one of these, verbatim. Install works from nothing but the repository URL; update works from the deployed skill, or from the URL when the deployment predates the skill.
+
+Install (no deployment in the project):
+
+```text
+Install ai-standards into this project from https://github.com/aka-NameRec/ai-standards:
+clone it, read templates/standards-update/update-ai-standards.SKILL.md, and run its Install
+mode — survey the project, propose features with recommendations, deploy the confirmed set
+after my confirmation.
+```
+
+Update (deployment of this release or newer):
+
+```text
+Update ai-standards to the latest release.
+```
+
+Update (deployment older than the skill — bootstrap):
+
+```text
+Update ai-standards in this project from https://github.com/aka-NameRec/ai-standards: clone
+it, read templates/standards-update/update-ai-standards.SKILL.md, and run its Upgrade mode —
+silently refresh the enabled features, announce the ones not yet in the manifest, enable the
+confirmed set, and move the version pin.
+```
+
 For this repository's release workflow:
 
 - `rtk uv run bump-version` previews the next release version and date.

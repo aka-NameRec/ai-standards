@@ -4,6 +4,41 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.2.1] — 2026-08-29
+
+### Canonical Prompts
+
+Give your agent one of these, verbatim.
+
+Install (no deployment in the project):
+
+```text
+Install ai-standards into this project from https://github.com/aka-NameRec/ai-standards:
+clone it, read templates/standards-update/update-ai-standards.SKILL.md, and run its Install
+mode — survey the project, propose features with recommendations, deploy the confirmed set
+after my confirmation.
+```
+
+Update (deployment of this release or newer):
+
+```text
+Update ai-standards to the latest release.
+```
+
+Update (deployment older than the skill — bootstrap):
+
+```text
+Update ai-standards in this project from https://github.com/aka-NameRec/ai-standards: clone
+it, read templates/standards-update/update-ai-standards.SKILL.md, and run its Upgrade mode —
+silently refresh the enabled features, announce the ones not yet in the manifest, enable the
+confirmed set, and move the version pin.
+```
+
+### Changed
+
+- **The `update-ai-standards` skill is dual-mode and cold-start capable**: an Install mode surveys a project without a deployment (existing `AGENTS.md` and its provenance, stacks, docs layout and language, ConPort/Basic Memory presence, CI, tracker, agent environments), proposes the feature set one line at a time with recommendations, and deploys the confirmed set; the file is written to be followed straight from a checkout, so a project older than the skill bootstraps from the URL alone by naming it. The upgrade digest now announces only features that are new **and not yet enabled**, and a bootstrap preamble re-deploys the procedure before announcing. Rationale: [`docs/decisions/2026-08-29-standards-install-and-cold-start.md`](docs/decisions/2026-08-29-standards-install-and-cold-start.md).
+- **`standards_source` is recorded at install time**: the manifest metadata carries the repository URL the standards came from, renders into the `AGENTS.md` header, and is what lets later update prompts skip the URL.
+
 ## [2.2.0] — 2026-08-28
 
 ### Upgrade Notes

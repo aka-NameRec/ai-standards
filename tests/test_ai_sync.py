@@ -1568,6 +1568,30 @@ def test_sync_deploys_update_skill_adapters_regardless_of_features(tmp_path: Pat
         assert "Never enable a feature without the user's explicit confirmation" in content
 
 
+def test_update_skill_template_keeps_install_mode_and_cold_start() -> None:
+    templates = [
+        REPO_ROOT / "templates" / "standards-update" / name
+        for name in (
+            "update-ai-standards.SKILL.md",
+            "update-ai-standards.claude.md",
+            "update-ai-standards.cursor.mdc",
+        )
+    ]
+    for template in templates:
+        text = template.read_text(encoding="utf-8")
+        flat = " ".join(text.split())
+
+        # Both modes and the cold-start entry stay put: the skill must remain
+        # self-sufficient when followed from a checkout with no deployment.
+        assert "## Install Mode" in text, template
+        assert "## Upgrade Mode" in text, template
+        assert "Cold start." in flat, template
+        assert "Survey the project." in flat, template
+        # The digest must not announce features the manifest already enables.
+        assert "not yet enabled" in flat, template
+        assert "standards_source" in flat, template
+
+
 def test_check_fails_when_manifest_pin_drifts_from_the_source(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()
