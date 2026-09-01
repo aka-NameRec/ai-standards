@@ -55,7 +55,7 @@ Create `context_portal/` before relying on ConPort workspace detection. Without 
 ConPort is transient operational memory. Durable architectural, operational, and module-boundary knowledge belongs in Git-tracked Markdown artifacts:
 
 - decision records (`docs/decisions/**`)
-- module contracts (`MODULE_CONTRACT.md`)
+- module contracts (records under `docs/architecture/**`)
 - architecture docs (`docs/architecture/**`)
 
 ConPort complements these artifacts; it does not replace them. Promote durable conclusions from ConPort into canonical documentation only on explicit user request.

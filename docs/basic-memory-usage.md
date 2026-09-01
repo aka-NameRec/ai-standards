@@ -52,8 +52,7 @@ It intentionally does not standardize:
 Treat the following as canonical documentation:
 
 - `docs/decisions/**`
-- `docs/architecture/**`
-- `MODULE_CONTRACT.md`
+- `docs/architecture/**` (including module-contract records)
 - equivalent local artifacts that define accepted constraints, contracts, or decisions
 
 Treat the following as working memory:

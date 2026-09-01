@@ -101,7 +101,7 @@ Source provenance:
 - Constrain the Basic Memory MCP server to a single project per workspace (for example `bm mcp --project <name>` or the equivalent MCP configuration) so retrieval returns only the current project's artifacts.
 - Disable the Basic Memory MCP server in workspaces that do not have a project, so queries never fall back to a shared default dump.
 - Treat canonical documentation and agent-managed working memory as different layers even when Basic Memory indexes both.
-- Treat `docs/domain/**`, `docs/decisions/**`, `docs/architecture/**`, `MODULE_CONTRACT.md`, and equivalent local artifacts as canonical project knowledge.
+- Treat `docs/domain/**`, `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge.
 - Treat `docs/ai-memory/**` and equivalent local note areas as agent-managed working memory rather than canonical truth.
 - Before creating or updating canonical documentation through Basic Memory, search existing canonical documents and working-memory notes to avoid duplicates and surface contradictions.
 - Keep permalink generation enabled once the knowledge tree holds only notes: `memory://` addressing and graph traversal resolve through permalinks, and a project without them degrades to plain search.
@@ -210,9 +210,10 @@ Source provenance:
 
 ## Module Contracts
 - Treat a module as the smallest change unit for which one responsibility contract and one set of invariants can be stated clearly.
-- Create `MODULE_CONTRACT.md` only for major, risky, shared, or architecturally non-obvious modules.
+- Write a module contract as one record under `docs/architecture/**`: name it `YYYY-MM-DD-module-contract-<module-slug>.md`, give it frontmatter `title` and `type: module-contract`, and state one contract per record.
+- Create a contract record only for major, risky, shared, or architecturally non-obvious modules; not for every folder, CRUD endpoint, or thin wrapper.
 - Use the contract to state ownership, non-goals, inputs, outputs, dependencies, invariants, failure boundaries, and verification.
-- Do not create a contract for every folder, CRUD endpoint, or thin wrapper by default.
+- Treat a root-level `MODULE_CONTRACT.md` as a legacy form: recognize and read it during discovery, but do not create new ones.
 
 ## Decision Records
 - Create a short decision record when an architectural or operational choice will matter for future changes and code review.
@@ -222,7 +223,7 @@ Source provenance:
 - Unless a project defines a stricter local convention, name files under `docs/decisions/**` and `docs/architecture/**` as `YYYY-MM-DD-<topic-slug>.md`.
 
 ## Canonical Documentation And Agent Working Memory
-- Treat `docs/decisions/**`, `docs/architecture/**`, `MODULE_CONTRACT.md`, and equivalent local artifacts as canonical project knowledge.
+- Treat `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge.
 - Treat `docs/ai-memory/**` as agent-managed working memory rather than canonical truth.
 - Durable conclusions must be promoted from working memory into canonical documentation only on explicit user request.
 - Working memory should link to canonical documents when they already exist instead of duplicating them.
@@ -259,9 +260,10 @@ the agent must complete module-contract discovery for the affected code area.
 ### Canonical Source
 
 - Git-tracked module contracts are canonical project knowledge. Canonical contracts include
-  `MODULE_CONTRACT.md`, contract records under `docs/architecture/**`, file-local
-  `START_MODULE_CONTRACT` / `END_MODULE_CONTRACT` blocks, and other project-declared
-  contract artifacts.
+  contract records under `docs/architecture/**` (dated records marked `type: module-contract`
+  in the frontmatter), file-local `START_MODULE_CONTRACT` / `END_MODULE_CONTRACT` blocks, and
+  other project-declared contract artifacts. A root-level `MODULE_CONTRACT.md` is a legacy
+  form: recognize and read it, never create one.
 - Memory systems such as Basic Memory are indexes and navigation aids only. They never
   replace reading the canonical contract from the repository.
 
@@ -271,7 +273,8 @@ At the start of a coding task:
 
 1. Establish whether the project declares contract artifacts at all: query the Basic Memory
    index when `basic-memory` is enabled, otherwise run one cheap check such as
-   `rg --files -g MODULE_CONTRACT.md` plus a look under `docs/architecture/**`.
+   `rg --files docs/architecture -g '*module-contract*'` plus a look for a legacy root
+   `MODULE_CONTRACT.md`.
 2. If the project declares none, discovery is complete with that result: say so in one line
    and continue under the normal rules.
 3. Otherwise, query the index (when available) for the project name, `module contract`,
@@ -280,8 +283,8 @@ At the start of a coding task:
 4. If no index is available, stale, or insufficient, say so before broad discovery — for
    example: "the module-contract index is unavailable, so I will scan `docs/architecture`
    and contract markers directly, which costs extra context" — and then scan with targeted
-   commands such as `rg --files docs/architecture` and
-   `rg -n "START_MODULE_CONTRACT|module contract|контракт модуля"`.
+   commands such as `rg --files docs/architecture -g '*module-contract*'` and
+   `rg -n "type: module-contract|START_MODULE_CONTRACT|module contract|контракт модуля"`.
 
 ### Before Editing A File
 
@@ -405,7 +408,7 @@ Source provenance:
 
 ### What To Check
 - Correctness first: logic errors, missed edge cases, and failure paths that ignore the `Error Handling` rules in force here.
-- Then Architecture & Conventions: violations of this project's architecture rules and of any active stack fragments. Check the changed modules against their active module contracts (`MODULE_CONTRACT.md` — ownership, non-goals, invariants), against accepted records under `docs/architecture/**`, and against the module map when one exists; a violation cites the exact contract clause it breaks. A changed major module with no contract is reported as a `(no contract)` note — a gap to fill, not a defect.
+- Then Architecture & Conventions: violations of this project's architecture rules and of any active stack fragments. Check the changed modules against their active module contracts (records under `docs/architecture/**` marked `type: module-contract` in the frontmatter; a root-level `MODULE_CONTRACT.md` is a legacy form still worth reading — ownership, non-goals, invariants), against accepted decision records under `docs/architecture/**`, and against the module map when one exists; a violation cites the exact contract clause it breaks. A changed major module with no contract is reported as a `(no contract)` note — a gap to fill, not a defect.
 - Then Reuse: code that should have reused an existing project primitive, and duplication the change introduces on its own. Two new copies added by one change satisfy "prefer existing primitives", because neither copy is an existing primitive, and are duplication all the same; so is one intent expressed two different ways in sibling files.
 - Then Efficiency: avoidable cost, such as repeated queries, per-row or per-render work that could be hoisted, and client-side handling of something the server should do. Judge it against realistic data volumes and say when the cost is currently free.
 - Then Quality: readability, contract stability, test coverage of edge cases, and traps that only surface in production.

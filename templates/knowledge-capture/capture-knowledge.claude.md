@@ -11,7 +11,7 @@ Turn a working session into the durable memory the standard way. The user's requ
 
 - A choice was accepted → decision record under `docs/decisions/**` (or `docs/architecture/**`), `YYYY-MM-DD-topic-slug.md`, alternatives mandatory.
 - A task completed → task record under `docs/tasks/`, named `<task-id>-<topic>.md`; most sessions need one summary document, not one per subtask.
-- A major, risky, or shared module changed or grew a distinct contract → `MODULE_CONTRACT.md` next to it (ownership, non-goals, inputs, outputs, invariants, failure boundaries, verification).
+- A major, risky, or shared module changed or grew a distinct contract → a module-contract record under `docs/architecture/**`, named `YYYY-MM-DD-module-contract-<module-slug>.md` with frontmatter `type: module-contract` (ownership, non-goals, inputs, outputs, invariants, failure boundaries, verification).
 - New maintained documentation under `docs/` → add its README link and its Russian localized pair in the same change set (`<name>.ru.md`); `-log-` chat exports are exempt and live in `docs/archive/**`.
 - Operational state (current focus, progress, handoff) → the tracker (ConPort), never canonical docs.
 

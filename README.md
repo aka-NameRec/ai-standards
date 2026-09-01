@@ -546,6 +546,8 @@ Ready-to-copy downstream templates:
 - [templates/decision-record.md](templates/decision-record.md)
 - [templates/module-map.md](templates/module-map.md)
 
+A module contract is one `YYYY-MM-DD-module-contract-<module-slug>.md` record under `docs/architecture/**` with frontmatter `title` and `type: module-contract`; a root-level `MODULE_CONTRACT.md` is a legacy form that is recognized but no longer created. Notation rationale: [docs/decisions/2026-09-01-module-contract-record-notation.md](docs/decisions/2026-09-01-module-contract-record-notation.md)
+
 ## Using Module Contract Discovery Gate In a Project
 
 The `module-contract-gate` feature adds a write-time duty: before changing production code, the agent must complete module-contract discovery — canonical contracts read from the repository, Basic Memory as an index only, coverage decided per touched file, re-discovery on defined triggers, and a short contract note in the implementation summary. Discovery is proportional: a project that declares no contract artifacts completes discovery with that result. It is a registry composite that carries `structured-artifacts`; enable it right after `structured-artifacts` in the manifest so the rendered section lands next to Module Contracts.

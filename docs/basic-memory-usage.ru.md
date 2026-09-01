@@ -52,8 +52,7 @@ Feature сознательно не стандартизует:
 Считайте canonical documentation:
 
 - `docs/decisions/**`
-- `docs/architecture/**`
-- `MODULE_CONTRACT.md`
+- `docs/architecture/**` (включая записи module contracts)
 - эквивалентные локальные artifacts, которые фиксируют принятые constraints, contracts или decisions
 
 Считайте working memory:

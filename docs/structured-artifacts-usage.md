@@ -32,7 +32,7 @@ Typical outcomes:
 The feature standardizes these artifacts:
 
 - `change-plan.md` for non-trivial implementation planning
-- `MODULE_CONTRACT.md` for major, risky, shared, or non-obvious modules
+- a module-contract record under `docs/architecture/**` for major, risky, shared, or non-obvious modules
 - `decision-record.md` for durable architecture or operational choices
 - `module-map.md` as an optional aid for orchestration-heavy or integration-heavy flows
 
@@ -101,7 +101,7 @@ Create a decision record when:
 - the answer to "why did we do it this way?" will matter later
 - the decision should survive code review and commit history browsing
 
-Unless a project defines a stricter local convention, use `YYYY-MM-DD-<topic-slug>.md` for files under `docs/decisions/**` and `docs/architecture/**`.
+Unless a project defines a stricter local convention, use `YYYY-MM-DD-<topic-slug>.md` for files under `docs/decisions/**` and `docs/architecture/**`. A module contract record carries the marker in its name: `YYYY-MM-DD-module-contract-<module-slug>.md`, with frontmatter `title` and `type: module-contract`. One record states one contract.
 
 Create a module map only when:
 
@@ -140,8 +140,7 @@ Bad module boundaries usually look like:
 Treat the following as canonical documentation:
 
 - `docs/decisions/**`
-- `docs/architecture/**`
-- `MODULE_CONTRACT.md`
+- `docs/architecture/**` (including module-contract records)
 - equivalent local project artifacts that define accepted constraints or contracts
 
 Treat the following as agent working memory:
@@ -201,7 +200,7 @@ Examples that require an explicit request before editing canonical documentation
 Start small:
 
 1. Use `change-plan.md` first.
-2. Add `MODULE_CONTRACT.md` only for one or two genuinely risky modules.
+2. Add a module-contract record only for one or two genuinely risky modules.
 3. Introduce decision records only where "why" keeps getting lost.
 4. Add `module-map.md` only after a real navigation problem appears.
 

@@ -538,6 +538,8 @@ Constraints:
 - [templates/decision-record.md](templates/decision-record.md)
 - [templates/module-map.md](templates/module-map.md)
 
+Модульный контракт — одна запись `YYYY-MM-DD-module-contract-<module-slug>.md` в `docs/architecture/**` с frontmatter `title` и `type: module-contract`; корневой `MODULE_CONTRACT.md` — legacy-форма: распознаётся, но больше не создаётся. Обоснование нотации: [docs/decisions/2026-09-01-module-contract-record-notation.md](docs/decisions/2026-09-01-module-contract-record-notation.md)
+
 ## Использование гейта обнаружения модульных контрактов в проекте
 
 Фича `module-contract-gate` добавляет обязанность момента написания кода: перед изменением производственного кода агент обязан выполнить discovery модульных контрактов — канонические контракты читаются из репозитория, Basic Memory только индексирует, покрытие определяется по каждому затрагиваемому файлу, повторный discovery — по заданным триггерам, плюс короткая контрактная заметка в итоговом резюме. Discovery пропорционален: проект, не объявляющий контрактных артефактов, завершает discovery этим результатом. Это композит в реестре, несущий и `structured-artifacts`; включайте сразу после `structured-artifacts` в манифесте, чтобы раздел встал рядом с Module Contracts.

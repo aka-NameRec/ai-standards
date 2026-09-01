@@ -859,8 +859,9 @@ def test_structured_artifacts_feature_can_be_rendered(tmp_path: Path) -> None:
 
     assert "## Lightweight Structured Artifacts" in result.content
     assert (
-        "Create `MODULE_CONTRACT.md` only for major, risky, shared, or "
-        "architecturally non-obvious modules." in result.content
+        "Write a module contract as one record under `docs/architecture/**`: name it "
+        "`YYYY-MM-DD-module-contract-<module-slug>.md`, give it frontmatter `title` and "
+        "`type: module-contract`, and state one contract per record." in result.content
     )
 
 
@@ -1262,10 +1263,10 @@ def test_code_review_fragment_names_module_contracts() -> None:
         REPO_ROOT / "templates" / "code-review-report.md"
     ).read_text(encoding="utf-8")
 
-    assert "MODULE_CONTRACT.md" in fragment
+    assert "type: module-contract" in fragment
     assert "docs/architecture/**" in fragment
     assert "(no contract)" in fragment
-    assert "violates: MODULE_CONTRACT.md" in template
+    assert "violates: docs/architecture/2026-08-11-module-contract-payments.md" in template
 
 
 def test_sync_deploys_capture_knowledge_adapters_when_feature_enabled(tmp_path: Path) -> None:
@@ -2085,9 +2086,40 @@ def test_doctor_leaves_names_alone_outside_the_governed_directories(tmp_path: Pa
     # Living documents and working memory are not canonical dated artifacts, and neither
     # are conventional files a project is required to name a particular way.
     _note(project_root, "docs/ai-memory/Статус проекта.md", "# Статус проекта\n")
-    _note(project_root, "docs/MODULE_CONTRACT.md", "# MODULE_CONTRACT\n")
 
     assert "note-name-against-convention" not in _codes(run_doctor(project_root))
+
+
+def test_doctor_flags_legacy_module_contract_locations(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    # The legacy contract form stays recognizable; doctor points at the record home.
+    _note(project_root, "MODULE_CONTRACT.md", "# MODULE_CONTRACT\n")
+    _note(project_root, "docs/MODULE_CONTRACT.md", "# MODULE_CONTRACT\n")
+
+    report = run_doctor(project_root)
+
+    assert "legacy-module-contract-location" in _codes(report)
+    assert {
+        finding.location
+        for finding in report.findings
+        if finding.code == "legacy-module-contract-location"
+    } == {"MODULE_CONTRACT.md", "docs/MODULE_CONTRACT.md"}
+    # The legacy name stays out of scope of the note-name convention.
+    assert "note-name-against-convention" not in _codes(report)
+
+
+def test_doctor_accepts_module_contract_records(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(
+        project_root,
+        "docs/architecture/2026-09-01-module-contract-demo.md",
+        "---\ntitle: Module Contract: demo\ntype: module-contract\n---\n\n"
+        "# Module Contract: demo\n",
+    )
+
+    codes = _codes(run_doctor(project_root))
+
+    assert "legacy-module-contract-location" not in codes
 
 
 def test_manifest_can_redeclare_the_governed_directories(tmp_path: Path) -> None:

@@ -29,6 +29,9 @@ DEFAULT_DATED_NOTE_DIRECTORIES = ("domain", "decisions", "architecture")
 # A localized sibling such as `<name>.ru.md` keeps the base name, so the language tag is
 # stripped before the name is judged.
 LANGUAGE_SUFFIX_PATTERN = re.compile(r"\.[a-z]{2}$")
+# The legacy contract form predates the record notation; it stays recognizable but doctor
+# points at the record home under docs/architecture/**.
+LEGACY_CONTRACT_NAME = "MODULE_CONTRACT.md"
 # An observation is `- [category] text`; the negative lookahead keeps ordinary markdown
 # links such as `- [label](url)` from counting as one.
 OBSERVATION_PATTERN = re.compile(r"^\s*[-*]\s*\[[^\]]+\](?!\()", re.MULTILINE)
@@ -1203,6 +1206,23 @@ def _audit_knowledge_tree(
             _is_inside(note_path, directory) for directory in governed_directories
         )
         findings.extend(_audit_note(note_path, relative_path, name_is_governed))
+
+    for legacy_path in (project_root / LEGACY_CONTRACT_NAME, knowledge_tree / LEGACY_CONTRACT_NAME):
+        if legacy_path.is_file():
+            findings.append(
+                DoctorFinding(
+                    severity=SEVERITY_WARNING,
+                    code="legacy-module-contract-location",
+                    location=legacy_path.relative_to(project_root).as_posix(),
+                    message=(
+                        "Module contracts are records under 'docs/architecture/**' named "
+                        "'YYYY-MM-DD-module-contract-<module-slug>.md' with frontmatter "
+                        "'type: module-contract'. A root-level MODULE_CONTRACT.md is a legacy "
+                        "form: migrate it to a record. Moving needs a decision, so it is "
+                        "reported rather than fixed automatically."
+                    ),
+                )
+            )
     return findings, notes_checked
 
 

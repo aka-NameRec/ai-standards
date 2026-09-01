@@ -1,5 +1,6 @@
 ---
 title: 'Module Contract: scripts/ai_sync.py'
+type: module-contract
 permalink: ai-standards/module-contract
 ---
 

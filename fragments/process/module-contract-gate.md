@@ -14,9 +14,10 @@ the agent must complete module-contract discovery for the affected code area.
 ### Canonical Source
 
 - Git-tracked module contracts are canonical project knowledge. Canonical contracts include
-  `MODULE_CONTRACT.md`, contract records under `docs/architecture/**`, file-local
-  `START_MODULE_CONTRACT` / `END_MODULE_CONTRACT` blocks, and other project-declared
-  contract artifacts.
+  contract records under `docs/architecture/**` (dated records marked `type: module-contract`
+  in the frontmatter), file-local `START_MODULE_CONTRACT` / `END_MODULE_CONTRACT` blocks, and
+  other project-declared contract artifacts. A root-level `MODULE_CONTRACT.md` is a legacy
+  form: recognize and read it, never create one.
 - Memory systems such as Basic Memory are indexes and navigation aids only. They never
   replace reading the canonical contract from the repository.
 
@@ -26,7 +27,8 @@ At the start of a coding task:
 
 1. Establish whether the project declares contract artifacts at all: query the Basic Memory
    index when `basic-memory` is enabled, otherwise run one cheap check such as
-   `rg --files -g MODULE_CONTRACT.md` plus a look under `docs/architecture/**`.
+   `rg --files docs/architecture -g '*module-contract*'` plus a look for a legacy root
+   `MODULE_CONTRACT.md`.
 2. If the project declares none, discovery is complete with that result: say so in one line
    and continue under the normal rules.
 3. Otherwise, query the index (when available) for the project name, `module contract`,
@@ -35,8 +37,8 @@ At the start of a coding task:
 4. If no index is available, stale, or insufficient, say so before broad discovery — for
    example: "the module-contract index is unavailable, so I will scan `docs/architecture`
    and contract markers directly, which costs extra context" — and then scan with targeted
-   commands such as `rg --files docs/architecture` and
-   `rg -n "START_MODULE_CONTRACT|module contract|контракт модуля"`.
+   commands such as `rg --files docs/architecture -g '*module-contract*'` and
+   `rg -n "type: module-contract|START_MODULE_CONTRACT|module contract|контракт модуля"`.
 
 ### Before Editing A File
 

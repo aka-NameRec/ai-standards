@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+
+- **Module contracts are records, not root files** (user issue #10): the `Module Contracts` rules now place a contract as one `YYYY-MM-DD-module-contract-<module-slug>.md` record under `docs/architecture/**` with frontmatter `title` and `type: module-contract`; a root-level `MODULE_CONTRACT.md` is a legacy form that discovery and review still recognize but never create. The `Module Contract Discovery Gate` lists the records first and keeps the root file as legacy; the canonical-documentation enumerations in `structured-artifacts` and `basic-memory` no longer name the root file; the `code-review` fragment and the `standard-code-review` templates find contracts by the record marker; the `capture-knowledge` templates write records. Decision record: `docs/decisions/2026-09-01-module-contract-record-notation.md`.
+- **`ai-sync doctor`** reports a root-level `MODULE_CONTRACT.md` (repository root or knowledge-tree root) as a `legacy-module-contract-location` warning pointing at the record home; the warning is reported, never auto-fixed.
+- **This repository's own contract migrated** from `docs/MODULE_CONTRACT.md` to `docs/architecture/2026-09-01-module-contract-ai-sync.md` (+ `.ru.md`), with `type: module-contract` in the frontmatter; the template `templates/module-contract.md` carries the record frontmatter.
+
 ## [2.2.1] — 2026-08-30
 
 ### Canonical Prompts

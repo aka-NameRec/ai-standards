@@ -6,7 +6,7 @@
 - Constrain the Basic Memory MCP server to a single project per workspace (for example `bm mcp --project <name>` or the equivalent MCP configuration) so retrieval returns only the current project's artifacts.
 - Disable the Basic Memory MCP server in workspaces that do not have a project, so queries never fall back to a shared default dump.
 - Treat canonical documentation and agent-managed working memory as different layers even when Basic Memory indexes both.
-- Treat `docs/domain/**`, `docs/decisions/**`, `docs/architecture/**`, `MODULE_CONTRACT.md`, and equivalent local artifacts as canonical project knowledge.
+- Treat `docs/domain/**`, `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge.
 - Treat `docs/ai-memory/**` and equivalent local note areas as agent-managed working memory rather than canonical truth.
 - Before creating or updating canonical documentation through Basic Memory, search existing canonical documents and working-memory notes to avoid duplicates and surface contradictions.
 - Keep permalink generation enabled once the knowledge tree holds only notes: `memory://` addressing and graph traversal resolve through permalinks, and a project without them degrades to plain search.

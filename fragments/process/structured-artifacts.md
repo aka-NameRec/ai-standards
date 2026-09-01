@@ -12,9 +12,10 @@
 
 ## Module Contracts
 - Treat a module as the smallest change unit for which one responsibility contract and one set of invariants can be stated clearly.
-- Create `MODULE_CONTRACT.md` only for major, risky, shared, or architecturally non-obvious modules.
+- Write a module contract as one record under `docs/architecture/**`: name it `YYYY-MM-DD-module-contract-<module-slug>.md`, give it frontmatter `title` and `type: module-contract`, and state one contract per record.
+- Create a contract record only for major, risky, shared, or architecturally non-obvious modules; not for every folder, CRUD endpoint, or thin wrapper.
 - Use the contract to state ownership, non-goals, inputs, outputs, dependencies, invariants, failure boundaries, and verification.
-- Do not create a contract for every folder, CRUD endpoint, or thin wrapper by default.
+- Treat a root-level `MODULE_CONTRACT.md` as a legacy form: recognize and read it during discovery, but do not create new ones.
 
 ## Decision Records
 - Create a short decision record when an architectural or operational choice will matter for future changes and code review.
@@ -24,7 +25,7 @@
 - Unless a project defines a stricter local convention, name files under `docs/decisions/**` and `docs/architecture/**` as `YYYY-MM-DD-<topic-slug>.md`.
 
 ## Canonical Documentation And Agent Working Memory
-- Treat `docs/decisions/**`, `docs/architecture/**`, `MODULE_CONTRACT.md`, and equivalent local artifacts as canonical project knowledge.
+- Treat `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge.
 - Treat `docs/ai-memory/**` as agent-managed working memory rather than canonical truth.
 - Durable conclusions must be promoted from working memory into canonical documentation only on explicit user request.
 - Working memory should link to canonical documents when they already exist instead of duplicating them.

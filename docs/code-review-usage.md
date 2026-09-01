@@ -92,7 +92,7 @@ Enabling `review-lenses` does not change what a bare "code review" request does,
 
 ### The Standard Review Skill
 
-When the `code-review` feature is enabled, `sync-templates` also deploys the feature-gated `standard-code-review` skill to the declared agents. It packages the workflow above into one procedure: the `code-review` passes, the full lens set including the two extra DRY rules (the surrounding-convention check and the clone-detector pass), and an architecture-and-contracts check that reconciles changed modules with their `MODULE_CONTRACT.md` and the accepted records under `docs/architecture/**` — a changed major module with no contract is reported as a `(no contract)` note. The output is one report in the fixed shape, in the chat language.
+When the `code-review` feature is enabled, `sync-templates` also deploys the feature-gated `standard-code-review` skill to the declared agents. It packages the workflow above into one procedure: the `code-review` passes, the full lens set including the two extra DRY rules (the surrounding-convention check and the clone-detector pass), and an architecture-and-contracts check that reconciles changed modules with their module-contract records under `docs/architecture/**` and the accepted decision records there — a changed major module with no contract is reported as a `(no contract)` note. The output is one report in the fixed shape, in the chat language.
 
 Activate it by asking for «стандартный code review», "standard code review", or «сделай ревью по стандарту». A bare "code review" request keeps the base workflow; the skill is the superset.
 

@@ -1,4 +1,9 @@
-# MODULE CONTRACT: <module-name>
+---
+title: 'Module Contract: <module-name>'
+type: module-contract
+---
+
+# Module Contract: <module-name>
 
 ## Purpose
 - Why this module exists.

@@ -32,7 +32,7 @@ permalink: ai-standards/structured-artifacts-usage.ru
 Возможность стандартизует следующие артефакты:
 
 - `change-plan.md` для планирования нетривиальной реализации
-- `MODULE_CONTRACT.md` для крупных, рискованных, разделяемых или архитектурно неочевидных модулей
+- запись module contract в `docs/architecture/**` для крупных, рискованных, разделяемых или архитектурно неочевидных модулей
 - `decision-record.md` для устойчивых архитектурных или операционных решений
 - `module-map.md` как опциональное средство навигации по orchestration-heavy или integration-heavy потокам
 
@@ -101,7 +101,7 @@ features = [
 - ответ на вопрос "почему мы сделали именно так?" будет важен позже
 - решение должно пережить code review и просмотр истории репозитория
 
-Если проект не задаёт более строгую локальную конвенцию, используйте `YYYY-MM-DD-<topic-slug>.md` для файлов в `docs/decisions/**` и `docs/architecture/**`.
+Если проект не задаёт более строгую локальную конвенцию, используйте `YYYY-MM-DD-<topic-slug>.md` для файлов в `docs/decisions/**` и `docs/architecture/**`. Запись module contract несёт метку в имени: `YYYY-MM-DD-module-contract-<module-slug>.md`, с frontmatter `title` и `type: module-contract`. Одна запись — один контракт.
 
 Создавайте module map только когда:
 
@@ -140,8 +140,7 @@ features = [
 Считайте canonical documentation:
 
 - `docs/decisions/**`
-- `docs/architecture/**`
-- `MODULE_CONTRACT.md`
+- `docs/architecture/**` (включая записи module contracts)
 - эквивалентные локальные project artifacts, которые фиксируют принятые ограничения или контракты
 
 Считайте agent working memory:
@@ -201,7 +200,7 @@ features = [
 Начинайте с малого:
 
 1. Сначала используйте `change-plan.md`.
-2. Добавляйте `MODULE_CONTRACT.md` только для одного-двух действительно рискованных модулей.
+2. Добавляйте запись module contract только для одного-двух действительно рискованных модулей.
 3. Вводите decision records только там, где регулярно теряется ответ на вопрос "почему".
 4. Добавляйте `module-map.md` только после появления реальной навигационной проблемы.
 

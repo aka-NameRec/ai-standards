@@ -1,11 +1,12 @@
 ---
 title: 'Модульный контракт: scripts/ai_sync.py'
+type: module-contract
 permalink: ai-standards/module-contract.ru
 ---
 
 # Модульный контракт: scripts/ai_sync.py
 
-Английская версия: [MODULE_CONTRACT.md](MODULE_CONTRACT.md)
+Английская версия: [2026-09-01-module-contract-ai-sync.md](2026-09-01-module-contract-ai-sync.md)
 
 Модуль: `scripts/ai_sync.py`, доступный как CLI `ai-sync` (render, update, check, init-project, sync-templates, init-claude-bridge, doctor).
 

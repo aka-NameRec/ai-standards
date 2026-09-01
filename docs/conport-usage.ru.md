@@ -55,7 +55,7 @@ ConPort идентифицирует рабочее пространство п�
 ConPort — transient operational memory. Durable architectural, operational и module-boundary knowledge принадлежит Git-tracked Markdown-артефактам:
 
 - decision records (`docs/decisions/**`)
-- module contracts (`MODULE_CONTRACT.md`)
+- module contracts (записи в `docs/architecture/**`)
 - architecture docs (`docs/architecture/**`)
 
 ConPort дополняет эти артефакты; он их не заменяет. Продвигайте durable-выводы из ConPort в каноническую документацию только по явному запросу пользователя.
