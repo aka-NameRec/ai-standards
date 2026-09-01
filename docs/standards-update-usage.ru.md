@@ -17,7 +17,7 @@ permalink: ai-standards/standards-update-usage.ru
 
 Скилл развёртывается с каждым развёртыванием ai-standards, объявившим агентов в `[tooling].agents`, — без фиче-гейта, потому что он обслуживает сам ai-standards, а не процесс проекта. Голый запрос активирует его: «обнови ai-standards», "update ai-standards", «обнови стандарты до последней версии»; «установи ai-standards» / "install ai-standards" активирует режим установки.
 
-Если развёртывание старше скилла, бутстрапом служит сам файл скилла — он написан так, чтобы выполняться прямо из чекаута. Дайте своему агенту канонический промпт из раздела «Standard Install And Update Prompts» README (или обновите без агента вручную: поднимите чекаут ai-standards до нового релиза, выполните `uv run ai-sync render --project-root <проект>` и `uv run ai-sync sync-templates --project-root <проект>` и выставьте `ai_standards_version` в `ai.project.toml` на этот релиз). Скилл разворачивается командой `sync-templates`; дальше работает голый запрос.
+Если развёртывание старше скилла, бутстрапом служит сам файл скилла — он написан так, чтобы выполняться прямо из чекаута. Дайте своему агенту канонический промпт из раздела «Standard Install And Update Prompts» README (или обновите без агента вручную: поднимите чекаут ai-standards до нового релиза, выполните `uv run ai-sync render --project-root <проект>` и `uv run ai-sync sync-templates --project-root <проект>` и выставьте `ai_standards_version` в `ai.project.toml` на полный пин `<version>-<date>` этого релиза). Скилл разворачивается командой `sync-templates`; дальше работает голый запрос.
 
 ## Режим установки
 

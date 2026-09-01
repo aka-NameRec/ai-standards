@@ -23,7 +23,7 @@ permalink: ai-standards/module-contract.ru
 
 ## Inputs
 
-- `ai.project.toml` (манифест), `registry.toml` (каталог фич и стеков), `fragments/**`, `templates/**`
+- `ai.project.toml` (манифест), `registry.toml` (каталог фич и стеков), `meta.toml` (release metadata), `fragments/**`, `templates/**`
 - проектные `local_overrides` / `optional_local_overrides` (дословно, собственный ведущий frontmatter снимается)
 - опционально: конфигурация индексатора Basic Memory (только чтение, гейтится фичей)
 

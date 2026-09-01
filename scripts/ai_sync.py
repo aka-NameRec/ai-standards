@@ -58,8 +58,6 @@ class Registry:
 @dataclass(frozen=True)
 class Manifest:
     ai_standards_version: str
-    project_version: str | None
-    project_release_date: str | None
     fragments: list[str]
     features: list[str]
     stacks: list[str]
@@ -301,21 +299,18 @@ def _load_registry(repo_root: Path) -> Registry:
 
 
 def _load_release_metadata(repo_root: Path) -> ReleaseMetadata:
-    data = _load_toml(repo_root / "pyproject.toml")
-    tool = _expect_optional_table(data, "tool", "pyproject")
-    ai_standards_tool = _expect_optional_table(tool, "ai-standards", "pyproject.tool")
+    data = _load_toml(repo_root / "meta.toml")
+    release = _expect_table(data, "release", "meta")
     return ReleaseMetadata(
-        version=_expect_string(
-            ai_standards_tool,
-            "version",
-            "pyproject.tool.ai-standards",
-        ),
-        release_date=_expect_string(
-            ai_standards_tool,
-            "release_date",
-            "pyproject.tool.ai-standards",
-        ),
+        version=_expect_string(release, "version", "meta.release"),
+        release_date=_expect_string(release, "date", "meta.release"),
     )
+
+
+def _release_pin(release_metadata: ReleaseMetadata) -> str:
+    """Full pin string of a release; identical to the release tag name."""
+
+    return f"{release_metadata.version}-{release_metadata.release_date}"
 
 
 def _version_drift_message(pinned: str, in_use: str) -> str | None:
@@ -347,12 +342,6 @@ def _load_manifest(project_root: Path) -> Manifest:
             primary_key="ai_standards_version",
             fallback_key="version",
             context="manifest",
-        ),
-        project_version=_expect_optional_string(data, "project_version", "manifest"),
-        project_release_date=_expect_optional_string(
-            data,
-            "project_release_date",
-            "manifest",
         ),
         fragments=_expect_string_list(data, "fragments", "manifest"),
         features=_expect_string_list(data, "features", "manifest"),
@@ -455,6 +444,16 @@ def _expect_optional_table(
             raise SyncError(f"Expected string key inside '{key}' in {context}")
         result[mapping_key] = mapping_value
     return result
+
+
+def _expect_table(
+    data: dict[str, object],
+    key: str,
+    context: str,
+) -> dict[str, object]:
+    if key not in data or not isinstance(data[key], dict):
+        raise SyncError(f"Expected table '{key}' in {context}")
+    return _expect_optional_table(data, key, context)
 
 
 def _expect_mapping_of_string_lists(
@@ -585,20 +584,9 @@ def build_rendered_content(
         ),
         f"<!-- Fragments: {', '.join(fragment_ids)} -->",
     ]
-    if manifest.ai_standards_version != release_metadata.version:
+    if manifest.ai_standards_version != _release_pin(release_metadata):
         metadata_lines.append(
             f"<!-- Requested ai-standards version: {manifest.ai_standards_version} -->"
-        )
-    if manifest.project_version and manifest.project_release_date:
-        metadata_lines.append(
-            f"<!-- Project version: {manifest.project_version} "
-            f"release date: {manifest.project_release_date} -->"
-        )
-    elif manifest.project_version:
-        metadata_lines.append(f"<!-- Project version: {manifest.project_version} -->")
-    elif manifest.project_release_date:
-        metadata_lines.append(
-            f"<!-- Project release date: {manifest.project_release_date} -->"
         )
     if manifest.metadata:
         for key in sorted(manifest.metadata):
@@ -642,7 +630,7 @@ def _seed_manifest_release_version(project_root: Path) -> None:
     content = manifest_path.read_text(encoding="utf-8")
     content = content.replace(
         'ai_standards_version = "replace-me"',
-        f'ai_standards_version = "{release_metadata.version}"',
+        f'ai_standards_version = "{_release_pin(release_metadata)}"',
         1,
     )
     manifest_path.write_text(content, encoding="utf-8")
@@ -773,7 +761,7 @@ def render(
     write_rendered_content(result)
     drift = _version_drift_message(
         _load_manifest(project_root).ai_standards_version,
-        _load_release_metadata(_repo_root()).version,
+        _release_pin(_load_release_metadata(_repo_root())),
     )
     if drift:
         typer.echo(f"Warning: {drift}")
@@ -791,7 +779,7 @@ def update(
     write_rendered_content(result)
     drift = _version_drift_message(
         _load_manifest(project_root).ai_standards_version,
-        _load_release_metadata(_repo_root()).version,
+        _release_pin(_load_release_metadata(_repo_root())),
     )
     if drift:
         typer.echo(f"Warning: {drift}")
@@ -807,7 +795,7 @@ def check(
 
     drift = _version_drift_message(
         _load_manifest(project_root).ai_standards_version,
-        _load_release_metadata(_repo_root()).version,
+        _release_pin(_load_release_metadata(_repo_root())),
     )
     if drift:
         raise SyncError(drift)
@@ -1675,7 +1663,7 @@ def doctor(
 
     drift = _version_drift_message(
         _load_manifest(project_root).ai_standards_version,
-        _load_release_metadata(_repo_root()).version,
+        _release_pin(_load_release_metadata(_repo_root())),
     )
     if drift:
         typer.echo(f"warn [standards-version-drift] ai.project.toml: {drift}")

@@ -1,6 +1,8 @@
 [project]
 name = "ai-standards"
-version = "1.3.0"
+# The standards release version lives in meta.toml ([release]). This package
+# version is a placeholder and is not bumped on standards releases.
+version = "0.0.0"
 description = "Python support scripts for the ai-standards repository."
 requires-python = ">=3.11"
 dependencies = [
@@ -37,7 +39,3 @@ python_version = "3.11"
 strict = true
 files = ["scripts", "tests"]
 mypy_path = "typings"
-
-[tool.ai-standards]
-version = "2.2.1"
-release_date = "2026-08-30"

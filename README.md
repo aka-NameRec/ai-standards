@@ -107,9 +107,7 @@ Use four layers:
 Recommended starting point for a Python/FastAPI project with standard communication, planning, and architecture requirements:
 
 ```toml
-ai_standards_version = "0.1.0"
-project_version = "replace-me"
-project_release_date = "YYYY-MM-DD"
+ai_standards_version = "2.2.1-2026-08-30"
 
 fragments = [
   "core/base",
@@ -676,18 +674,14 @@ Detailed operational guidance lives in:
 
 ## Versioning
 
-Pin the desired standards version in `ai.project.toml`:
+Pin the desired standards release in `ai.project.toml` with the full pin, identical to the release tag name:
 
 ```toml
-ai_standards_version = "0.1.0"
-project_version = "replace-me"
-project_release_date = "YYYY-MM-DD"
+ai_standards_version = "2.2.1-2026-08-30"
 ```
 
-The renderer embeds the current `ai-standards` release metadata from `pyproject.toml`
-`tool.ai-standards`
-and the project-local version metadata from `ai.project.toml` into the generated file
-header.
+The renderer embeds the current `ai-standards` release metadata from `meta.toml`
+(`[release]`) into the generated file header.
 
 `ai-sync check` fails when `ai_standards_version` disagrees with the standards source in use, `render` and `update` echo a warning, and `doctor` reports the drift — a deployment cannot silently move off the version it claims to pin.
 

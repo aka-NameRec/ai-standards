@@ -9,7 +9,7 @@ permalink: ai-standards/decisions/2026-04-18-separate-release-version-from-pytho
 
 ## Статус
 
-Accepted
+Заменено решением [2026-09-01-unify-release-versioning-meta-toml.ru.md](2026-09-01-unify-release-versioning-meta-toml.ru.md).
 
 ## Дата
 

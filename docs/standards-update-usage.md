@@ -17,7 +17,7 @@ Before this skill, a bare "update ai-standards" request was underdefined at four
 
 The skill deploys with every ai-standards deployment that declares agents in `[tooling].agents` — no feature toggle, because it maintains ai-standards itself rather than a project process. A bare request activates it: «обнови ai-standards», "update ai-standards", «обнови стандарты до последней версии»; «установи ai-standards» / "install ai-standards" activates the install mode.
 
-If the deployment predates the skill, the skill file itself is the bootstrap: it is written to be followed straight from a checkout. Give your agent the canonical prompt from the README's "Standard Install And Update Prompts" section (or, for a no-agent update by hand: bring the ai-standards checkout to the newer release, run `uv run ai-sync render --project-root <project>` and `uv run ai-sync sync-templates --project-root <project>`, and set `ai_standards_version` in `ai.project.toml` to that release). The skill deploys with `sync-templates`; from then on the bare request works.
+If the deployment predates the skill, the skill file itself is the bootstrap: it is written to be followed straight from a checkout. Give your agent the canonical prompt from the README's "Standard Install And Update Prompts" section (or, for a no-agent update by hand: bring the ai-standards checkout to the newer release, run `uv run ai-sync render --project-root <project>` and `uv run ai-sync sync-templates --project-root <project>`, and set `ai_standards_version` in `ai.project.toml` to that release's `<version>-<date>` pin). The skill deploys with `sync-templates`; from then on the bare request works.
 
 ## Install Mode
 

@@ -21,7 +21,7 @@ The single rendering and template-deployment tool of this repository, plus the d
 
 ## Inputs
 
-- `ai.project.toml` (manifest), `registry.toml` (feature/stack catalog), `fragments/**`, `templates/**`
+- `ai.project.toml` (manifest), `registry.toml` (feature/stack catalog), `meta.toml` (release metadata), `fragments/**`, `templates/**`
 - per-project `local_overrides` / `optional_local_overrides` (verbatim, leading frontmatter stripped)
 - optional: Basic Memory indexer config (read-only, feature-gated)
 

@@ -9,7 +9,7 @@ Russian localized version: [2026-04-18-separate-release-version-from-python-pack
 
 ## Status
 
-Accepted
+Superseded by [2026-09-01-unify-release-versioning-meta-toml.md](2026-09-01-unify-release-versioning-meta-toml.md).
 
 ## Date
 

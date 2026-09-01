@@ -14,7 +14,7 @@ import typer
 from scripts.ai_sync import build_rendered_content, write_rendered_content
 
 VERSION_PATTERN = re.compile(r"^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)$")
-AI_STANDARDS_TABLE_HEADER = "[tool.ai-standards]"
+RELEASE_TABLE_HEADER = "[release]"
 PART_VALUES: tuple[str, ...] = ("major", "minor", "patch")
 app = typer.Typer(add_completion=False, no_args_is_help=False)
 
@@ -61,20 +61,11 @@ def _expect_string(data: dict[str, object], key: str, context: str) -> str:
 
 
 def _load_release_state(repo_root: Path) -> ReleaseState:
-    data = _load_toml(repo_root / "pyproject.toml")
-    tool = _expect_table(data, "tool", "pyproject")
-    ai_standards = _expect_table(tool, "ai-standards", "pyproject.tool")
+    data = _load_toml(repo_root / "meta.toml")
+    release = _expect_table(data, "release", "meta")
     return ReleaseState(
-        version=_expect_string(
-            ai_standards,
-            "version",
-            "pyproject.tool.ai-standards",
-        ),
-        release_date=_expect_string(
-            ai_standards,
-            "release_date",
-            "pyproject.tool.ai-standards",
-        ),
+        version=_expect_string(release, "version", "meta.release"),
+        release_date=_expect_string(release, "date", "meta.release"),
     )
 
 def _parse_version(version: str) -> tuple[int, int, int]:
@@ -189,46 +180,41 @@ def _replace_single_match(
     return updated
 
 
-def _upsert_tool_ai_standards_field(content: str, key: str, value: str) -> str:
-    if AI_STANDARDS_TABLE_HEADER in content:
-        if re.search(rf"(?ms)^\[tool\.ai-standards\]\n.*?^{re.escape(key)} = ", content):
+def _upsert_release_field(content: str, key: str, value: str) -> str:
+    if RELEASE_TABLE_HEADER in content:
+        if re.search(rf"(?ms)^\[release\]\n.*?^{re.escape(key)} = ", content):
             return _replace_single_match(
-                rf'(?ms)(^\[tool\.ai-standards\]\n.*?^{re.escape(key)} = )"[^"]+"',
+                rf'(?ms)(^\[release\]\n.*?^{re.escape(key)} = )"[^"]+"',
                 rf'\1"{value}"',
                 content,
-                f"pyproject tool.ai-standards.{key}",
+                f"meta.release.{key}",
             )
         return _replace_single_match(
-            r'(?ms)(^\[tool\.ai-standards\]\n)',
+            r'(?ms)(^\[release\]\n)',
             rf'\1{key} = "{value}"\n',
             content,
-            f"pyproject tool.ai-standards.{key}",
+            f"meta.release.{key}",
         )
     return (
         content.rstrip()
         + (
-            f"\n\n{AI_STANDARDS_TABLE_HEADER}\n"
+            f"\n\n{RELEASE_TABLE_HEADER}\n"
             f'{key} = "{value}"\n'
         )
     )
 
 
-def _update_pyproject(repo_root: Path, version: str, release_date: str) -> None:
-    path = repo_root / "pyproject.toml"
+def _update_meta(repo_root: Path, version: str, release_date: str) -> None:
+    path = repo_root / "meta.toml"
     content = path.read_text(encoding="utf-8")
-    content = _upsert_tool_ai_standards_field(content, "version", version)
-    content = _upsert_tool_ai_standards_field(content, "release_date", release_date)
+    content = _upsert_release_field(content, "version", version)
+    content = _upsert_release_field(content, "date", release_date)
     if not content.endswith("\n"):
         content += "\n"
     path.write_text(content, encoding="utf-8")
 
 
-def _update_manifest_file(
-    path: Path,
-    ai_standards_version: str | None = None,
-    project_version: str | None = None,
-    project_release_date: str | None = None,
-) -> None:
+def _update_manifest_file(path: Path, ai_standards_version: str | None = None) -> None:
     content = path.read_text(encoding="utf-8")
     if ai_standards_version is not None:
         if re.search(r"^ai_standards_version = ", content, flags=re.MULTILINE):
@@ -247,26 +233,6 @@ def _update_manifest_file(
             )
         else:
             content = f'ai_standards_version = "{ai_standards_version}"\n' + content
-    if project_version is not None:
-        if re.search(r"^project_version = ", content, flags=re.MULTILINE):
-            content = _replace_single_match(
-                r'(^project_version = )"[^"]+"',
-                rf'\1"{project_version}"',
-                content,
-                f"{path.name} project_version",
-            )
-        else:
-            content = f'project_version = "{project_version}"\n' + content
-    if project_release_date is not None:
-        if re.search(r"^project_release_date = ", content, flags=re.MULTILINE):
-            content = _replace_single_match(
-                r'(^project_release_date = )"[^"]+"',
-                rf'\1"{project_release_date}"',
-                content,
-                f"{path.name} project_release_date",
-            )
-        else:
-            content = f'project_release_date = "{project_release_date}"\n' + content
     path.write_text(content, encoding="utf-8")
 
 
@@ -283,16 +249,15 @@ def save_release(
         explicit_version=version,
         explicit_release_date=release_date,
     )
-    _update_pyproject(repo_root, proposal.next_version, proposal.next_release_date)
+    release_pin = f"{proposal.next_version}-{proposal.next_release_date}"
+    _update_meta(repo_root, proposal.next_version, proposal.next_release_date)
     _update_manifest_file(
         repo_root / "ai.project.toml",
-        ai_standards_version=proposal.next_version,
-        project_version=proposal.next_version,
-        project_release_date=proposal.next_release_date,
+        ai_standards_version=release_pin,
     )
     _update_manifest_file(
         repo_root / "templates" / "project_manifest.toml",
-        ai_standards_version=proposal.next_version,
+        ai_standards_version=release_pin,
     )
     rendered = build_rendered_content(repo_root, repo_root=repo_root)
     write_rendered_content(rendered)
@@ -371,7 +336,7 @@ def save(
 
 @app.command()
 def tag() -> None:
-    """Create an annotated release tag from pyproject.toml on main."""
+    """Create an annotated release tag from meta.toml on main."""
 
     tag_name = create_tag(_repo_root())
     typer.echo(tag_name)

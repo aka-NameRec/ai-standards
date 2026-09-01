@@ -103,9 +103,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project
 Рекомендуемая стартовая точка для Python/FastAPI проекта со стандартными требованиями к коммуникации, планированию и архитектуре:
 
 ```toml
-ai_standards_version = "0.1.0"
-project_version = "replace-me"
-project_release_date = "YYYY-MM-DD"
+ai_standards_version = "2.2.1-2026-08-30"
 
 fragments = [
   "core/base",
@@ -668,17 +666,14 @@ ConPort остаётся полезным для transient operational context �
 
 ## Версионирование
 
-Фиксируйте нужную версию стандартов в `ai.project.toml`.
+Фиксируйте нужный релиз стандартов в `ai.project.toml` полным пином, совпадающим с именем релизного тега.
 
 ```toml
-ai_standards_version = "0.1.0"
-project_version = "replace-me"
-project_release_date = "YYYY-MM-DD"
+ai_standards_version = "2.2.1-2026-08-30"
 ```
 
 Сборщик встраивает в заголовок сгенерированного файла текущие release metadata из
-`pyproject.toml` `tool.ai-standards` и project-local version metadata из
-`ai.project.toml`.
+`meta.toml` (секция `[release]`).
 
 `ai-sync check` падает, если `ai_standards_version` расходится с фактически используемым
 исходником стандартов, `render` и `update` выводят предупреждение, а `doctor` сообщает
