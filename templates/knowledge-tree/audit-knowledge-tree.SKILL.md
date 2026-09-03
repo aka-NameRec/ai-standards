@@ -23,7 +23,7 @@ ai-sync doctor --project-root <path>          # report
 ai-sync doctor --project-root <path> --fix    # apply what needs no judgement
 ```
 
-It reports misplaced `local_overrides`, indexed roots pointed at a repository instead of a knowledge tree, disabled permalinks, missing or mismatched frontmatter, file names against the convention, and notes with no observations or relations. Findings marked `(fixable)` are repaired by `--fix`: rendering inputs move out of the tree and the manifest is repointed, missing frontmatter titles and headings are restored, empty directories are pruned.
+It reports misplaced `local_overrides`, indexed roots pointed at a repository instead of a knowledge tree, disabled permalinks, missing or mismatched frontmatter, file names against the convention, non-note data files (images, PDFs, raw logs, CSV dumps), and notes with no observations or relations. Findings marked `(fixable)` are repaired by `--fix`: rendering inputs move out of the tree and the manifest is repointed, missing frontmatter titles and headings are restored, empty directories are pruned.
 
 Run `--fix` first, then work the remainder. Everything left needs a decision, which is why it was left. Take that list as the work list instead of walking the tree by hand.
 
@@ -44,6 +44,7 @@ Decide what the file is before deciding what is wrong with it:
 | Solution-space note | states what the team chose | the alternatives rejected and the consequences accepted |
 | Note (either genre) | lives in the knowledge tree | frontmatter `title`, matching `# H1`, observations, relations |
 | Rendering input | listed in `local_overrides` | must live outside the tree; no frontmatter needed |
+| Data file | images, PDFs, raw logs, CSV dumps — anything not Markdown | move out of the tree, or mask via a `.gitignore` at the tree root while notes cite it; never delete silently |
 | Generated output | carries a generated-by marker | must live outside the tree; never edit |
 | Verbatim source | `type: spec`, transcripts, quoted requirements | structure may be repaired, content must not |
 
@@ -52,6 +53,7 @@ Decide what the file is before deciding what is wrong with it:
 Work through the findings in this order, confirming each change:
 
 - **Misplaced rendering input** — move it out of the tree and update the manifest path. Highest value: it protects generated files.
+- **Data file inside the tree** — move it out of the tree, or, while notes cite it, mask it via a `.gitignore` at the tree root (`*.png`, `raw/` — gitignore-style patterns, no `!` negation). Never delete it silently; reindex only after `ai-sync doctor` stops reporting it.
 - **Missing or mismatched frontmatter** — add `title`, align it with the `# H1`, set `type` to match the folder.
 - **File name against convention** — use `move_note`, never a filesystem rename: it moves the file and updates the index together.
 - **Missing relations** — propose links to notes that already exist; a forward reference to a note that does not exist yet is valid and resolves on creation.

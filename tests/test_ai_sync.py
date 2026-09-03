@@ -13,6 +13,7 @@ from scripts.ai_sync import (
     CLAUDE_BRIDGE_MARKER,
     DEFAULT_OUTPUT_NAME,
     SEVERITY_ERROR,
+    SEVERITY_WARNING,
     DoctorReport,
     SyncError,
     _build_managed_template_content,
@@ -1998,6 +1999,127 @@ def test_doctor_accepts_a_dated_ascii_slug(tmp_path: Path) -> None:
     _note(project_root, "docs/README.md", "# x\n")
 
     assert "note-name-against-convention" not in _codes(run_doctor(project_root))
+
+
+def test_doctor_flags_a_non_note_data_file_inside_the_knowledge_tree(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/artifacts/screenshot.png", "pretend bytes")
+
+    report = run_doctor(project_root)
+
+    finding = next(
+        f
+        for f in report.findings
+        if f.code == "non-note-data-file-inside-knowledge-tree"
+    )
+    assert finding.severity == SEVERITY_WARNING
+    assert finding.location == "docs/artifacts/screenshot.png"
+    assert report.error_count == 0
+
+
+def test_doctor_accepts_a_markdown_only_knowledge_tree(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/note.md", "---\ntitle: Note\n---\n\n# Note\n")
+
+    assert "non-note-data-file-inside-knowledge-tree" not in _codes(run_doctor(project_root))
+
+
+def test_doctor_skips_hidden_entries_in_the_knowledge_tree(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/.obsidian/screenshot.png", "x")
+    _note(project_root, "docs/.draft.png", "x")
+
+    assert "non-note-data-file-inside-knowledge-tree" not in _codes(run_doctor(project_root))
+
+
+def test_doctor_honours_masks_from_a_gitignore_at_the_knowledge_tree_root(
+    tmp_path: Path,
+) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/.gitignore", "*.png\nraw/\n")
+    _note(project_root, "docs/shot.png", "x")
+    _note(project_root, "docs/deep/raw/dump.csv", "x")
+    _note(project_root, "docs/scan.jpg", "x")
+
+    findings = [
+        f
+        for f in run_doctor(project_root).findings
+        if f.code == "non-note-data-file-inside-knowledge-tree"
+    ]
+
+    assert [finding.location for finding in findings] == ["docs/scan.jpg"]
+
+
+def test_doctor_honours_a_global_bmignore_beside_the_indexer_config(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md", features="basic-memory")
+    _note(project_root, "docs/report.pdf", "x")
+    _note(project_root, "docs/shot.png", "x")
+    (tmp_path / ".bmignore").write_text("*.pdf\n", encoding="utf-8")
+    indexer_config = tmp_path / "indexer.json"
+    indexer_config.write_text(
+        json.dumps({"projects": {"demo": {"path": str(project_root / "docs")}}}),
+        encoding="utf-8",
+    )
+
+    findings = [
+        f
+        for f in run_doctor(project_root, indexer_config=indexer_config).findings
+        if f.code == "non-note-data-file-inside-knowledge-tree"
+    ]
+
+    assert [finding.location for finding in findings] == ["docs/shot.png"]
+
+
+def test_doctor_skips_the_archive_subtree_for_data_files(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/archive/dump.csv", "x")
+
+    assert "non-note-data-file-inside-knowledge-tree" not in _codes(run_doctor(project_root))
+
+
+def test_doctor_does_not_double_report_an_override_inside_the_tree(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "docs/project-rules.txt")
+
+    codes = _codes(run_doctor(project_root))
+
+    assert "override-inside-knowledge-tree" in codes
+    assert "non-note-data-file-inside-knowledge-tree" not in codes
+
+
+def test_doctor_negation_in_masks_is_inert(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/.gitignore", "!keep.png\n")
+    _note(project_root, "docs/keep.png", "x")
+
+    codes = _codes(run_doctor(project_root))
+
+    # A '!' pattern is matched literally, so it masks nothing — the file stays flagged,
+    # which is exactly what the indexer does with the same mask file.
+    assert "non-note-data-file-inside-knowledge-tree" in codes
+
+
+def test_doctor_negation_does_not_reinclude_under_a_blanket_mask(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    _note(project_root, "docs/.gitignore", "*.png\n!keep.png\n")
+    _note(project_root, "docs/keep.png", "x")
+    _note(project_root, "docs/other.png", "x")
+
+    # Mirrors the indexer: the blanket glob masks every .png; '!' adds no exception.
+    assert "non-note-data-file-inside-knowledge-tree" not in _codes(run_doctor(project_root))
+
+
+def test_data_file_findings_are_never_auto_fixed(tmp_path: Path) -> None:
+    project_root = _doctor_project(tmp_path, "ai/project-rules.md")
+    data_path = _note(project_root, "docs/dump.csv", "x")
+
+    actions = run_repair(project_root, run_doctor(project_root))
+
+    assert not [
+        action
+        for action in actions
+        if action.code == "non-note-data-file-inside-knowledge-tree"
+    ]
+    assert data_path.exists()
 
 
 def test_fix_moves_a_rendering_input_out_of_the_tree(tmp_path: Path) -> None:

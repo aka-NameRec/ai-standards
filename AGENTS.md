@@ -95,6 +95,7 @@ Source provenance:
 - Use Basic Memory as a retrieval and indexing layer over Git-tracked Markdown knowledge when the project explicitly enables this feature.
 - Point a Basic Memory project at a dedicated knowledge tree, never at a repository root. A repository root pulls vendored files, build artifacts, and generated output into the knowledge graph as if they were notes.
 - Treat every file inside the knowledge tree as a note. Rendering inputs, generated output, templates, and machine-owned files belong outside it.
+- Keep binary and bulk-data files (images, PDFs, raw logs, CSV dumps) out of the knowledge tree: the indexer treats them as notes and burns reindex time on them. Store them outside the tree, or, while they must stay beside the notes citing them, mask them via a `.gitignore` at the knowledge-tree root (the indexer's project home) or the global `~/.basic-memory/.bmignore` — gitignore-style patterns with no `!` exceptions. Reindex only after `ai-sync doctor` stops reporting them.
 - Keep `local_overrides` and any other rendering input outside the knowledge tree, so metadata written by the indexer can never reach a generated file.
 - Constrain the Basic Memory MCP server to a single project per workspace (for example `bm mcp --project <name>` or the equivalent MCP configuration) so retrieval returns only the current project's artifacts.
 - Disable the Basic Memory MCP server in workspaces that do not have a project, so queries never fall back to a shared default dump.

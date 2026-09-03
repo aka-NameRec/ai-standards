@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import fnmatch
 import json
 import re
 import tomllib
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated, cast
@@ -1142,11 +1144,45 @@ def _audit_note(
     return findings
 
 
+def _matches_indexer_mask(relative_path: Path, patterns: Sequence[str]) -> bool:
+    """Mirror the matcher Basic Memory applies to ignore patterns.
+
+    Reference: ``basic_memory.ignore_utils.should_ignore_path`` (0.23.x). The
+    subtleties worth keeping identical: a directory pattern matches a single
+    path component at any depth, a glob applies per component as well as to
+    the whole path, ``*`` crosses ``/`` on the whole path, and a ``!`` prefix
+    is not negation — the pattern is matched literally, so exceptions are
+    inexpressible, exactly as upstream behaves.
+    """
+    relative_posix = relative_path.as_posix()
+    for pattern in patterns:
+        if pattern.startswith("/"):
+            root_pattern = pattern[1:]
+            if root_pattern.endswith("/"):
+                if relative_path.parts and relative_path.parts[0] == root_pattern[:-1]:
+                    return True
+            elif fnmatch.fnmatch(relative_posix, root_pattern):
+                return True
+            continue
+        if pattern.endswith("/"):
+            if pattern[:-1] in relative_path.parts:
+                return True
+            continue
+        if pattern in relative_path.parts:
+            return True
+        if any(fnmatch.fnmatch(part, pattern) for part in relative_path.parts):
+            return True
+        if fnmatch.fnmatch(relative_posix, pattern):
+            return True
+    return False
+
+
 def _audit_knowledge_tree(
     project_root: Path,
     knowledge_tree: Path,
     manifest: Manifest,
     dated_note_directories: tuple[str, ...],
+    indexer_masks: Sequence[str] = (),
 ) -> tuple[list[DoctorFinding], int]:
     if not knowledge_tree.is_dir():
         return (
@@ -1194,6 +1230,33 @@ def _audit_knowledge_tree(
             _is_inside(note_path, directory) for directory in governed_directories
         )
         findings.extend(_audit_note(note_path, relative_path, name_is_governed))
+
+    for data_path in sorted(knowledge_tree.rglob("*")):
+        if not data_path.is_file() or data_path.suffix.lower() == ".md":
+            continue
+        if _is_inside(data_path, archive_dir):
+            continue
+        if data_path.resolve() in declared_overrides:
+            continue
+        data_relative_path = data_path.relative_to(knowledge_tree)
+        if any(part.startswith(".") for part in data_relative_path.parts):
+            continue
+        if _matches_indexer_mask(data_relative_path, indexer_masks):
+            continue
+        findings.append(
+            DoctorFinding(
+                severity=SEVERITY_WARNING,
+                code="non-note-data-file-inside-knowledge-tree",
+                location=data_path.relative_to(project_root).as_posix(),
+                message=(
+                    "Non-note data file inside the knowledge tree; the indexer treats it as "
+                    "a note and burns reindex time on it. Move it outside the tree, or mask "
+                    "it via a '.gitignore' at the knowledge-tree root or the global "
+                    "'.bmignore' (gitignore-style patterns, no '!' negation). Reindex only "
+                    "after this finding is resolved."
+                ),
+            )
+        )
 
     for legacy_path in (project_root / LEGACY_CONTRACT_NAME, knowledge_tree / LEGACY_CONTRACT_NAME):
         if legacy_path.is_file():
@@ -1398,18 +1461,26 @@ def run_doctor(
     )
 
     findings = _audit_override_placement(project_root, manifest, knowledge_tree)
+    resolved_indexer_config = DEFAULT_INDEXER_CONFIG if indexer_config is None else indexer_config
+    # The data-file check stays quiet on exactly what the indexer would ignore: the
+    # project-level .gitignore at the knowledge-tree root always, the global .bmignore
+    # beside the indexer configuration only while the feature gate opens — the indexer
+    # configuration is read-only and feature-gated by contract.
+    masks = list(_load_bmignore_patterns(knowledge_tree / ".gitignore"))
+    if "basic-memory" in manifest.features:
+        masks.extend(_load_bmignore_patterns(resolved_indexer_config.parent / ".bmignore"))
     tree_findings, notes_checked = _audit_knowledge_tree(
-        project_root, knowledge_tree, manifest, dated_note_directories
+        project_root,
+        knowledge_tree,
+        manifest,
+        dated_note_directories,
+        indexer_masks=tuple(masks),
     )
     findings.extend(tree_findings)
 
     if "basic-memory" in manifest.features:
         findings.extend(
-            _audit_indexer_config(
-                project_root,
-                knowledge_tree,
-                DEFAULT_INDEXER_CONFIG if indexer_config is None else indexer_config,
-            )
+            _audit_indexer_config(project_root, knowledge_tree, resolved_indexer_config)
         )
 
     return DoctorReport(

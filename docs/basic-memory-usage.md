@@ -75,6 +75,12 @@ Inside the knowledge tree, every file is a note. That has a direct consequence f
 
 The same rule covers templates, generated output, and any other machine-owned Markdown.
 
+Binary and bulk data are the same trap with worse consequences. Images, PDFs, raw logs, CSV dumps, and any other non-Markdown payload are indexed as notes: the graph fills with entities nobody retrieves, and embedding runs grind through junk chunks. Keep such files out of the tree. When a file must stay beside the notes citing it — a screenshot referenced by a decision, a dump attached to an investigation note — mask it instead. Basic Memory honours a `.gitignore` at its project root — for the standard wiring the knowledge tree itself, so `docs/.gitignore` — plus the global `~/.basic-memory/.bmignore`. `docs/archive` is not an escape hatch by default: the indexer walks it too until a `.bmignore` line (`archive/`) excludes it, and by convention the archive holds verbatim sources, not data files.
+
+The mask syntax is gitignore-style but narrower, and the differences bite on the first try. A directory pattern (`raw/`) matches a single path component at any depth; a glob such as `*.png` applies per path component, so it masks at any depth as well; a `*` inside a full-path pattern crosses `/`. There is no `!` negation — a pattern starting with `!` is matched literally, so a whitelist of "only Markdown" is not expressible; hidden, dot-prefixed names are ignored by default. Masking does not clean what the pollution already put into the graph: after masking, clear the phantom entities and reindex once (`bm reindex --full`, or a search and embeddings rebuild).
+
+`ai-sync doctor` closes the loop: it reports every non-Markdown, unmasked file under the knowledge tree as `non-note-data-file-inside-knowledge-tree`. Treat that finding as a stop sign — reindex only after the report is clean.
+
 ## Frontmatter And Permalinks
 
 Basic Memory can write frontmatter during sync. On a clean knowledge tree that is desirable: permalinks are what `memory://` addressing and graph traversal resolve through, and a project without them degrades to plain search.
@@ -198,6 +204,8 @@ This keeps each project's knowledge layer precise and prevents the "common dump"
 ## Reindexing Policy
 
 Normal file edits inside indexed directories should rely on Basic Memory's regular filesystem sync.
+
+Gate every explicit reindex on a clean `ai-sync doctor` run: a `non-note-data-file-inside-knowledge-tree` finding means junk is about to be indexed — mask or move the files first.
 
 Run a status check after:
 
