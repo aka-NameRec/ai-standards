@@ -27,6 +27,11 @@ Russian localized version: [project-rules.ru.md](project-rules.ru.md)
 - When creating a new documentation pair, prefer `name.md` for English and `name.ru.md` for Russian.
 - Do not rewrite, translate, or pair chat export files whose names contain `-log-`.
 
+## Issue Tracker Language
+
+- Create GitHub issues for this repository exclusively in Russian: both the issue title and the issue description.
+- Keep verbatim technical names (commands, flags, file paths, API fields, feature and artifact identifiers) untranslated inside Russian issue texts.
+
 ## Release Workflow
 
 - Repository release metadata lives in `meta.toml` under `[release]` (`version` and `date`).
