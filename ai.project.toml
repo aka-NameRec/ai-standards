@@ -11,6 +11,7 @@ features = [
   "response-language-style",
   "retrieval-routing",
   "basic-memory",
+  "project-memory",
   "chroma",
   "design-first-collaboration",
   "reasoning-hygiene",

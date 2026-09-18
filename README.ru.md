@@ -18,6 +18,7 @@
 - [Использование гейта обнаружения модульных контрактов в проекте](#использование-гейта-обнаружения-модульных-контрактов-в-проекте)
 - [Использование Session Hygiene в проекте](#использование-session-hygiene-в-проекте)
 - [Использование Retrieval Routing в проекте](#использование-retrieval-routing-в-проекте)
+- [Использование Project Memory в проекте](#использование-project-memory-в-проекте)
 - [Использование Basic Memory в проекте](#использование-basic-memory-в-проекте)
 - [Использование Chroma в проекте](#использование-chroma-в-проекте)
 - [Использование Agent Usage Hygiene в проекте](#использование-agent-usage-hygiene-в-проекте)
@@ -97,7 +98,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project
 Используются четыре слоя:
 
 - `fragments`: прямые базовые правила, которые должны включаться всегда.
-- `features`: опциональные возможности вроде `retrieval-routing`, `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene` и `agent-usage-hygiene`.
+- `features`: опциональные возможности вроде `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene` и `agent-usage-hygiene`.
 - `stacks`: правила, зависящие от технологии или архитектурного стиля, например `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring` или `spring-data-jpa`.
 - `tooling.agents`: опциональные agent adapters вроде `codex`, `claude`, `kilo` и `cursor` для управляемых локальных workflow templates.
 
@@ -597,6 +598,25 @@ Capability именуются независимо от реализаций (Ba
 
 - английское: [docs/retrieval-routing-usage.md](docs/retrieval-routing-usage.md)
 - русское: [docs/retrieval-routing-usage.ru.md](docs/retrieval-routing-usage.ru.md)
+
+## Использование Project Memory в проекте
+
+`project-memory` даёт локальной межсессионной рабочей памяти стандартный дом: `docs/local/**`, по умолчанию в `.gitignore`, с фиксированной таксономией (`context`, `decisions`, `progress`, `patterns`, `investigations`, `handoffs`), политикой записи, политикой чтения и явным путём продвижения в каноническую документацию.
+
+`ai-standards` владеет переиспользуемой политикой:
+
+- локальная рабочая память никогда не канонична, а каноническая документация не впитывает сессионное состояние ради сохранения контекста агента
+- память — курируемое хранилище состояния, а не журнал исполнения: записывайте то, что нужно будущим сессиям, а не то, что просто произошло
+- чтение точечными запросами (цель, сущности, модули, решения, идентификаторы задач), никогда чтением всего дерева на старте сессии
+- продвижение локальное → каноническое — явная семантическая операция, никогда автоматическая
+- таксономия и жизненный цикл инструментально-независимы; фича лучше всего работает с `basic-memory`, но сознательно не требует его — возможность отделена от способа её поддержки
+
+При включённой `project-memory` `ai-sync doctor` аудирует `docs/local/**` ослабленными каноническими правилами (только читаемость) и предупреждает, когда область существует без покрывающего паттерна `.gitignore`.
+
+Подробное операционное руководство:
+
+- английское: [docs/project-memory-usage.md](docs/project-memory-usage.md)
+- русское: [docs/project-memory-usage.ru.md](docs/project-memory-usage.ru.md)
 
 ## Использование Basic Memory в проекте
 

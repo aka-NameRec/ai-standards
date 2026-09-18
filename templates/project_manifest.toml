@@ -8,6 +8,7 @@ fragments = [
 features = [
   "retrieval-routing",
   # "basic-memory",
+  # "project-memory",
   # "chroma",
   "design-first-collaboration",
   "reasoning-hygiene",
@@ -32,6 +33,11 @@ optional_local_overrides = [
 # [basic_memory]
 # knowledge_tree = "docs"
 # dated_note_directories = ["domain", "decisions", "architecture"]
+
+# Optional. Local working memory area inside the knowledge tree; enabled by the
+# "project-memory" feature. Gitignore it: '/docs/local/' by default.
+# [project_memory]
+# local_tree = "local"
 
 [tooling]
 agents = []

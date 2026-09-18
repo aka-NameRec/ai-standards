@@ -19,6 +19,9 @@ CLAUDE_BRIDGE_MARKER = "Managed by ai-standards: claude-bridge"
 MANAGED_TEMPLATE_MARKER_PREFIX = "Managed by ai-standards template:"
 FRONTMATTER_DELIMITER = "---\n"
 DEFAULT_KNOWLEDGE_TREE = "docs"
+# Local cross-session working memory lives inside the knowledge tree by default
+# (docs/local), is gitignored, and is audited with relaxed canonical rules.
+DEFAULT_LOCAL_MEMORY_TREE = "local"
 DEFAULT_INDEXER_CONFIG = Path.home() / ".basic-memory" / "config.json"
 ARCHIVE_DIRECTORY_NAME = "archive"
 SEVERITY_ERROR = "error"
@@ -69,6 +72,7 @@ class Manifest:
     metadata: dict[str, str]
     knowledge_tree: str | None
     dated_note_directories: list[str] | None
+    local_memory_tree: str | None
 
 
 @dataclass(frozen=True)
@@ -343,6 +347,7 @@ def _load_manifest(project_root: Path) -> Manifest:
     metadata_raw = _expect_optional_table(data, "metadata", "manifest")
     tooling_raw = _expect_optional_table(data, "tooling", "manifest")
     knowledge_raw = _expect_optional_table(data, "basic_memory", "manifest")
+    project_memory_raw = _expect_optional_table(data, "project_memory", "manifest")
     metadata: dict[str, str] = {}
     for key, value in metadata_raw.items():
         if not isinstance(value, str):
@@ -380,6 +385,11 @@ def _load_manifest(project_root: Path) -> Manifest:
             )
             if "dated_note_directories" in knowledge_raw
             else None
+        ),
+        local_memory_tree=_expect_optional_string(
+            project_memory_raw,
+            "local_tree",
+            "manifest.project_memory",
         ),
     )
 
@@ -1234,6 +1244,7 @@ def _audit_knowledge_tree(
     manifest: Manifest,
     dated_note_directories: tuple[str, ...],
     indexer_masks: Sequence[str] = (),
+    local_memory_dir: Path | None = None,
 ) -> tuple[list[DoctorFinding], int]:
     if not knowledge_tree.is_dir():
         return (
@@ -1276,6 +1287,23 @@ def _audit_knowledge_tree(
             continue
         notes_checked += 1
         relative_path = note_path.relative_to(project_root).as_posix()
+        # Local working memory is not canonical documentation: canonical-note
+        # rules (frontmatter title, Observations/Relations, dated naming) must
+        # not be pushed onto progress/handoff notes, so the area is audited
+        # for readability only.
+        if local_memory_dir is not None and _is_inside(note_path, local_memory_dir):
+            try:
+                _read_audit_text(note_path)
+            except UnreadableFile:
+                findings.append(
+                    DoctorFinding(
+                        severity=SEVERITY_ERROR,
+                        code="note-unreadable",
+                        location=relative_path,
+                        message="Note is not valid UTF-8 text and cannot be indexed.",
+                    )
+                )
+            continue
         governed_directories = tuple(knowledge_tree / name for name in dated_note_directories)
         name_is_governed = any(
             _is_inside(note_path, directory) for directory in governed_directories
@@ -1489,6 +1517,31 @@ def _archive_is_excluded(bmignore_path: Path) -> bool:
     return False
 
 
+def _local_memory_is_gitignored(project_root: Path, local_memory_dir: Path) -> bool:
+    """Check the project `.gitignore` for a pattern covering the local-memory area.
+
+    A conservative textual check: a pattern counts when its normalized form is the
+    area path itself (`docs/local`), the area with any suffix (`docs/local/*`), or a
+    deeper path under it. Exotic patterns are not interpreted — the doctor finding
+    says to verify manually, so a miss stays visible rather than silently passing.
+    """
+    try:
+        lines = (project_root / ".gitignore").read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return False
+    relative = local_memory_dir.relative_to(project_root).as_posix()
+    for line in lines:
+        pattern = line.strip()
+        if not pattern or pattern.startswith("#"):
+            continue
+        normalized = pattern.lstrip("/")
+        if normalized == relative or normalized == f"{relative}/":
+            return True
+        if normalized.startswith(f"{relative}/"):
+            return True
+    return False
+
+
 def run_doctor(
     project_root: Path,
     knowledge_tree_name: str | None = None,
@@ -1510,6 +1563,14 @@ def run_doctor(
         if manifest.dated_note_directories is not None
         else DEFAULT_DATED_NOTE_DIRECTORIES
     )
+    local_tree_name = (
+        manifest.local_memory_tree or DEFAULT_LOCAL_MEMORY_TREE
+        if "project-memory" in manifest.features
+        else None
+    )
+    local_memory_dir = (
+        (knowledge_tree / local_tree_name).resolve() if local_tree_name else None
+    )
 
     findings = _audit_override_placement(project_root, manifest, knowledge_tree)
     resolved_indexer_config = DEFAULT_INDEXER_CONFIG if indexer_config is None else indexer_config
@@ -1526,8 +1587,24 @@ def run_doctor(
         manifest,
         dated_note_directories,
         indexer_masks=tuple(masks),
+        local_memory_dir=local_memory_dir,
     )
     findings.extend(tree_findings)
+    if local_memory_dir is not None and local_memory_dir.is_dir():
+        if not _local_memory_is_gitignored(project_root, local_memory_dir):
+            findings.append(
+                DoctorFinding(
+                    severity=SEVERITY_WARNING,
+                    code="local-memory-not-gitignored",
+                    location=local_memory_dir.relative_to(project_root).as_posix(),
+                    message=(
+                        "Local working memory exists but no '.gitignore' pattern covers it. "
+                        "It is user-local by default: add '/docs/local/' (or the configured "
+                        "local tree) to '.gitignore'. Verify manually if an exotic pattern "
+                        "already covers it."
+                    ),
+                )
+            )
 
     if "basic-memory" in manifest.features:
         findings.extend(

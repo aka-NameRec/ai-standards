@@ -2684,3 +2684,116 @@ def test_dry_pass_reaches_the_fragment_and_every_simplify_review_adapter() -> No
             if line.startswith("#")
         ]
         assert "DRY" in headings, f"{surface.name} has no DRY section"
+
+
+def test_project_memory_renders_its_policy_invariants(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["project-memory"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n[metadata]\nproject_name = \"demo-project\"\n"
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    # Local memory != canonical knowledge; promotion is explicit — the issue
+    # #16 policy invariants for the project-memory feature.
+    assert "Never treat local working memory as canonical project documentation." in (
+        result.content
+    )
+    assert "explicit semantic operation, never an automatic synchronization step" in (
+        result.content
+    )
+    assert "curated state store, not an execution log" in result.content
+    assert "never read the whole memory tree at session start" in result.content
+    for category in ("`context/`", "`decisions/`", "`progress/`", "`patterns/`"):
+        assert category in result.content
+    assert "`investigations/`" in result.content
+    assert "`handoffs/`" in result.content
+
+
+def _local_memory_project(tmp_path: Path, gitignore: str | None) -> Path:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "ai").mkdir(parents=True)
+    (project_root / "ai.project.toml").write_text(
+        _minimal_manifest("ai/project-rules.md", features="project-memory"),
+        encoding="utf-8",
+    )
+    (project_root / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+    if gitignore is not None:
+        (project_root / ".gitignore").write_text(gitignore, encoding="utf-8")
+    # A local progress note with no canonical shape at all: no frontmatter,
+    # no Observations/Relations sections, free-form name.
+    (project_root / "docs" / "local" / "progress").mkdir(parents=True)
+    (project_root / "docs" / "local" / "progress" / "catalog-indexing.md").write_text(
+        "# Catalog indexing progress\n\n- [current] Trace index consumer.\n",
+        encoding="utf-8",
+    )
+    # A canonical note missing its Observations section: canonical rules must
+    # still apply outside the local area.
+    (project_root / "docs" / "decisions").mkdir(parents=True)
+    (
+        project_root / "docs" / "decisions" / "2026-09-01-sample-decision.md"
+    ).write_text(
+        "---\ntitle: Sample decision\n---\n\n# Sample decision\n\nBody.\n",
+        encoding="utf-8",
+    )
+    return project_root
+
+
+def test_doctor_relaxes_canonical_rules_inside_local_memory(tmp_path: Path) -> None:
+    project_root = _local_memory_project(tmp_path, gitignore="/docs/local/\n")
+
+    report = run_doctor(project_root)
+
+    locations = [finding.location for finding in report.findings]
+    # The local progress note produces no canonical findings at all.
+    assert not any("docs/local" in location for location in locations)
+    # The canonical note is still audited by canonical rules.
+    assert any(
+        finding.location == "docs/decisions/2026-09-01-sample-decision.md"
+        and finding.code == "note-without-observations"
+        for finding in report.findings
+    )
+    # A covering .gitignore pattern keeps the area quiet.
+    assert not any(finding.code == "local-memory-not-gitignored" for finding in report.findings)
+
+
+def test_doctor_warns_when_local_memory_is_not_gitignored(tmp_path: Path) -> None:
+    project_root = _local_memory_project(tmp_path, gitignore=None)
+
+    report = run_doctor(project_root)
+
+    assert any(finding.code == "local-memory-not-gitignored" for finding in report.findings)
+
+
+def test_doctor_ignores_local_memory_without_the_feature(tmp_path: Path) -> None:
+    project_root = _local_memory_project(tmp_path, gitignore=None)
+    # Same tree, but the feature is off: canonical rules apply again.
+    (project_root / "ai.project.toml").write_text(
+        _minimal_manifest("ai/project-rules.md", features="session-hygiene"),
+        encoding="utf-8",
+    )
+
+    report = run_doctor(project_root)
+
+    assert any(
+        finding.location.startswith("docs/local/") and finding.code == "note-without-frontmatter"
+        for finding in report.findings
+    )
+    assert not any(finding.code == "local-memory-not-gitignored" for finding in report.findings)

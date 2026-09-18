@@ -18,6 +18,7 @@
 - [Using Module Contract Discovery Gate In a Project](#using-module-contract-discovery-gate-in-a-project)
 - [Using Session Hygiene In a Project](#using-session-hygiene-in-a-project)
 - [Using Retrieval Routing In a Project](#using-retrieval-routing-in-a-project)
+- [Using Project Memory In a Project](#using-project-memory-in-a-project)
 - [Using Basic Memory In a Project](#using-basic-memory-in-a-project)
 - [Using Chroma In a Project](#using-chroma-in-a-project)
 - [Using Agent Usage Hygiene In a Project](#using-agent-usage-hygiene-in-a-project)
@@ -101,7 +102,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project --output-name 
 Use four layers:
 
 - `fragments`: direct core rules that should always be rendered.
-- `features`: optional capabilities such as `retrieval-routing`, `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
+- `features`: optional capabilities such as `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
 - `stacks`: technology-specific or architecture-specific rules such as `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring`, or `spring-data-jpa`.
 - `tooling.agents`: optional agent adapters such as `codex`, `claude`, `kilo`, and `cursor` for managed local workflow templates.
 
@@ -605,6 +606,25 @@ Detailed operational guidance lives in:
 
 - English guide: [docs/retrieval-routing-usage.md](docs/retrieval-routing-usage.md)
 - Russian guide: [docs/retrieval-routing-usage.ru.md](docs/retrieval-routing-usage.ru.md)
+
+## Using Project Memory In a Project
+
+`project-memory` gives local cross-session working memory a standard home: `docs/local/**`, gitignored by default, with a fixed taxonomy (`context`, `decisions`, `progress`, `patterns`, `investigations`, `handoffs`), a write policy, a read policy, and an explicit promotion path into canonical documentation.
+
+`ai-standards` owns the reusable policy:
+
+- local working memory is never canonical documentation, and canonical documentation never absorbs session state merely to preserve agent context
+- memory is a curated state store, not an execution log — write what future sessions need, not what merely happened
+- read by targeted queries (goal, entities, modules, decisions, task ids), never by reading the whole tree at session start
+- promotion local → canonical is an explicit semantic operation, never automatic
+- the taxonomy and lifecycle are tool-independent; the feature works best with `basic-memory` but deliberately does not require it — capability separated from the way it is supported
+
+When `project-memory` is enabled, `ai-sync doctor` audits `docs/local/**` with relaxed canonical rules (readability only) and warns when the area exists without a covering `.gitignore` pattern.
+
+Detailed operational guidance lives in:
+
+- English guide: [docs/project-memory-usage.md](docs/project-memory-usage.md)
+- Russian guide: [docs/project-memory-usage.ru.md](docs/project-memory-usage.ru.md)
 
 ## Using Basic Memory In a Project
 
