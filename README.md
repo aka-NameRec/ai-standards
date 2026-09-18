@@ -10,6 +10,7 @@
 - [Project-Specific Rules](#project-specific-rules)
 - [Agent Adapters](#agent-adapters)
 - [Import External Rules](#import-external-rules)
+- [Feature Groups And Dependencies](#feature-groups-and-dependencies)
 - [Using Reasoning Hygiene In a Project](#using-reasoning-hygiene-in-a-project)
 - [Using Autonomy Boundaries In a Project](#using-autonomy-boundaries-in-a-project)
 - [Using Review Lenses In a Project](#using-review-lenses-in-a-project)
@@ -410,6 +411,47 @@ Constraints:
 - Preserve existing behavior unless the imported rules justify a clear improvement.
 - If a source rule conflicts with UMA2 architecture or error-handling rules, reject it unless explicitly approved.
 ```
+
+## Feature Groups And Dependencies
+
+Features group by concern:
+
+**Knowledge and context**
+
+- `retrieval-routing` — the connecting policy layer over every retrieval capability
+- `basic-memory` — Markdown retrieval layer over canonical knowledge and local working memory
+- `project-memory` — tool-independent local working memory taxonomy and lifecycle
+- `session-hygiene` — when working state must be preserved or reloaded
+- `agent-usage-hygiene` — context discipline on the usage side
+
+**Engineering artifacts**
+
+- `structured-artifacts`
+- `module-contract-gate`
+
+**Code intelligence**
+
+- `chroma`
+
+**Execution governance**
+
+- `design-first-collaboration`
+- `autonomy-boundaries`
+- `reasoning-hygiene`
+- `code-review`
+- `review-lenses`
+
+Cross-cutting: `response-language-style`, `knowledge-capture`.
+
+Dependencies:
+
+- `retrieval-routing` works with a single retrieval backend enabled, and with none at all
+- `basic-memory` and `chroma` recommend `retrieval-routing`
+- `project-memory` works standalone; it works best with `basic-memory` indexing the area
+- `session-hygiene` integrates with `project-memory` when available (it defines when; project-memory defines what and how)
+- `structured-artifacts` artifacts may be indexed by `basic-memory`
+- `module-contract-gate` keeps canonical contracts in repository artifacts; retrieval may only locate them
+- `autonomy-boundaries` integrates with working-state persistence: persisting state never authorizes crossing a boundary
 
 ## Using Reasoning Hygiene In a Project
 

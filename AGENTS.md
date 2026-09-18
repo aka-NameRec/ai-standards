@@ -107,6 +107,7 @@ Stored knowledge is not conversation context. Retrieve it when relevant; do not 
 - Swapping an implementation backend must not require rewriting these behavioral rules.
 ## Basic Memory Usage
 - Use Basic Memory as a retrieval and indexing layer over Git-tracked Markdown knowledge when the project explicitly enables this feature.
+- Basic Memory serves two distinct classes of knowledge without mixing their roles: canonical project knowledge (`docs/domain/**`, `docs/decisions/**`, `docs/architecture/**` — Git-tracked, reviewed, durable, authoritative) and local working memory (`docs/local/**` — cross-session, agent-managed, user-local, mutable, never authoritative, not committed by default).
 - Point a Basic Memory project at a dedicated knowledge tree, never at a repository root. A repository root pulls vendored files, build artifacts, and generated output into the knowledge graph as if they were notes.
 - Treat every file inside the knowledge tree as a note. Rendering inputs, generated output, templates, and machine-owned files belong outside it.
 - Keep binary and bulk-data files (images, PDFs, raw logs, CSV dumps) out of the knowledge tree: the indexer treats them as notes and burns reindex time on them. Store them outside the tree, or, while they must stay beside the notes citing them, mask them via a `.gitignore` at the knowledge-tree root (the indexer's project home) or the global `~/.basic-memory/.bmignore` — gitignore-style patterns with no `!` exceptions. Reindex only after `ai-sync doctor` stops reporting them.
@@ -115,7 +116,7 @@ Stored knowledge is not conversation context. Retrieve it when relevant; do not 
 - Disable the Basic Memory MCP server in workspaces that do not have a project, so queries never fall back to a shared default dump.
 - Treat canonical documentation and agent-managed working memory as different layers even when Basic Memory indexes both.
 - Treat `docs/domain/**`, `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge.
-- Treat `docs/ai-memory/**` and equivalent local note areas as agent-managed working memory rather than canonical truth.
+- Treat `docs/local/**` and equivalent working-memory areas as agent-managed working memory rather than canonical truth; canonical-note rules do not apply there, and notes without canonical shape are expected, not defects.
 - Before creating or updating canonical documentation through Basic Memory, search existing canonical documents and working-memory notes to avoid duplicates and surface contradictions.
 - Keep permalink generation enabled once the knowledge tree holds only notes: `memory://` addressing and graph traversal resolve through permalinks, and a project without them degrades to plain search.
 - Treat `ensure_frontmatter_on_sync=false` together with `disable_permalinks=true` as a fallback for a legacy tree that cannot be narrowed yet, not as the default. Either flag alone still lets sync rewrite files that already carry frontmatter, and the pair gives up `memory://` addressing.
@@ -247,6 +248,12 @@ Source provenance:
 - Stop when verification stops converging, logs or evidence contradict the design anchor, or repeated fixes start widening the scope.
 - Stop when the blast radius grows materially beyond the declared scope or when rollback stops being cheap and predictable.
 - Stop when the agent can no longer explain the architecture delta from the start of the task in a compact reviewable form.
+- Stop when execution encounters a material design choice, contradictory requirements, widening scope, or evidence invalidating the agreed design: preserve the current state and request human direction rather than recording a new decision and continuing silently.
+
+### Working State During Long Execution
+- Long autonomous execution must periodically preserve externally reviewable task state at meaningful phase boundaries.
+- Persisting task state does not authorize the agent to cross an existing autonomy boundary.
+- Preserved state must be enough to resume from a fresh session without replaying the conversation, and compact enough to review before continuing.
 
 ### Sensitive Areas
 - Do not make architecture, module-boundary, or cross-cutting refactor decisions autonomously during long execution.
@@ -284,9 +291,10 @@ Source provenance:
 
 ## Canonical Documentation And Agent Working Memory
 - Treat `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge.
-- Treat `docs/ai-memory/**` as agent-managed working memory rather than canonical truth.
+- Treat `docs/local/**` (or the project's equivalent working-memory area) as agent-managed working memory rather than canonical truth.
 - Durable conclusions must be promoted from working memory into canonical documentation only on explicit user request.
 - Working memory should link to canonical documents when they already exist instead of duplicating them.
+- Structured artifacts are reviewable project knowledge; working memory holds evolving context, temporary findings, and session state — the two never mix roles.
 
 ## Canonical Documentation Write Policy
 - Do not modify canonical documentation unless the user explicitly asks to record, update, reconcile, supersede, or remove durable project knowledge.
@@ -408,8 +416,14 @@ Source provenance:
 - Warn the user when a long thread increases the risk of context drift, stale assumptions, goal substitution, or lost constraints.
 - Before continuing a long session, produce a compact handoff summary with the current goal, decisions, touched files, risks, constraints, and next slice.
 - Prefer starting a fresh chat when the work changes phase, the current context can no longer be summarized compactly, or the next slice depends on rules or decisions that should be reloaded explicitly.
-- Do not rely on transient chat memory for critical constraints; move them into project artifacts, agent working memory, or another durable memory mechanism.
+- Do not rely on transient chat memory for critical constraints; move them into project artifacts, local working memory, or another durable memory mechanism.
 - Re-read relevant project rules, active context, and task artifacts when a long session enters a new phase such as implementation, review, merge, or release.
+
+### Working State Across Sessions
+- Before a deliberate session handoff, preserve the minimum durable working state required to resume the task.
+- A new session should retrieve the relevant handoff and working-memory items rather than reconstructing state from conversation history.
+- Do not reload all accumulated memory at session start.
+- Session hygiene says when state must be preserved or reloaded; the project-memory capability says what and how.
 
 ### Long-Session Warning Triggers
 - Warn when the agent notices repeated goal restatement, conflicting assumptions, stale decisions, or uncertainty about which constraints still apply.
@@ -431,6 +445,7 @@ Source provenance:
 ## Agent Usage Hygiene
 - Treat usage economy as context discipline, not as permission to reduce engineering quality.
 - Prefer targeted discovery through search, diffs, logs, and focused file reads before loading broad context.
+- Treat targeted retrieval as part of context discipline: consult the narrowest enabled knowledge source before re-reading broad or unchanged material.
 - Keep task scope narrow enough that the next patch remains reviewable and verifiable.
 - Use the most targeted verification that still proves the change; do not skip required verification to save usage.
 - Avoid repeating large summaries or re-reading unchanged context when a compact reference or handoff summary is enough.
@@ -512,7 +527,7 @@ Source provenance:
 - Do not encode tool- or vendor-specific review-bot output formats; keep those in local adapters.
 ## Knowledge Capture
 
-- When the user asks to capture session knowledge the standard way («зафиксируй знания стандартным образом», зафиксировать решения или задачи), follow the feature-gated `capture-knowledge` skill: decision records for accepted choices, task records under `docs/tasks/`, module contracts only for major modules, README links for maintained docs, local project memory sync when the project enables it, and `.ru.md` pairs for everything under `docs/`.
+- When the user asks to capture session knowledge the standard way («зафиксируй знания стандартным образом», зафиксировать решения или задачи), follow the feature-gated `capture-knowledge` skill: decision records for accepted choices, task records under `docs/tasks/`, module contracts only for major modules, README links for maintained docs, local project memory update under `docs/local/**` when `project-memory` is enabled, and `.ru.md` pairs for everything under `docs/`.
 ## Python Stack
 - Respect repository-local tooling and module layout.
 - Favor explicit domain models and typed interfaces.

@@ -119,14 +119,15 @@ At phase boundaries, re-read relevant sources instead of relying only on chat me
 - task notes or change plans
 - decision records
 - module contracts or migration notes
-- `docs/ai-memory/**` or equivalent working-memory artifacts when the project uses them
-- local project memory handoff or active context when available
+- local working memory (`docs/local/**`) handoff and active-context notes when the project enables `project-memory`
 
 Reload only what is relevant to the next slice. Session hygiene should not become broad context loading by default.
 
 ## Relationship To Other Features
 
 - `basic-memory` can retrieve relevant Git-tracked knowledge and working-memory notes without broad context reloads.
+- `project-memory` holds the handoff and working-state notes this feature requires at session boundaries.
+- `retrieval-routing` retrieves them by targeted query at session start, never by loading the whole memory tree.
 - `structured-artifacts` provides change plans, decision records, and module contracts that make handoffs concrete.
 - `autonomy-boundaries` defines when long autonomous execution must stop for human review.
 - `reasoning-hygiene` keeps assumptions, edge cases, and verification points explicit.

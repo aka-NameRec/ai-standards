@@ -2797,3 +2797,54 @@ def test_doctor_ignores_local_memory_without_the_feature(tmp_path: Path) -> None
         for finding in report.findings
     )
     assert not any(finding.code == "local-memory-not-gitignored" for finding in report.findings)
+
+
+def test_integration_fragments_carry_their_boundary_rules(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = [\n'
+        + '  "session-hygiene",\n'
+        + '  "structured-artifacts",\n'
+        + '  "agent-usage-hygiene",\n'
+        + '  "autonomy-boundaries",\n'
+        + '  "basic-memory",\n'
+        + ']\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n[metadata]\nproject_name = \"demo-project\"\n"
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    # session-hygiene: WHEN vs WHAT/HOW split with project memory.
+    assert (
+        "Session hygiene says when state must be preserved or reloaded; the project-memory "
+        "capability says what and how."
+    ) in result.content
+    assert "Do not reload all accumulated memory at session start." in result.content
+    # autonomy-boundaries: persisting state never crosses a boundary.
+    assert (
+        "Persisting task state does not authorize the agent to cross an existing autonomy "
+        "boundary."
+    ) in result.content
+    # structured-artifacts: the local working-memory area is docs/local/**.
+    assert "Treat `docs/local/**` (or the project's equivalent working-memory area)" in (
+        result.content
+    )
+    # agent-usage-hygiene: targeted retrieval is context discipline.
+    assert (
+        "Treat targeted retrieval as part of context discipline: consult the narrowest "
+        "enabled knowledge source"
+    ) in result.content
+    # basic-memory: two classes of knowledge, roles never mix.
+    assert "never authoritative, not committed by default" in result.content

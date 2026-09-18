@@ -92,6 +92,7 @@ When `chroma` is enabled, `ai-sync sync-templates` also propagates a deployment 
 ## Relationship To Other Features
 
 - `basic-memory` remains a retrieval layer over Git-tracked Markdown documentation.
+- `retrieval-routing` routes semantic code-discovery questions here and requires verifying candidates at the authoritative layer.
 - `structured-artifacts` defines which Markdown artifacts count as canonical.
 - `design-first-collaboration` keeps intent and boundaries explicit before deployment.
 

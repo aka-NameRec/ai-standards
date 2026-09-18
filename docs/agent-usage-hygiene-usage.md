@@ -97,6 +97,8 @@ Avoid:
 - `reasoning-hygiene` keeps analysis focused on assumptions, risks, and verification.
 - `autonomy-boundaries` prevents long sessions from drifting beyond reviewable slices.
 - `structured-artifacts` provides change plans, contracts, and decision records that reduce transient context load.
+- `retrieval-routing` makes targeted retrieval the default exploration strategy, which is context discipline in practice.
+- `project-memory` keeps cross-session state out of the chat, so summaries stay compact.
 
 `agent-usage-hygiene` does not replace these features. It makes their context-economy value explicit and adds prompt-activated economy behavior.
 

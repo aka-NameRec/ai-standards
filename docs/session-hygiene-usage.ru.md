@@ -119,7 +119,7 @@ Fresh chat должен начинаться с:
 - task notes или change plans
 - decision records
 - module contracts или migration notes
-- `docs/ai-memory/**` или эквивалентные working-memory artifacts, если проект их использует
+- handoff и active-context заметки локальной рабочей памяти (`docs/local/**`), когда проект включил `project-memory`
 - handoff или active context из локальной памяти проекта, если доступны
 
 Загружайте только то, что relevant для next slice. Session hygiene не должна становиться broad context loading by default.
@@ -127,6 +127,8 @@ Fresh chat должен начинаться с:
 ## Связь с другими features
 
 - `basic-memory` может доставать релевантное Git-tracked knowledge и working-memory notes без широкой перезагрузки контекста.
+- `project-memory` хранит handoff-заметки и состояние работы, которые требуются этой фиче на границах сессий.
+- `retrieval-routing` извлекает их точечным запросом на старте сессии, но не чтением всего дерева памяти.
 - `structured-artifacts` даёт change plans, decision records и module contracts, которые делают handoffs конкретными.
 - `autonomy-boundaries` определяет, когда long autonomous execution должен остановиться для human review.
 - `reasoning-hygiene` удерживает assumptions, edge cases и verification points явными.

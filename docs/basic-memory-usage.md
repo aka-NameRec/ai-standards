@@ -57,7 +57,7 @@ Treat the following as canonical documentation:
 
 Treat the following as working memory:
 
-- `docs/ai-memory/**`
+- `docs/local/**` (local cross-session working memory, never canonical)
 - investigation notes
 - handoff notes
 - implementation gotchas
@@ -236,6 +236,8 @@ Use the narrowest reindex that resolves the reported problem.
 
 - `structured-artifacts` defines which Markdown artifacts count as plans, decision records, and module contracts.
 - `session-hygiene` defines when the agent should reload relevant durable context between phases or chats.
+- `project-memory` defines the local working-memory taxonomy (`docs/local/**`) that this feature indexes alongside canonical knowledge.
+- `retrieval-routing` routes project-memory queries through this layer when it is enabled.
 - `design-first-collaboration` keeps intent, boundaries, and non-goals explicit before implementation.
 
 `basic-memory` complements these features by making Git-tracked Markdown easier to retrieve and reuse. It does not replace reviewable documentation or explicit human decisions.
@@ -255,7 +257,7 @@ features = [
 Good prompts:
 
 - `Search our Basic Memory notes before creating a new design note.`
-- `Check whether this decision already exists in docs/decisions or ai-memory before writing anything new.`
+- `Check whether this decision already exists in docs/decisions or docs/local before writing anything new.`
 - `After this merge, check Basic Memory status and reindex only if the docs graph is stale.`
 - `Record this implementation gotcha in working memory, not in canonical documentation.`
 

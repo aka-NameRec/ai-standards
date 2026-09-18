@@ -10,6 +10,7 @@
 - [Правила, специфичные для проекта](#правила-специфичные-для-проекта)
 - [Agent Adapters](#agent-adapters)
 - [Заимствование внешних правил](#заимствование-внешних-правил)
+- [Группы фич и зависимости](#группы-фич-и-зависимости)
 - [Использование Reasoning Hygiene в проекте](#использование-reasoning-hygiene-в-проекте)
 - [Использование Autonomy Boundaries в проекте](#использование-autonomy-boundaries-в-проекте)
 - [Использование Review Lenses в проекте](#использование-review-lenses-в-проекте)
@@ -406,6 +407,47 @@ Constraints:
 - Preserve existing behavior unless the imported rules justify a clear improvement.
 - If a source rule conflicts with UMA2 architecture or error-handling rules, reject it unless explicitly approved.
 ```
+
+## Группы фич и зависимости
+
+Фичи группируются по зоне ответственности:
+
+**Знание и контекст**
+
+- `retrieval-routing` — связующий policy-слой над всеми retrieval-capability
+- `basic-memory` — Markdown retrieval-слой над каноническим знанием и локальной рабочей памятью
+- `project-memory` — инструментально-независимая таксономия и жизненный цикл локальной рабочей памяти
+- `session-hygiene` — когда рабочее состояние должно сохраняться и перезагружаться
+- `agent-usage-hygiene` — дисциплина контекста со стороны использования
+
+**Инженерные артефакты**
+
+- `structured-artifacts`
+- `module-contract-gate`
+
+**Интеллект по коду**
+
+- `chroma`
+
+**Управление исполнением**
+
+- `design-first-collaboration`
+- `autonomy-boundaries`
+- `reasoning-hygiene`
+- `code-review`
+- `review-lenses`
+
+Сквозные: `response-language-style`, `knowledge-capture`.
+
+Зависимости:
+
+- `retrieval-routing` работает с единственным включённым retrieval-backend и вовсе без них
+- `basic-memory` и `chroma` рекомендуют `retrieval-routing`
+- `project-memory` работает самостоятельно; лучше всего — с индексацией области через `basic-memory`
+- `session-hygiene` интегрируется с `project-memory`, когда тот доступен (она определяет «когда», project-memory — «что и как»)
+- артефакты `structured-artifacts` могут индексироваться `basic-memory`
+- `module-contract-gate` держит канонические контракты в артефактах репозитория; retrieval может их только находить
+- `autonomy-boundaries` интегрируется с сохранением рабочего состояния: сохранение состояния никогда не разрешает пересечь границу
 
 ## Использование Reasoning Hygiene в проекте
 

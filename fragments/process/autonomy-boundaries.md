@@ -15,6 +15,12 @@
 - Stop when verification stops converging, logs or evidence contradict the design anchor, or repeated fixes start widening the scope.
 - Stop when the blast radius grows materially beyond the declared scope or when rollback stops being cheap and predictable.
 - Stop when the agent can no longer explain the architecture delta from the start of the task in a compact reviewable form.
+- Stop when execution encounters a material design choice, contradictory requirements, widening scope, or evidence invalidating the agreed design: preserve the current state and request human direction rather than recording a new decision and continuing silently.
+
+### Working State During Long Execution
+- Long autonomous execution must periodically preserve externally reviewable task state at meaningful phase boundaries.
+- Persisting task state does not authorize the agent to cross an existing autonomy boundary.
+- Preserved state must be enough to resume from a fresh session without replaying the conversation, and compact enough to review before continuing.
 
 ### Sensitive Areas
 - Do not make architecture, module-boundary, or cross-cutting refactor decisions autonomously during long execution.

@@ -158,6 +158,7 @@ Feature не требует одного обязательного имени �
 - `design-first-collaboration` определяет, как фиксируются intent, boundaries и non-goals.
 - `reasoning-hygiene` улучшает качество self-review и работы с evidence.
 - `structured-artifacts` даёт change plans и decision records, в которых можно хранить session envelope.
+- `project-memory` хранит внешне проверяемое состояние задачи, сохраняемое на границах фаз; сохранение состояния никогда не разрешает пересекать границу автономии.
 
 `autonomy-boundaries` определяет момент, когда агент должен перестать опираться только на эти входы и запросить human verification.
 

@@ -7,6 +7,7 @@ Source provenance:
 ## Agent Usage Hygiene
 - Treat usage economy as context discipline, not as permission to reduce engineering quality.
 - Prefer targeted discovery through search, diffs, logs, and focused file reads before loading broad context.
+- Treat targeted retrieval as part of context discipline: consult the narrowest enabled knowledge source before re-reading broad or unchanged material.
 - Keep task scope narrow enough that the next patch remains reviewable and verifiable.
 - Use the most targeted verification that still proves the change; do not skip required verification to save usage.
 - Avoid repeating large summaries or re-reading unchanged context when a compact reference or handoff summary is enough.

@@ -8,8 +8,14 @@ Source provenance:
 - Warn the user when a long thread increases the risk of context drift, stale assumptions, goal substitution, or lost constraints.
 - Before continuing a long session, produce a compact handoff summary with the current goal, decisions, touched files, risks, constraints, and next slice.
 - Prefer starting a fresh chat when the work changes phase, the current context can no longer be summarized compactly, or the next slice depends on rules or decisions that should be reloaded explicitly.
-- Do not rely on transient chat memory for critical constraints; move them into project artifacts, agent working memory, or another durable memory mechanism.
+- Do not rely on transient chat memory for critical constraints; move them into project artifacts, local working memory, or another durable memory mechanism.
 - Re-read relevant project rules, active context, and task artifacts when a long session enters a new phase such as implementation, review, merge, or release.
+
+### Working State Across Sessions
+- Before a deliberate session handoff, preserve the minimum durable working state required to resume the task.
+- A new session should retrieve the relevant handoff and working-memory items rather than reconstructing state from conversation history.
+- Do not reload all accumulated memory at session start.
+- Session hygiene says when state must be preserved or reloaded; the project-memory capability says what and how.
 
 ### Long-Session Warning Triggers
 - Warn when the agent notices repeated goal restatement, conflicting assumptions, stale decisions, or uncertainty about which constraints still apply.

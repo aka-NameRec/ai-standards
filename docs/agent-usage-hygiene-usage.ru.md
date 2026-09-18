@@ -97,6 +97,8 @@ Economy mode заканчивается, когда:
 - `reasoning-hygiene` удерживает анализ на assumptions, risks и verification.
 - `autonomy-boundaries` не даёт длинным сессиям расползаться за пределы reviewable slices.
 - `structured-artifacts` даёт change plans, contracts и decision records, которые снижают transient context load.
+- `retrieval-routing` делает точечный retrieval стратегией разведки по умолчанию — это и есть дисциплина контекста.
+- `project-memory` держит межсессионное состояние вне чата, поэтому выжимки остаются компактными.
 
 `agent-usage-hygiene` не заменяет эти features. Она явно формулирует их context-economy value и добавляет prompt-activated economy behavior.
 

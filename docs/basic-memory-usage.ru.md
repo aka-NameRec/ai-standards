@@ -55,9 +55,9 @@ Feature сознательно не стандартизует:
 - `docs/architecture/**` (включая записи module contracts)
 - эквивалентные локальные artifacts, которые фиксируют принятые constraints, contracts или decisions
 
-Считайте working memory:
+Считайте рабочей памятью:
 
-- `docs/ai-memory/**`
+- `docs/local/**` (локальная межсессионная рабочая память, никогда каноничная)
 - investigation notes
 - handoff notes
 - implementation gotchas
@@ -236,6 +236,8 @@ Basic Memory должен быть ограничен одним проекто�
 
 - `structured-artifacts` определяет, какие Markdown artifacts считаются plans, decision records и module contracts.
 - `session-hygiene` определяет, когда агент должен повторно загружать релевантный durable context между фазами или чатами.
+- `project-memory` определяет таксономию локальной рабочей памяти (`docs/local/**`), которую эта фича индексирует вместе с каноническим знанием.
+- `retrieval-routing` маршрутизирует запросы к project-memory через этот слой, когда он включён.
 - `design-first-collaboration` удерживает явными intent, boundaries и non-goals до реализации.
 
 `basic-memory` дополняет эти features, делая Git-tracked Markdown проще для поиска и переиспользования. Он не заменяет reviewable documentation и явные human decisions.
@@ -255,7 +257,7 @@ features = [
 Хорошие prompts:
 
 - `Сначала поищи в Basic Memory notes, прежде чем создавать новую design note.`
-- `Проверь, не существует ли уже это решение в docs/decisions или ai-memory, прежде чем писать что-то новое.`
+- `Проверь, не существует ли уже это решение в docs/decisions или docs/local, прежде чем писать что-то новое.`
 - `После этого merge проверь status Basic Memory и запускай reindex только если docs graph устарел.`
 - `Зафиксируй этот implementation gotcha в working memory, а не в canonical documentation.`
 

@@ -158,6 +158,7 @@ These are not merely "be careful" areas. They are review points.
 - `design-first-collaboration` defines how intent, boundaries, and non-goals are established.
 - `reasoning-hygiene` improves the quality of the agent's self-review and evidence handling.
 - `structured-artifacts` provides the change plans and decision records that can carry the session envelope.
+- `project-memory` holds the externally reviewable task state preserved at phase boundaries; persisting state never authorizes crossing an autonomy boundary.
 
 `autonomy-boundaries` tells the agent when to stop leaning on those inputs and request human verification.
 

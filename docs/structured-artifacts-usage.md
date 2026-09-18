@@ -143,7 +143,7 @@ Treat the following as canonical documentation:
 
 Treat the following as agent working memory:
 
-- `docs/ai-memory/**`
+- `docs/local/**` (or the project's configured working-memory area)
 - investigation notes that are still evolving
 - temporary findings not yet accepted as canonical
 
@@ -164,8 +164,7 @@ Before changing canonical documentation:
 
 ## Local Working Memory Versus Decision Records
 
-Use local working memory (`docs/local/**`, or `docs/ai-memory/**` in projects that
-still use that convention) for:
+Use local working memory (`docs/local/**`) for:
 
 - active context
 - recent progress
@@ -182,7 +181,7 @@ Do not mirror every local memory note into a decision record.
 
 ## Explicit Promotion Examples
 
-Examples that belong in `docs/ai-memory/**` without a separate request:
+Examples that belong in `docs/local/**` without a separate request:
 
 - updating an investigation note after tracing a bug
 - recording an implementation gotcha for the next session

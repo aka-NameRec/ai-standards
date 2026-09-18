@@ -1,5 +1,6 @@
 ## Basic Memory Usage
 - Use Basic Memory as a retrieval and indexing layer over Git-tracked Markdown knowledge when the project explicitly enables this feature.
+- Basic Memory serves two distinct classes of knowledge without mixing their roles: canonical project knowledge (`docs/domain/**`, `docs/decisions/**`, `docs/architecture/**` — Git-tracked, reviewed, durable, authoritative) and local working memory (`docs/local/**` — cross-session, agent-managed, user-local, mutable, never authoritative, not committed by default).
 - Point a Basic Memory project at a dedicated knowledge tree, never at a repository root. A repository root pulls vendored files, build artifacts, and generated output into the knowledge graph as if they were notes.
 - Treat every file inside the knowledge tree as a note. Rendering inputs, generated output, templates, and machine-owned files belong outside it.
 - Keep binary and bulk-data files (images, PDFs, raw logs, CSV dumps) out of the knowledge tree: the indexer treats them as notes and burns reindex time on them. Store them outside the tree, or, while they must stay beside the notes citing them, mask them via a `.gitignore` at the knowledge-tree root (the indexer's project home) or the global `~/.basic-memory/.bmignore` — gitignore-style patterns with no `!` exceptions. Reindex only after `ai-sync doctor` stops reporting them.
@@ -8,7 +9,7 @@
 - Disable the Basic Memory MCP server in workspaces that do not have a project, so queries never fall back to a shared default dump.
 - Treat canonical documentation and agent-managed working memory as different layers even when Basic Memory indexes both.
 - Treat `docs/domain/**`, `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge.
-- Treat `docs/ai-memory/**` and equivalent local note areas as agent-managed working memory rather than canonical truth.
+- Treat `docs/local/**` and equivalent working-memory areas as agent-managed working memory rather than canonical truth; canonical-note rules do not apply there, and notes without canonical shape are expected, not defects.
 - Before creating or updating canonical documentation through Basic Memory, search existing canonical documents and working-memory notes to avoid duplicates and surface contradictions.
 - Keep permalink generation enabled once the knowledge tree holds only notes: `memory://` addressing and graph traversal resolve through permalinks, and a project without them degrades to plain search.
 - Treat `ensure_frontmatter_on_sync=false` together with `disable_permalinks=true` as a fallback for a legacy tree that cannot be narrowed yet, not as the default. Either flag alone still lets sync rewrite files that already carry frontmatter, and the pair gives up `memory://` addressing.

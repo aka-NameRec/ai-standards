@@ -26,9 +26,10 @@
 
 ## Canonical Documentation And Agent Working Memory
 - Treat `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge.
-- Treat `docs/ai-memory/**` as agent-managed working memory rather than canonical truth.
+- Treat `docs/local/**` (or the project's equivalent working-memory area) as agent-managed working memory rather than canonical truth.
 - Durable conclusions must be promoted from working memory into canonical documentation only on explicit user request.
 - Working memory should link to canonical documents when they already exist instead of duplicating them.
+- Structured artifacts are reviewable project knowledge; working memory holds evolving context, temporary findings, and session state — the two never mix roles.
 
 ## Canonical Documentation Write Policy
 - Do not modify canonical documentation unless the user explicitly asks to record, update, reconcile, supersede, or remove durable project knowledge.
