@@ -129,7 +129,10 @@ knowledge retrieval и code retrieval/intelligence, — удалив ConPort, в
 
 ## Итог
 
-- Заполняется при закрытии итерации.
+-Доставлено пятью фазовыми коммитами на `rules-change/16-memory-retrieval-reorganization`: ConPort удалён (с инструкцией миграции и защищённым маркером retire-механизмом); добавлен policy-слой `retrieval-routing` и стал гейтом деплой-скилла; добавлена `project-memory` с таксономией `docs/local/**` и ослабленным аудитом doctor; переработаны интеграции (session-hygiene, structured-artifacts, agent-usage-hygiene, autonomy-boundaries, basic-memory, knowledge-capture) плюс группы фич в README; добавлена экспериментальная `structural-code-intelligence` с методологией evaluation A/B/C.
+- Верификация: 127 тестов прошло, render/check идемпотентны, ruff (scripts, tests) и mypy чисты, doctor 0 ошибок, `rg -i conport` ограничен датированной историей и намеренными ссылками миграции, поведенческие сценарии A–E сверены по сгенерированным правилам.
+- Отклонения: существенных нет. Порядок и объём фаз по плану выдержаны; гейт деплой-скилла переключён в фазе 2 ровно как запланировано.
+- Последующие шаги: пометка релиза 2.4.0; миграция девяти downstream-проектов; прогон structural evaluation до любого решения о включении (эпик #19).
 
 ## Observations
 

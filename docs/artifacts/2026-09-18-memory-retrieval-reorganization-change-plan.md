@@ -125,7 +125,10 @@ Epic follow-up (phases 6–7): issue #19.
 
 ## Outcome
 
-- Pending. Filled at iteration close.
+- Delivered in five phase commits on `rules-change/16-memory-retrieval-reorganization`: ConPort removed (with migration instructions and the marker-guarded retire mechanism); `retrieval-routing` policy layer added and made the deployment-skill gate; `project-memory` added with the `docs/local/**` taxonomy and the relaxed doctor audit; integrations reworked (session-hygiene, structured-artifacts, agent-usage-hygiene, autonomy-boundaries, basic-memory, knowledge-capture) plus README feature groups; experimental `structural-code-intelligence` added with the A/B/C evaluation methodology.
+- Verification: 127 tests passed, render/check idempotent, ruff (scripts, tests) and mypy clean, doctor 0 errors, `rg -i conport` limited to dated history and intentional migration references, behavioral scenarios A–E verified against the rendered rules.
+- Deviations: none material. The plan's phase order and scope held; the deploy-skill gate switched in phase 2 exactly as planned.
+- Follow-ups: release 2.4.0 tagging; migration of nine downstream projects; run the structural evaluation before any adoption decision (epic #19).
 
 ## Observations
 
