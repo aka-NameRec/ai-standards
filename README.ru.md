@@ -22,6 +22,7 @@
 - [Использование Project Memory в проекте](#использование-project-memory-в-проекте)
 - [Использование Basic Memory в проекте](#использование-basic-memory-в-проекте)
 - [Использование Chroma в проекте](#использование-chroma-в-проекте)
+- [Использование Structural Code Intelligence в проекте](#использование-structural-code-intelligence-в-проекте)
 - [Использование Agent Usage Hygiene в проекте](#использование-agent-usage-hygiene-в-проекте)
 - [Порядок работы с проектом](#порядок-работы-с-проектом)
 - [Версионирование](#версионирование)
@@ -428,6 +429,7 @@ Constraints:
 **Интеллект по коду**
 
 - `chroma`
+- `structural-code-intelligence` (экспериментальная; требует осознанного включения, evaluation ожидается)
 
 **Управление исполнением**
 
@@ -448,6 +450,7 @@ Constraints:
 - артефакты `structured-artifacts` могут индексироваться `basic-memory`
 - `module-contract-gate` держит канонические контракты в артефактах репозитория; retrieval может их только находить
 - `autonomy-boundaries` интегрируется с сохранением рабочего состояния: сохранение состояния никогда не разрешает пересечь границу
+- `structural-code-intelligence` требует `retrieval-routing` и остаётся вне рекомендуемого стека, пока evaluation A/B/C не подтвердит включение
 
 ## Использование Reasoning Hygiene в проекте
 
@@ -719,6 +722,24 @@ Capability именуются независимо от реализаций (Ba
 
 - английском: [docs/chroma-usage.md](docs/chroma-usage.md)
 - русском: [docs/chroma-usage.ru.md](docs/chroma-usage.ru.md)
+
+## Использование Structural Code Intelligence в проекте
+
+`structural-code-intelligence` — **экспериментальная** опциональная фича: retrieval по связям между сущностями кода — путям вызовов, зависимостям, границам модулей, анализу влияния. Она не входит в рекомендуемый стек; включайте её осознанно.
+
+`ai-standards` владеет переиспользуемой политикой:
+
+- предпочитайте её, когда вопрос о связях сущностей кода, а не о семантическом сходстве («что может затронуть изменение этого класса?»)
+- структурные результаты сужают множество кандидатов и никогда не доказывают полноту — верифицируйте на авторитетном слое
+- capability нейтральна к реализации: её реализует graph-инструмент (Graphify — один из возможных backend'ов), и команды инструментов в стандарты не входят
+- структурный граф описателен; модульные контракты остаются нормативными — граф их не заменяет
+
+Включение в рекомендуемый стек ждёт evaluation A/B/C: [docs/structural-code-intelligence-evaluation.ru.md](docs/structural-code-intelligence-evaluation.ru.md).
+
+Подробное операционное руководство:
+
+- английское: [docs/structural-code-intelligence-usage.md](docs/structural-code-intelligence-usage.md)
+- русское: [docs/structural-code-intelligence-usage.ru.md](docs/structural-code-intelligence-usage.ru.md)
 
 ## Использование Agent Usage Hygiene в проекте
 

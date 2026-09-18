@@ -2848,3 +2848,35 @@ def test_integration_fragments_carry_their_boundary_rules(tmp_path: Path) -> Non
     ) in result.content
     # basic-memory: two classes of knowledge, roles never mix.
     assert "never authoritative, not committed by default" in result.content
+
+
+def test_structural_code_intelligence_renders_as_experimental(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["retrieval-routing", "structural-code-intelligence"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n[metadata]\nproject_name = \"demo-project\"\n"
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    assert "## Structural Code Intelligence (Experimental)" in result.content
+    assert "not part of the recommended stack" in result.content
+    assert (
+        "Prefer structural code intelligence when the question is primarily about "
+        "relationships between known or discoverable code entities"
+    ) in result.content
+    assert "never encode a specific tool's commands" in result.content
+    assert "normative module contract" in result.content
+    assert "captures what the code structurally is" in result.content

@@ -22,6 +22,7 @@
 - [Using Project Memory In a Project](#using-project-memory-in-a-project)
 - [Using Basic Memory In a Project](#using-basic-memory-in-a-project)
 - [Using Chroma In a Project](#using-chroma-in-a-project)
+- [Using Structural Code Intelligence In a Project](#using-structural-code-intelligence-in-a-project)
 - [Using Agent Usage Hygiene In a Project](#using-agent-usage-hygiene-in-a-project)
 - [Project Flow](#project-flow)
 - [Versioning](#versioning)
@@ -432,6 +433,7 @@ Features group by concern:
 **Code intelligence**
 
 - `chroma`
+- `structural-code-intelligence` (experimental; requires deliberate opt-in, evaluation pending)
 
 **Execution governance**
 
@@ -452,6 +454,7 @@ Dependencies:
 - `structured-artifacts` artifacts may be indexed by `basic-memory`
 - `module-contract-gate` keeps canonical contracts in repository artifacts; retrieval may only locate them
 - `autonomy-boundaries` integrates with working-state persistence: persisting state never authorizes crossing a boundary
+- `structural-code-intelligence` requires `retrieval-routing` and stays out of the recommended stack until its A/B/C evaluation justifies adoption
 
 ## Using Reasoning Hygiene In a Project
 
@@ -727,6 +730,24 @@ Detailed operational guidance lives in:
 
 - English guide: [docs/chroma-usage.md](docs/chroma-usage.md)
 - Russian guide: [docs/chroma-usage.ru.md](docs/chroma-usage.ru.md)
+
+## Using Structural Code Intelligence In a Project
+
+`structural-code-intelligence` is an **experimental** optional feature: retrieval over relationships between code entities — call paths, dependency paths, module boundaries, impact analysis. It is not part of the recommended stack; enable it only deliberately.
+
+`ai-standards` owns the reusable policy:
+
+- prefer it when the question is about relationships between code entities rather than semantic similarity ("what can be affected by changing this class?")
+- structural results narrow the candidate set; they never prove completeness — verify at the authoritative layer
+- the capability is implementation-neutral: a graph tool (Graphify is one possible backend) implements it, and no tool's commands enter the standards
+- a structural graph is descriptive; module contracts stay normative — the graph never replaces them
+
+Adoption into the recommended stack waits for the A/B/C evaluation: [docs/structural-code-intelligence-evaluation.md](docs/structural-code-intelligence-evaluation.md).
+
+Detailed operational guidance lives in:
+
+- English guide: [docs/structural-code-intelligence-usage.md](docs/structural-code-intelligence-usage.md)
+- Russian guide: [docs/structural-code-intelligence-usage.ru.md](docs/structural-code-intelligence-usage.ru.md)
 
 ## Using Agent Usage Hygiene In a Project
 
