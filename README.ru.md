@@ -17,6 +17,7 @@
 - [Использование Structured Artifacts в проекте](#использование-structured-artifacts-в-проекте)
 - [Использование гейта обнаружения модульных контрактов в проекте](#использование-гейта-обнаружения-модульных-контрактов-в-проекте)
 - [Использование Session Hygiene в проекте](#использование-session-hygiene-в-проекте)
+- [Использование Retrieval Routing в проекте](#использование-retrieval-routing-в-проекте)
 - [Использование Basic Memory в проекте](#использование-basic-memory-в-проекте)
 - [Использование Chroma в проекте](#использование-chroma-в-проекте)
 - [Использование Agent Usage Hygiene в проекте](#использование-agent-usage-hygiene-в-проекте)
@@ -96,7 +97,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project
 Используются четыре слоя:
 
 - `fragments`: прямые базовые правила, которые должны включаться всегда.
-- `features`: опциональные возможности вроде `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene` и `agent-usage-hygiene`.
+- `features`: опциональные возможности вроде `retrieval-routing`, `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene` и `agent-usage-hygiene`.
 - `stacks`: правила, зависящие от технологии или архитектурного стиля, например `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring` или `spring-data-jpa`.
 - `tooling.agents`: опциональные agent adapters вроде `codex`, `claude`, `kilo` и `cursor` для управляемых локальных workflow templates.
 
@@ -572,6 +573,30 @@ Constraints:
 
 - английском руководстве: [docs/session-hygiene-usage.md](docs/session-hygiene-usage.md)
 - русском руководстве: [docs/session-hygiene-usage.ru.md](docs/session-hygiene-usage.ru.md)
+
+## Использование Retrieval Routing в проекте
+
+`retrieval-routing` — инструментально-нейтральный policy-слой над всеми включёнными в проект retrieval-capability: project memory, канонической документацией, семантическим поиском по коду, структурной code intelligence и прямым доступом к исходникам.
+
+Ключевой принцип: накопленное знание — не контекст разговора. Извлекай его, когда оно релевантно; не предзагружай только потому, что оно существует.
+
+`ai-standards` владеет переиспользуемой политикой:
+
+- retrieval до широкой разведки репозитория: запрашивай самый узкий источник, способный ответить на текущий вопрос
+- включённую retrieval-capability обязательно учитывать, когда она совпадает с информационной потребностью
+- маршрутизация по информационной потребности, а не по привычности инструмента: состояние предыдущей задачи и локальные решения — в project memory, канонические вопросы — в Git-отслеживаемую документацию, семантическое обнаружение кода — в Chroma, точные символы — в прямой доступ к исходникам, анализ влияния — в структурную code intelligence (когда включена)
+- retrieval — обнаружение улик: он сужает множество кандидатов, но никогда не доказывает корректность или полноту
+- верификация на авторитетном слое (каноническая документация, исходники, тесты) перед опорой на извлечённые утверждения
+- постепенная эскалация: узкий retrieval, затем широкий, затем точечное чтение файлов, и только потом инспекция всего репозитория
+
+Capability именуются независимо от реализаций (Basic Memory, Chroma, graph-инструмент), поэтому смена backend'а не переписывает поведенческие правила. Фича не несёт API инструментов.
+
+Включение `retrieval-routing` в манифест также гейтит навык/команду/правило `deploy-ai-retrieval-stack` для объявленных агентов: навык развёртывания разворачивает включённые в манифест retrieval-слои (Basic Memory, Chroma) в свободном от гонок порядке.
+
+Подробное операционное руководство:
+
+- английское: [docs/retrieval-routing-usage.md](docs/retrieval-routing-usage.md)
+- русское: [docs/retrieval-routing-usage.ru.md](docs/retrieval-routing-usage.ru.md)
 
 ## Использование Basic Memory в проекте
 

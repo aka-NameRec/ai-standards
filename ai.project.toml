@@ -9,6 +9,7 @@ fragments = [
 
 features = [
   "response-language-style",
+  "retrieval-routing",
   "basic-memory",
   "chroma",
   "design-first-collaboration",

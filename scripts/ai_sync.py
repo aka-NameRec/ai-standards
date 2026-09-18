@@ -111,7 +111,7 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             agent="codex",
             source_relative_path="templates/ai-infrastructure/deploy-ai-retrieval-stack.SKILL.md",
             destination_relative_path=".codex/skills/ai-infrastructure/deploy-ai-retrieval-stack/SKILL.md",
-            feature="chroma",
+            feature="retrieval-routing",
         ),
         AgentTemplate(
             agent="codex",
@@ -149,7 +149,7 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             agent="cursor",
             source_relative_path="templates/ai-infrastructure/deploy-ai-retrieval-stack.cursor.mdc",
             destination_relative_path=".cursor/rules/deploy-ai-retrieval-stack.mdc",
-            feature="chroma",
+            feature="retrieval-routing",
         ),
         AgentTemplate(
             agent="cursor",
@@ -187,7 +187,7 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             agent="claude",
             source_relative_path="templates/ai-infrastructure/deploy-ai-retrieval-stack.claude.md",
             destination_relative_path=".claude/commands/deploy-ai-retrieval-stack.md",
-            feature="chroma",
+            feature="retrieval-routing",
         ),
         AgentTemplate(
             agent="claude",
@@ -225,7 +225,7 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             agent="kilo",
             source_relative_path="templates/ai-infrastructure/deploy-ai-retrieval-stack.SKILL.md",
             destination_relative_path=".agents/skills/ai-infrastructure/deploy-ai-retrieval-stack/SKILL.md",
-            feature="chroma",
+            feature="retrieval-routing",
         ),
         AgentTemplate(
             agent="kilo",

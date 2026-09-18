@@ -69,6 +69,81 @@ def test_rendered_rules_never_mention_conport(tmp_path: Path) -> None:
     assert "conport" not in result.content
 
 
+def test_retrieval_routing_renders_its_policy_invariants(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["retrieval-routing"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n[metadata]\nproject_name = \"demo-project\"\n"
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    # Stored knowledge != active context; enabled capability must be considered;
+    # retrieval does not replace verification — the issue #16 policy invariants.
+    assert "Stored knowledge is not conversation context" in result.content
+    assert "query the narrowest available knowledge source" in result.content
+    assert (
+        "When an enabled retrieval capability directly matches the current "
+        "information need, use it"
+    ) in result.content
+    assert (
+        "Route retrieval according to the kind of information required, "
+        "not according to tool familiarity"
+    ) in result.content
+    assert "Retrieval narrows the evidence set" in result.content
+    assert (
+        "Verify retrieved claims against their authoritative source" in result.content
+    )
+    assert "Prefer narrow retrieval before broad retrieval" in result.content
+    assert "## Routing Table" in result.content
+    assert "### Capability And Implementation" in result.content
+
+
+def test_deploy_skill_gates_on_retrieval_routing_not_chroma(tmp_path: Path) -> None:
+    def make_project(feature_line: str) -> Path:
+        project_root = tmp_path / f"project-{feature_line}"
+        project_root.mkdir()
+        (project_root / "docs" / "ai").mkdir(parents=True)
+        manifest = (
+            MANIFEST_RELEASE_BLOCK
+            + 'fragments = ["core/base"]\n'
+            + f"features = {feature_line}\n"
+            + 'stacks = ["python"]\n'
+            + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+            + "\n[tooling]\nagents = [\"cursor\"]\n"
+            + "\n[metadata]\nproject_name = \"demo-project\"\n"
+        )
+        (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+        (project_root / "docs" / "ai" / "project-rules.md").write_text(
+            "# Project-Specific AI Rules\n\n- Demo override.\n",
+            encoding="utf-8",
+        )
+        return project_root
+
+    with_routing = make_project('["retrieval-routing"]')
+    without_routing = make_project('["chroma"]')
+
+    sync_project_templates(with_routing)
+    sync_project_templates(without_routing)
+
+    assert (with_routing / ".cursor/rules/deploy-ai-retrieval-stack.mdc").exists()
+    assert not (without_routing / ".cursor/rules/deploy-ai-retrieval-stack.mdc").exists()
+    # Chroma alone still deploys its infra templates.
+    assert (without_routing / ".ai-standards/scripts/code_index.py").exists()
+
+
 def test_render_contains_expected_markers(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()
@@ -1223,7 +1298,7 @@ def test_sync_retires_managed_copies_of_renamed_templates(tmp_path: Path) -> Non
     manifest = (
         MANIFEST_RELEASE_BLOCK +
         'fragments = ["core/base"]\n'
-        'features = ["chroma"]\n'
+        'features = ["retrieval-routing", "chroma"]\n'
         'stacks = ["python"]\n'
         'local_overrides = ["docs/ai/project-rules.md"]\n'
         "\n"
@@ -1340,7 +1415,7 @@ def test_sync_deploys_parseable_chroma_infra_templates(tmp_path: Path) -> None:
     manifest = (
         MANIFEST_RELEASE_BLOCK +
         'fragments = ["core/base"]\n'
-        'features = ["chroma"]\n'
+        'features = ["retrieval-routing", "chroma"]\n'
         'stacks = ["python"]\n'
         'local_overrides = ["docs/ai/project-rules.md"]\n'
         "\n"
@@ -1543,7 +1618,7 @@ def test_sync_creates_infra_and_skill_when_chroma_enabled(tmp_path: Path) -> Non
     manifest = (
         MANIFEST_RELEASE_BLOCK
         + 'fragments = ["core/base", "core/architecture"]\n'
-        + 'features = ["chroma"]\n'
+        + 'features = ["retrieval-routing", "chroma"]\n'
         + 'stacks = ["python"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"

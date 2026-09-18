@@ -17,6 +17,7 @@
 - [Using Structured Artifacts In a Project](#using-structured-artifacts-in-a-project)
 - [Using Module Contract Discovery Gate In a Project](#using-module-contract-discovery-gate-in-a-project)
 - [Using Session Hygiene In a Project](#using-session-hygiene-in-a-project)
+- [Using Retrieval Routing In a Project](#using-retrieval-routing-in-a-project)
 - [Using Basic Memory In a Project](#using-basic-memory-in-a-project)
 - [Using Chroma In a Project](#using-chroma-in-a-project)
 - [Using Agent Usage Hygiene In a Project](#using-agent-usage-hygiene-in-a-project)
@@ -100,7 +101,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project --output-name 
 Use four layers:
 
 - `fragments`: direct core rules that should always be rendered.
-- `features`: optional capabilities such as `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
+- `features`: optional capabilities such as `retrieval-routing`, `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
 - `stacks`: technology-specific or architecture-specific rules such as `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring`, or `spring-data-jpa`.
 - `tooling.agents`: optional agent adapters such as `codex`, `claude`, `kilo`, and `cursor` for managed local workflow templates.
 
@@ -580,6 +581,30 @@ Detailed operational guidance lives in:
 
 - English guide: [docs/session-hygiene-usage.md](docs/session-hygiene-usage.md)
 - Russian guide: [docs/session-hygiene-usage.ru.md](docs/session-hygiene-usage.ru.md)
+
+## Using Retrieval Routing In a Project
+
+`retrieval-routing` is the tool-neutral policy layer over every retrieval capability the project enables: project memory, canonical documentation, semantic code search, structural code intelligence, and direct source access.
+
+The core principle: stored knowledge is not conversation context. Retrieve it when relevant; do not preload it merely because it exists.
+
+`ai-standards` owns the reusable policy:
+
+- retrieve before broad repository exploration: query the narrowest source that can answer the current question
+- an enabled retrieval capability must be considered when it matches the information need
+- route by information need, not tool familiarity: previous task state and local decisions to project memory, canonical questions to Git-tracked documentation, semantic code discovery to Chroma, exact symbols to direct source access, impact analysis to structural code intelligence (when enabled)
+- retrieval is evidence discovery: it narrows the candidate set, it never proves correctness or completeness
+- verify at the authoritative layer (canonical docs, source, tests) before relying on retrieved claims
+- escalate progressively: narrow retrieval, then broad retrieval, then targeted file exploration, only then repository-wide inspection
+
+Capabilities are named independently of their implementations (Basic Memory, Chroma, a graph tool), so swapping a backend does not rewrite the behavioral rules. The feature carries no tool APIs.
+
+Enabling `retrieval-routing` in a manifest also gates the `deploy-ai-retrieval-stack` skill/command/rule for the declared agents: the deployment skill deploys the retrieval layers enabled in the manifest (Basic Memory, Chroma) in a race-free order.
+
+Detailed operational guidance lives in:
+
+- English guide: [docs/retrieval-routing-usage.md](docs/retrieval-routing-usage.md)
+- Russian guide: [docs/retrieval-routing-usage.ru.md](docs/retrieval-routing-usage.ru.md)
 
 ## Using Basic Memory In a Project
 

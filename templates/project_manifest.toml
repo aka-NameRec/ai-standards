@@ -6,6 +6,7 @@ fragments = [
   "core/error-handling",
 ]
 features = [
+  "retrieval-routing",
   # "basic-memory",
   # "chroma",
   "design-first-collaboration",

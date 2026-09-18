@@ -1,5 +1,6 @@
 [features]
 response-language-style = ["process/response-language-style"]
+retrieval-routing = ["process/retrieval-routing"]
 basic-memory = ["tools/basic-memory"]
 chroma = ["tools/chroma"]
 design-first-collaboration = ["process/design-first-collaboration"]
@@ -21,6 +22,7 @@ knowledge-capture = ["process/knowledge-capture"]
 # next release actually receives; adjust it during `bump-version` if needed.
 [feature_meta]
 response-language-style = "2.2.0"
+retrieval-routing = "2.4.0"
 basic-memory = "2.0.0"
 chroma = "2.1.0"
 code-review = "2.2.0"
