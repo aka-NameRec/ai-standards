@@ -16,3 +16,6 @@ logs/
 # Templates this repository deploys into itself via sync-templates. Downstream
 # projects commit their copies; here they would only duplicate templates/.
 .ai-standards/
+
+# Local cross-session working memory (project-memory feature)
+/docs/local/
