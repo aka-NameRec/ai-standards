@@ -63,7 +63,7 @@ def _init_demo_repo(tmp_path: Path) -> Path:
         encoding="utf-8",
     )
     (repo_root / "registry.toml").write_text(
-        '[features]\nconport = ["core/base"]\n\n[stacks]\npython = ["core/base"]\n',
+        '[features]\ndemo-feature = ["core/base"]\n\n[stacks]\npython = ["core/base"]\n',
         encoding="utf-8",
     )
     (repo_root / "fragments" / "core" / "base.md").write_text(
@@ -78,7 +78,7 @@ def _init_demo_repo(tmp_path: Path) -> Path:
         (
             'ai_standards_version = "0.1.0-2026-04-15"\n'
             'fragments = ["core/base"]\n'
-            'features = ["conport"]\n'
+            'features = ["demo-feature"]\n'
             'stacks = ["python"]\n'
             'local_overrides = ["docs/ai/project-rules.md"]\n'
             "optional_local_overrides = []\n"
@@ -95,7 +95,7 @@ def _init_demo_repo(tmp_path: Path) -> Path:
         (
             'ai_standards_version = "0.1.0-2026-04-15"\n'
             'fragments = ["core/base"]\n'
-            'features = ["conport"]\n'
+            'features = ["demo-feature"]\n'
             'stacks = ["python"]\n'
             'local_overrides = ["docs/ai/project-rules.md"]\n'
             "optional_local_overrides = []\n"

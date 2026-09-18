@@ -72,7 +72,6 @@ It is less useful for:
 
 ```toml
 features = [
-  "conport",
   "design-first-collaboration",
   "reasoning-hygiene",
   "structured-artifacts",
@@ -132,10 +131,9 @@ Bad module boundaries usually look like:
 - `design-first-collaboration` defines when intent, boundaries, and non-goals should be made explicit.
 - `reasoning-hygiene` improves the quality of analysis behind those artifacts.
 - `basic-memory` can index canonical documentation and working-memory notes for retrieval across sessions.
-- `conport` stores transient operational context and session handoffs.
 - `structured-artifacts` adds Git-reviewable documents for plans, contracts, and durable decisions.
 
-## Canonical Documentation, Working Memory, And ConPort
+## Canonical Documentation And Working Memory
 
 Treat the following as canonical documentation:
 
@@ -164,9 +162,10 @@ Before changing canonical documentation:
 - prefer updating an existing document over creating a duplicate
 - stop and surface contradictions instead of silently resolving them
 
-## ConPort Versus Decision Records
+## Local Working Memory Versus Decision Records
 
-Use ConPort for:
+Use local working memory (`docs/local/**`, or `docs/ai-memory/**` in projects that
+still use that convention) for:
 
 - active context
 - recent progress
@@ -179,7 +178,7 @@ Use a decision record for:
 - a choice that future reviews or refactors must be able to cite
 - a documented alternative analysis that should live with the codebase
 
-Do not mirror every ConPort entry into a decision record.
+Do not mirror every local memory note into a decision record.
 
 ## Explicit Promotion Examples
 

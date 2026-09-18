@@ -19,7 +19,10 @@ permalink: ai-standards/architecture/2026-08-27-knowledge-stack-roles.ru
 | адаптер Basic Memory (cockpit) | детерминированная проекция реестра в `~/.basic-memory/config.json`; единственный писатель этого файла | нет — проекция |
 | Basic Memory | графовый поиск по живому дереву знаний (`docs/**` без архива); заметки идентифицируются по `title` во frontmatter; `memory://` через пермалинки | нет — проекция дерева |
 | Chroma | векторный поиск: кодовые коллекции по явным корням; коллекция истории над `docs/archive` | нет — проекция |
-| ConPort | операционная память: активный контекст, прогресс, передача сессий | нет — транзиентная |
+
+ConPort покинул слой операционной памяти в сентябре 2026 года; его заменила локальная
+рабочая память (`docs/local/**`) — см.
+[2026-09-18-memory-retrieval-reorganization.ru.md](../decisions/2026-09-18-memory-retrieval-reorganization.ru.md).
 
 ## Инварианты границ
 
@@ -37,7 +40,7 @@ permalink: ai-standards/architecture/2026-08-27-knowledge-stack-roles.ru
 
 ## Observations
 
-- [fact] git — единственный канонический слой; Basic Memory, Chroma, ConPort и отрендеренный `AGENTS.md` — проекции, пересобираемые из файлов.
+- [fact] git — единственный канонический слой; Basic Memory, Chroma и отрендеренный `AGENTS.md` — проекции, пересобираемые из файлов.
 - [fact] Конвейер «реестр → конфиг» однописательный: адаптер cockpit пишет `~/.basic-memory/config.json`, а `ai-sync doctor` его только читает.
 - [fact] Архив пересекает границу Basic Memory через `.bmignore`, а границу Chroma — через объявление коллекции: по одной строке, с разной верификацией.
 

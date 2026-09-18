@@ -9,7 +9,10 @@ permalink: ai-standards/decisions/2026-08-24-knowledge-store-role-separation.ru
 
 ## Status
 
-Accepted
+Accepted (роли Basic Memory, Chroma и git сохраняются). Слой ConPort частично
+суперседирован в сентябре 2026 года решением
+[2026-09-18-memory-retrieval-reorganization.ru.md](2026-09-18-memory-retrieval-reorganization.ru.md);
+его заменила локальная рабочая память в `docs/local/**`.
 
 Спутник решения [2026-08-24-archive-history-in-docs-tree.ru.md](2026-08-24-archive-history-in-docs-tree.ru.md), применяющего это разделение к историческим экспортам чатов.
 

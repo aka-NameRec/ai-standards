@@ -1,6 +1,6 @@
 ---
 name: capture-knowledge
-description: Capture a finished working session into the project's durable memory the standard way — sync ConPort state, write a decision record for every accepted choice, a task record for completed tasks, a module contract when a major module changed, README links for new maintained docs. Use when the user asks to «зафиксируй знания стандартным образом», зафиксировать решения или задачи, or "capture the session knowledge".
+description: Capture a finished working session into the project's durable memory the standard way — update local project memory, write a decision record for every accepted choice, a task record for completed tasks, a module contract when a major module changed, README links for new maintained docs. Use when the user asks to «зафиксируй знания стандартным образом», зафиксировать решения или задачи, or "capture the session knowledge".
 disable-model-invocation: true
 ---
 
@@ -14,7 +14,7 @@ Turn a working session into the durable memory the standard way. The user's requ
 - A task completed → task record under `docs/tasks/`, named `<task-id>-<topic>.md`; most sessions need one summary document, not one per subtask.
 - A major, risky, or shared module changed or grew a distinct contract → a module-contract record under `docs/architecture/**`, named `YYYY-MM-DD-module-contract-<module-slug>.md` with frontmatter `type: module-contract` (ownership, non-goals, inputs, outputs, invariants, failure boundaries, verification).
 - New maintained documentation under `docs/` → add its README link and its Russian localized pair in the same change set (`<name>.ru.md`); `-log-` chat exports are exempt and live in `docs/archive/**`.
-- Operational state (current focus, progress, handoff) → the tracker (ConPort), never canonical docs.
+- Operational state (current focus, progress, handoff) → local project memory under `docs/local/**` (when the project enables it), never canonical docs.
 
 ## Write To The Tree
 
@@ -26,11 +26,11 @@ Every new note needs no repair from birth:
 - English original + `.ru.md` pair updated in the same change set;
 - relative repository links only.
 
-## Mirror To The Tracker
+## Update Local Project Memory
 
-- Update active context so a fresh session can resume without rereading the chat.
-- Log decisions with a pointer to their record files, and progress entries DONE/TODO.
-- The tracker is transient: it references canonical docs, it does not replace them.
+- Update the local context/progress notes (and a handoff note when the session ends mid-task) so a fresh session can resume without rereading the chat.
+- Record local decisions with a pointer to their canonical record files when one exists; local memory references canonical docs, it does not replace them.
+- Local project memory is working state, never canonical documentation.
 
 ## Verify Before Reporting
 

@@ -21,7 +21,7 @@ If the deployment predates the skill, the skill file itself is the bootstrap: it
 
 ## Install Mode
 
-For projects with no deployment at all. The procedure surveys before it proposes: existing `AGENTS.md` (a hand-written one is never overwritten without a merge decision), the stacks in play against the registry, docs layout and language, ConPort or Basic Memory presence, CI, tracker, and the agent environments the team uses. It then proposes the feature set one line at a time with a recommendation for or against, and deploys only the confirmed set: `init-project`, the filled manifest (`features`, `stacks`, `tooling.agents`, `standards_source`, `tracker_url` when named), `render`, `sync-templates`, `check`, `doctor`.
+For projects with no deployment at all. The procedure surveys before it proposes: existing `AGENTS.md` (a hand-written one is never overwritten without a merge decision), the stacks in play against the registry, docs layout and language, Basic Memory or other memory tooling presence, CI, tracker, and the agent environments the team uses. It then proposes the feature set one line at a time with a recommendation for or against, and deploys only the confirmed set: `init-project`, the filled manifest (`features`, `stacks`, `tooling.agents`, `standards_source`, `tracker_url` when named), `render`, `sync-templates`, `check`, `doctor`.
 
 Install records `standards_source` in the manifest metadata — the repository URL the standards came from. Every later update reads it, which is why the update prompts after this point need no URL.
 

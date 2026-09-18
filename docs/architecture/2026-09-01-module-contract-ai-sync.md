@@ -28,7 +28,7 @@ The single rendering and template-deployment tool of this repository, plus the d
 ## Outputs
 
 - rendered `AGENTS.md` (and the Claude bridge import)
-- deployed managed templates: agent adapters under `.codex/`, `.cursor/`, `.claude/`, `.agents/` — including the always-deployed `update-ai-standards` adapters whenever agents are declared; infrastructure under `.ai-standards/`
+- deployed managed templates: agent adapters under `.codex/`, `.cursor/`, `.claude/`, `.agents/` — including the always-deployed `update-ai-standards` adapters whenever agents are declared; infrastructure under `.ai-standards/`; removal of deployed copies for templates that no longer ship (retired destinations)
 - `doctor` reports (errors exit non-zero, suitable for CI) and `--fix` filesystem repairs
 
 ## Invariants
@@ -37,6 +37,7 @@ The single rendering and template-deployment tool of this repository, plus the d
 - Managed markers match the destination syntax: HTML comments for `.md`/`.mdc`/`.html`, `#` comments otherwise; a shebang stays the first line.
 - `--fix` only applies repairs that follow from a rule: moves rendering inputs out of the tree and repoints the manifest, restores titles/headings, strips indexer-stamped frontmatter, prunes empty directories. It warns when git cannot undo it.
 - Detection of managed files is format-agnostic (marker text prefix, any comment syntax).
+- Retirement is marker-guarded: a retired destination is deleted only while it still carries the managed marker; a user-rewritten file survives, and directories emptied by retirement are pruned down to (never above) the agent skills/rules root.
 - Existing projects keep rendering from their declared override paths; scaffolding changes affect only new projects.
 - Version pins cannot drift silently: `check` fails while the manifest `ai_standards_version` disagrees with the standards source in use, `render`/`update` echo a warning, and `doctor` reports `standards-version-drift`.
 

@@ -9,7 +9,9 @@ Russian localized version: [2026-08-24-knowledge-store-role-separation.ru.md](20
 
 ## Status
 
-Accepted
+Accepted (Basic Memory, Chroma, and git roles stand). The ConPort layer was superseded
+in September 2026 by [2026-09-18-memory-retrieval-reorganization.md](2026-09-18-memory-retrieval-reorganization.md);
+local working memory under `docs/local/**` replaces it.
 
 Companion to [2026-08-24-archive-history-in-docs-tree.md](2026-08-24-archive-history-in-docs-tree.md), which applies this split to historical chat exports.
 

@@ -236,7 +236,6 @@ Basic Memory должен быть ограничен одним проекто�
 
 - `structured-artifacts` определяет, какие Markdown artifacts считаются plans, decision records и module contracts.
 - `session-hygiene` определяет, когда агент должен повторно загружать релевантный durable context между фазами или чатами.
-- `conport` остаётся полезным для transient operational context и handoff storage.
 - `design-first-collaboration` удерживает явными intent, boundaries и non-goals до реализации.
 
 `basic-memory` дополняет эти features, делая Git-tracked Markdown проще для поиска и переиспользования. Он не заменяет reviewable documentation и явные human decisions.
@@ -245,7 +244,6 @@ Basic Memory должен быть ограничен одним проекто�
 
 ```toml
 features = [
-  "conport",
   "basic-memory",
   "structured-artifacts",
   "session-hygiene",

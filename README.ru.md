@@ -96,7 +96,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project
 Используются четыре слоя:
 
 - `fragments`: прямые базовые правила, которые должны включаться всегда.
-- `features`: опциональные возможности вроде `conport`, `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene` и `agent-usage-hygiene`.
+- `features`: опциональные возможности вроде `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene` и `agent-usage-hygiene`.
 - `stacks`: правила, зависящие от технологии или архитектурного стиля, например `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring` или `spring-data-jpa`.
 - `tooling.agents`: опциональные agent adapters вроде `codex`, `claude`, `kilo` и `cursor` для управляемых локальных workflow templates.
 
@@ -113,7 +113,6 @@ fragments = [
 ]
 
 features = [
-  "conport",
   "design-first-collaboration",
   "reasoning-hygiene",
   "autonomy-boundaries",
@@ -421,7 +420,7 @@ Constraints:
 
 - какие практики рассуждения вообще стоит стандартизировать
 - какие prompt-паттерны слишком хрупкие или model-specific для нормализации
-- как эта возможность дополняет `design-first-collaboration`, `conport` и `structured-artifacts`
+- как эта возможность дополняет `design-first-collaboration`, `project-memory` и `structured-artifacts`
 
 Подробная методика применения находится в:
 
@@ -567,7 +566,7 @@ Constraints:
 - fresh chats предпочтительны, когда long-session context становится менее надёжным, чем explicit artifacts
 - shared defaults не должны продвигать хрупкие message-count или token-count thresholds
 
-ConPort остаётся полезным для transient operational context и handoff storage. Если проект использует Basic Memory или другой Markdown retrieval layer, предпочитайте его для поиска релевантного Git-tracked knowledge вместо широкой перезагрузки контекста.
+Операционный контекст и handoff-состояние живут в локальной памяти проекта (`docs/local/**`, см. фичу `project-memory`). Если проект использует Basic Memory или другой Markdown retrieval layer, предпочитайте его для поиска релевантного Git-tracked knowledge вместо широкой перезагрузки контекста.
 
 Подробная методика применения находится в:
 
@@ -610,7 +609,7 @@ ConPort остаётся полезным для transient operational context �
 
 ## Использование Chroma в проекте
 
-`chroma` — это опциональная возможность для проектов, которым нужен слой семантического поиска по исходному коду репозитория, отдельный от оперативной памяти ConPort и retrieval-слоя документации Basic Memory.
+`chroma` — это опциональная возможность для проектов, которым нужен слой семантического поиска по исходному коду репозитория, отдельный от retrieval-слоя документации Basic Memory.
 
 Используйте `chroma`, когда проекту полезны переиспользуемые правила для:
 
@@ -621,13 +620,13 @@ ConPort остаётся полезным для transient operational context �
 
 `ai-standards` владеет переиспользуемой политикой:
 
-- Chroma — слой семантического поиска по коду, отдельный от хранилищ ConPort и Basic Memory
+- Chroma — слой семантического поиска по коду, отдельный от хранилищ Basic Memory
 - все запросы идут через freshness-gate-обёртку (обновление перед запросом, блокировка при ошибке)
 - similarity сужает исследование, но не доказывает полноту
 - индексация инкрементальная по content-hash с atomic resumable-манифестом
 - локальный `PersistentClient` (embedded-хранилище) — режим развёртывания по умолчанию
 
-Включение `chroma` в манифесте делает сразу три вещи: рендерит usage-фрагмент в `AGENTS.md`, синхронизирует инфра-шаблоны код-индекса под `.ai-standards/` (`scripts/code_index.py` и `code-index.toml`) и распространяет навык/команду/правило `deploy-ai-knowledge-stack` на объявленных агентов. Навык развёртывания разворачивает весь AI knowledge stack (ConPort, Basic Memory, Chroma) в свободном от гонок порядке.
+Включение `chroma` в манифесте делает сразу три вещи: рендерит usage-фрагмент в `AGENTS.md`, синхронизирует инфра-шаблоны код-индекса под `.ai-standards/` (`scripts/code_index.py` и `code-index.toml`) и распространяет навык/команду/правило `deploy-ai-retrieval-stack` на объявленных агентов. Навык развёртывания разворачивает включённые retrieval-слои (Basic Memory, Chroma) в свободном от гонок порядке.
 
 Подробное операционное руководство:
 

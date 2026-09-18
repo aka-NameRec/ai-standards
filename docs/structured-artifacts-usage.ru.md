@@ -72,7 +72,6 @@ permalink: ai-standards/structured-artifacts-usage.ru
 
 ```toml
 features = [
-  "conport",
   "design-first-collaboration",
   "reasoning-hygiene",
   "structured-artifacts",
@@ -132,10 +131,9 @@ features = [
 - `design-first-collaboration` задаёт, когда intent, boundaries и non-goals должны быть вынесены наружу.
 - `reasoning-hygiene` улучшает качество анализа, стоящего за этими артефактами.
 - `basic-memory` может индексировать canonical documentation и working-memory notes для retrieval между сессиями.
-- `conport` хранит transient operational context и session handoffs.
 - `structured-artifacts` добавляет Git-reviewable документы для планов, контрактов и устойчивых решений.
 
-## Canonical Documentation, Working Memory и ConPort
+## Canonical Documentation и Working Memory
 
 Считайте canonical documentation:
 
@@ -164,9 +162,9 @@ features = [
 - предпочитайте обновление существующего документа созданию дубля
 - при противоречии не разрешайте конфликт молча, а поднимайте его явно
 
-## ConPort и decision records
+## Локальная рабочая память и decision records
 
-Используйте ConPort для:
+Используйте локальную рабочую память (`docs/local/**` или `docs/ai-memory/**` в проектах, где ещё действует старая конвенция) для:
 
 - active context
 - недавнего прогресса
@@ -179,7 +177,7 @@ features = [
 - выбора, на который должны ссылаться будущие review или refactoring tasks
 - оформленного анализа альтернатив, который должен жить вместе с кодовой базой
 
-Не нужно зеркалить каждую запись ConPort в decision record.
+Не нужно зеркалить каждую заметку локальной памяти в decision record.
 
 ## Примеры явного promotion
 

@@ -236,7 +236,6 @@ Use the narrowest reindex that resolves the reported problem.
 
 - `structured-artifacts` defines which Markdown artifacts count as plans, decision records, and module contracts.
 - `session-hygiene` defines when the agent should reload relevant durable context between phases or chats.
-- `conport` remains useful for transient operational context and handoff storage.
 - `design-first-collaboration` keeps intent, boundaries, and non-goals explicit before implementation.
 
 `basic-memory` complements these features by making Git-tracked Markdown easier to retrieve and reuse. It does not replace reviewable documentation or explicit human decisions.
@@ -245,7 +244,6 @@ Use the narrowest reindex that resolves the reported problem.
 
 ```toml
 features = [
-  "conport",
   "basic-memory",
   "structured-artifacts",
   "session-hygiene",

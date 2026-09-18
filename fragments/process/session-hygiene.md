@@ -8,7 +8,7 @@ Source provenance:
 - Warn the user when a long thread increases the risk of context drift, stale assumptions, goal substitution, or lost constraints.
 - Before continuing a long session, produce a compact handoff summary with the current goal, decisions, touched files, risks, constraints, and next slice.
 - Prefer starting a fresh chat when the work changes phase, the current context can no longer be summarized compactly, or the next slice depends on rules or decisions that should be reloaded explicitly.
-- Do not rely on transient chat memory for critical constraints; move them into project artifacts, agent working memory, ConPort handoff notes, or another durable memory mechanism.
+- Do not rely on transient chat memory for critical constraints; move them into project artifacts, agent working memory, or another durable memory mechanism.
 - Re-read relevant project rules, active context, and task artifacts when a long session enters a new phase such as implementation, review, merge, or release.
 
 ### Long-Session Warning Triggers

@@ -97,7 +97,6 @@ Economy mode заканчивается, когда:
 - `reasoning-hygiene` удерживает анализ на assumptions, risks и verification.
 - `autonomy-boundaries` не даёт длинным сессиям расползаться за пределы reviewable slices.
 - `structured-artifacts` даёт change plans, contracts и decision records, которые снижают transient context load.
-- `conport` может сохранять durable project memory вне активного model context.
 
 `agent-usage-hygiene` не заменяет эти features. Она явно формулирует их context-economy value и добавляет prompt-activated economy behavior.
 
@@ -105,7 +104,6 @@ Economy mode заканчивается, когда:
 
 ```toml
 features = [
-  "conport",
   "design-first-collaboration",
   "reasoning-hygiene",
   "autonomy-boundaries",

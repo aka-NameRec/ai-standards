@@ -36,6 +36,39 @@ CURRENT_RELEASE_PIN = f"{CURRENT_AI_STANDARDS_VERSION}-{CURRENT_RELEASE_DATE}"
 MANIFEST_RELEASE_BLOCK = f'ai_standards_version = "{CURRENT_RELEASE_PIN}"\n'
 
 
+def test_rendered_rules_never_mention_conport(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = [\n'
+        + '  "basic-memory",\n'
+        + '  "chroma",\n'
+        + '  "session-hygiene",\n'
+        + '  "structured-artifacts",\n'
+        + '  "knowledge-capture",\n'
+        + ']\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n[metadata]\nproject_name = \"demo-project\"\n"
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    # ConPort is gone from the standards: no fragment may reintroduce it into
+    # rendered rules (policy test for the memory/retrieval reorganization).
+    assert "ConPort" not in result.content
+    assert "conport" not in result.content
+
+
 def test_render_contains_expected_markers(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()
@@ -50,7 +83,6 @@ def test_render_contains_expected_markers(tmp_path: Path) -> None:
         '  "core/error-handling",\n'
         ']\n'
         'features = [\n'
-        '  "conport",\n'
         '  "basic-memory",\n'
         '  "design-first-collaboration",\n'
         '  "structured-artifacts",\n'
@@ -127,7 +159,7 @@ def test_java_spring_stack_alias_can_be_rendered(tmp_path: Path) -> None:
     manifest = (
         MANIFEST_RELEASE_BLOCK +
         'fragments = ["core/base", "core/architecture", "core/error-handling"]\n'
-        'features = ["conport"]\n'
+        'features = ["session-hygiene"]\n'
         'stacks = ["java-spring"]\n'
         'local_overrides = ["docs/ai/project-rules.md"]\n'
         "\n"
@@ -156,7 +188,7 @@ def test_explicit_java_spring_stack_combination_can_be_rendered(tmp_path: Path) 
     manifest = (
         MANIFEST_RELEASE_BLOCK +
         'fragments = ["core/base", "core/architecture", "core/error-handling"]\n'
-        'features = ["conport"]\n'
+        'features = ["session-hygiene"]\n'
         'stacks = ["java", "spring", "spring-data-jpa"]\n'
         'local_overrides = ["docs/ai/project-rules.md"]\n'
         "\n"
@@ -187,7 +219,7 @@ def test_legacy_manifest_version_key_still_renders(tmp_path: Path) -> None:
     manifest = (
         'version = "0.1.0"\n'
         'fragments = ["core/base"]\n'
-        'features = ["conport"]\n'
+        'features = ["session-hygiene"]\n'
         'stacks = ["python"]\n'
         'local_overrides = ["docs/ai/project-rules.md"]\n'
         "\n"
@@ -217,7 +249,7 @@ def test_typescript_stack_can_be_rendered(tmp_path: Path) -> None:
     manifest = (
         MANIFEST_RELEASE_BLOCK +
         'fragments = ["core/base", "core/error-handling"]\n'
-        'features = ["conport"]\n'
+        'features = ["session-hygiene"]\n'
         'stacks = ["typescript", "react"]\n'
         'local_overrides = ["docs/ai/project-rules.md"]\n'
         "\n"
@@ -250,7 +282,7 @@ def test_vue_stack_renders_modern_guidance(tmp_path: Path) -> None:
     manifest = (
         MANIFEST_RELEASE_BLOCK
         + 'fragments = ["core/base", "core/error-handling"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["typescript", "vue"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -279,7 +311,7 @@ def test_nextjs_stack_renders_framework_guidance(tmp_path: Path) -> None:
     manifest = (
         MANIFEST_RELEASE_BLOCK
         + 'fragments = ["core/base", "core/error-handling"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["typescript", "react", "nextjs"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -308,7 +340,7 @@ def test_tanstack_query_stack_can_be_rendered_with_react(tmp_path: Path) -> None
     manifest = (
         MANIFEST_RELEASE_BLOCK
         + 'fragments = ["core/base", "core/error-handling"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["typescript", "react", "tanstack-query"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -337,7 +369,7 @@ def test_nuxt_vite_and_fsd_stacks_can_be_rendered_together(tmp_path: Path) -> No
     manifest = (
         MANIFEST_RELEASE_BLOCK
         + 'fragments = ["core/base", "core/error-handling"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["typescript", "vue", "nuxt", "vite", "fsd"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -379,7 +411,7 @@ def test_vue_query_alias_can_be_rendered(tmp_path: Path) -> None:
     manifest = (
         MANIFEST_RELEASE_BLOCK
         + 'fragments = ["core/base", "core/error-handling"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["typescript", "vue-query"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -408,7 +440,7 @@ def test_python_stack_renders_unified_guidance(tmp_path: Path) -> None:
     manifest = (
         MANIFEST_RELEASE_BLOCK
         + 'fragments = ["core/base", "core/error-handling"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["python"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -442,7 +474,7 @@ def test_django_and_fastapi_stacks_render_updated_guidance(tmp_path: Path) -> No
     manifest = (
         MANIFEST_RELEASE_BLOCK
         + 'fragments = ["core/base", "core/error-handling"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["django", "fastapi"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -474,7 +506,7 @@ def test_django_drf_stack_renders_softened_guidance(tmp_path: Path) -> None:
     manifest = (
         MANIFEST_RELEASE_BLOCK
         + 'fragments = ["core/base", "core/error-handling"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["django-drf"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -503,7 +535,7 @@ def test_django_service_layer_and_save_orchestration_render(tmp_path: Path) -> N
     manifest = (
         MANIFEST_RELEASE_BLOCK
         + 'fragments = ["core/base", "core/error-handling"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["django", "django-service-layer", "django-save-orchestration"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -536,7 +568,7 @@ def test_frontend_layered_architecture_stack_can_be_rendered(tmp_path: Path) -> 
     manifest = (
         MANIFEST_RELEASE_BLOCK
         + 'fragments = ["core/base", "core/error-handling"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["react", "frontend-layered-architecture"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -1048,7 +1080,7 @@ def test_missing_optional_override_does_not_fail(tmp_path: Path) -> None:
     manifest = (
         MANIFEST_RELEASE_BLOCK +
         'fragments = ["core/base", "core/architecture"]\n'
-        'features = ["conport"]\n'
+        'features = ["session-hygiene"]\n'
         'stacks = ["python"]\n'
         'local_overrides = ["docs/ai/project-rules.md"]\n'
         'optional_local_overrides = ["docs/ai/private-rules.local.md"]\n'
@@ -1173,6 +1205,92 @@ def test_sync_project_templates_skips_unmanaged_local_changes(tmp_path: Path) ->
     # The unmanaged rule stays untouched; the update skill still deploys.
     assert [result.status for result in results] == ["skipped-unmanaged", "created"]
     assert destination.read_text(encoding="utf-8") == "# custom local rule\n"
+
+
+def test_sync_retires_managed_copies_of_renamed_templates(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+    retired_destination = project_root / ".cursor/rules/deploy-ai-knowledge-stack.mdc"
+    retired_destination.parent.mkdir(parents=True)
+    retired_destination.write_text(
+        "<!-- Managed by ai-standards template: "
+        "templates/ai-infrastructure/deploy-ai-knowledge-stack.cursor.mdc -->\n"
+        "# legacy deployment rule\n",
+        encoding="utf-8",
+    )
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK +
+        'fragments = ["core/base"]\n'
+        'features = ["chroma"]\n'
+        'stacks = ["python"]\n'
+        'local_overrides = ["docs/ai/project-rules.md"]\n'
+        "\n"
+        "[tooling]\n"
+        'agents = ["cursor"]\n'
+        "\n"
+        "[metadata]\n"
+        'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    results = sync_project_templates(project_root)
+
+    retired = [result for result in results if result.status == "retired"]
+    assert [result.destination_path for result in retired] == [retired_destination]
+    assert not retired_destination.exists()
+    # The renamed replacement deploys alongside the retirement.
+    replacement = project_root / ".cursor/rules/deploy-ai-retrieval-stack.mdc"
+    assert replacement.exists()
+    assert any(result.destination_path == replacement for result in results)
+
+
+def test_sync_retirement_keeps_unmanaged_and_prunes_emptied_directories(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    retired_destination = (
+        project_root / ".codex/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md"
+    )
+    retired_destination.parent.mkdir(parents=True)
+    retired_destination.write_text("# user-rewritten rule, marker removed\n", encoding="utf-8")
+    emptied_destination = project_root / ".claude/commands/deploy-ai-knowledge-stack.md"
+    emptied_destination.parent.mkdir(parents=True)
+    emptied_destination.write_text(
+        "<!-- Managed by ai-standards template: whatever -->\n# legacy command\n",
+        encoding="utf-8",
+    )
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["session-hygiene"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n[tooling]\nagents = []\n"
+        + "\n[metadata]\nproject_name = \"demo-project\"\n"
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai").mkdir(parents=True)
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    results = sync_project_templates(project_root)
+
+    assert [result.status for result in results] == ["retired"]
+    # The user-rewritten copy survives; the managed copy is gone together with
+    # the directory the removal emptied.
+    assert retired_destination.read_text(encoding="utf-8") == (
+        "# user-rewritten rule, marker removed\n"
+    )
+    assert not emptied_destination.exists()
+    assert not emptied_destination.parent.exists()
 
 
 def test_managed_marker_keeps_toml_parseable() -> None:
@@ -1451,16 +1569,16 @@ def test_sync_creates_infra_and_skill_when_chroma_enabled(tmp_path: Path) -> Non
     assert (project_root / ".ai-standards" / "scripts" / "code_index.py").exists()
     assert (project_root / ".ai-standards" / "code-index.toml").exists()
     assert (
-        project_root / ".codex/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md"
+        project_root / ".codex/skills/ai-infrastructure/deploy-ai-retrieval-stack/SKILL.md"
     ).exists()
     assert (
-        project_root / ".claude/commands/deploy-ai-knowledge-stack.md"
+        project_root / ".claude/commands/deploy-ai-retrieval-stack.md"
     ).exists()
     assert (
-        project_root / ".agents/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md"
+        project_root / ".agents/skills/ai-infrastructure/deploy-ai-retrieval-stack/SKILL.md"
     ).exists()
     assert (
-        project_root / ".cursor/rules/deploy-ai-knowledge-stack.mdc"
+        project_root / ".cursor/rules/deploy-ai-retrieval-stack.mdc"
     ).exists()
     assert not (project_root / ".claude/commands/simplify-review.md").exists()
     assert not (
@@ -1532,7 +1650,7 @@ def test_sync_deploys_update_skill_adapters_regardless_of_features(tmp_path: Pat
     manifest = (
         MANIFEST_RELEASE_BLOCK
         + 'fragments = ["core/base"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["python"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -1597,7 +1715,7 @@ def test_check_fails_when_manifest_pin_drifts_from_the_source(tmp_path: Path) ->
             'ai_standards_version = "0.0.1"',
         )
         + 'fragments = ["core/base"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["python"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -1628,7 +1746,7 @@ def test_render_warns_when_manifest_pin_drifts_from_the_source(
             'ai_standards_version = "0.0.1"',
         )
         + 'fragments = ["core/base"]\n'
-        + 'features = ["conport"]\n'
+        + 'features = ["session-hygiene"]\n'
         + 'stacks = ["python"]\n'
         + 'local_overrides = ["docs/ai/project-rules.md"]\n'
         + "\n"
@@ -1759,7 +1877,7 @@ def test_sync_skips_chroma_infra_when_feature_disabled(tmp_path: Path) -> None:
 def _minimal_manifest(
     local_override: str,
     optional_override: str | None = None,
-    features: str = "conport",
+    features: str = "session-hygiene",
 ) -> str:
     manifest = (
         MANIFEST_RELEASE_BLOCK
@@ -1827,7 +1945,7 @@ def test_init_project_scaffolds_local_overrides_outside_the_knowledge_tree(
     assert '"ai/project-rules.md"' in manifest
     assert "docs/ai/project-rules.md" not in manifest
 
-def _doctor_project(tmp_path: Path, override_path: str, features: str = "conport") -> Path:
+def _doctor_project(tmp_path: Path, override_path: str, features: str = "session-hygiene") -> Path:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()
     (project_root / override_path).parent.mkdir(parents=True, exist_ok=True)

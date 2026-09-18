@@ -26,7 +26,7 @@ Upgrade mode; when the deployed skill is missing or older than this file, run `r
    `uv run ai-sync --help` works.
 2. **Survey the project.** Existing `AGENTS.md` (rendered or hand-written — if hand-written,
    ask how to merge before overwriting anything); stacks in play against the registry's
-   `[stacks]`; docs layout and language; ConPort or Basic Memory already configured; CI;
+   `[stacks]`; docs layout and language; Basic Memory or other memory tooling already configured; CI;
    tracker; which agent environments the team uses (`codex`, `claude`, `kilo`, `cursor`).
 3. **Propose the feature set.** From `[features]` in `registry.toml`, one line per feature —
    what it changes for this project, a recommendation for or against based on the survey, and
@@ -68,6 +68,50 @@ Upgrade mode; when the deployed skill is missing or older than this file, run `r
 8. **Verify and report.** `check` + `doctor`; report the old and new versions, what was
    refreshed, what was enabled, and that the agent should be restarted to load the new
    `AGENTS.md`.
+
+## ConPort Migration (upgrades to 2.4.0 and later)
+
+Run this when the upgrade crosses into 2.4.0 and the project still carries ConPort:
+`conport` in the manifest `features`, a `context_portal/` directory at the project root,
+or a ConPort MCP server in a client configuration. Offer the migration before touching
+the manifest: replacing `conport` without it loses the operational memory.
+
+1. **Detect.** Manifest `features`; `context_portal/`; ConPort MCP entries in
+   `kilo.json`, `.codex/config.toml`, and any other client in use.
+2. **Export.** Prefer the ConPort MCP tools while the server is still wired
+   (`get_active_context`, `get_decisions`, `get_progress`, `get_system_patterns`,
+   `get_custom_data`). When no server is available, read `context_portal/conport.db`
+   (SQLite) directly.
+3. **Lay out into `docs/local/**`** following the project-memory taxonomy. Minimal
+   frontmatter: `title`, `type`, `status`, `updated`. Canonical-note requirements do
+   not apply inside `docs/local/`.
+   - active context → `docs/local/context/<project>.md`, collapsed to
+     goal/scope/constraints/phase/next — not a raw dump;
+   - decisions → `docs/local/decisions/<slug>.md` with reason and status; ask which
+     decisions to promote straight into canonical `docs/decisions/**` — that promotion
+     is the user's explicit choice;
+   - progress → `docs/local/progress/<task>.md`; carry over only open work (`done`
+     items may appear as one-line context); closed entries stay in the export;
+   - system patterns → `docs/local/patterns/<slug>.md`;
+   - custom data and glossary → by content: `docs/local/investigations/` or
+     `docs/local/context/`; live glossary terms are candidates for `docs/domain/**`.
+
+   ConPort relations have no direct equivalent: serialize them as links in the note
+   bodies; the retrieval graph rebuilds from those links.
+4. **Wire the new model.** Ensure `/docs/local/` is in `.gitignore` (local memory is
+   user-local and not committed by default). Replace `conport` in `features` with
+   `project-memory` (and `retrieval-routing`, `basic-memory` when not yet enabled).
+   Run `bm reindex` when Basic Memory is wired.
+5. **Decommission ConPort — only after the user confirms the migration result.**
+   Remove `context_portal/` (verify the migrated notes exist first: it is the only
+   copy of the exported data), then remove the ConPort MCP server from every client
+   configuration.
+6. **Verify.** `render` + `check` + `doctor` clean; a targeted search over the local
+   memory notes finds the migrated material.
+
+Never decommission ConPort before the migrated notes are verified, and never promote
+migrated local decisions into canonical documentation without the user's explicit
+request.
 
 ## Never
 

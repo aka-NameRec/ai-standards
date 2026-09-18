@@ -19,7 +19,10 @@ Descriptive overview of the knowledge stack around a project. The argument for t
 | Basic Memory adapter (cockpit) | deterministic projection of the registry into `~/.basic-memory/config.json`; the only writer of that file | no — projection |
 | Basic Memory | graph retrieval over the living knowledge tree (`docs/**` minus archive); notes identified by frontmatter `title`; `memory://` via permalinks | no — projection of the tree |
 | Chroma | vector retrieval: code collections per explicit roots; a history collection over `docs/archive` | no — projection |
-| ConPort | operational memory: active context, progress, handoffs | no — transient |
+
+ConPort left the operational-memory layer in September 2026; local working memory
+(`docs/local/**`) replaces it — see
+[2026-09-18-memory-retrieval-reorganization.md](../decisions/2026-09-18-memory-retrieval-reorganization.md).
 
 ## Boundary Invariants
 
@@ -37,7 +40,7 @@ Descriptive overview of the knowledge stack around a project. The argument for t
 
 ## Observations
 
-- [fact] git is the only canonical layer; Basic Memory, Chroma, ConPort, and the rendered `AGENTS.md` are projections rebuildable from files.
+- [fact] git is the only canonical layer; Basic Memory, Chroma, and the rendered `AGENTS.md` are projections rebuildable from files.
 - [fact] The registry-to-config pipeline is single-writer: the cockpit adapter writes `~/.basic-memory/config.json`, and `ai-sync doctor` only reads it.
 - [fact] The archive crosses the Basic Memory boundary through `.bmignore` and the Chroma boundary through a collection declaration, each one line and each verified differently.
 

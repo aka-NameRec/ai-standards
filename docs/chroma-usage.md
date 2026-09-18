@@ -9,7 +9,7 @@ Russian localized version: [chroma-usage.ru.md](chroma-usage.ru.md)
 
 This guide explains how to use the `chroma` feature from `ai-standards` in downstream projects.
 
-`chroma` standardizes semantic code search over repository source files as a layer that is deliberately separate from ConPort operational memory and Basic Memory documentation retrieval.
+`chroma` standardizes semantic code search over repository source files as a layer that is deliberately separate from Basic Memory documentation retrieval.
 
 ## Goals
 
@@ -31,7 +31,7 @@ Typical outcomes:
 The feature standardizes shared policy for:
 
 - using Chroma as a semantic code-search layer over source files
-- keeping the code index separate from ConPort and Basic Memory stores
+- keeping the code index separate from Basic Memory stores
 - freshness-gated querying (refresh before query, block on refresh failure)
 - incremental indexing by content hash with an atomic resumable manifest
 - local `PersistentClient` as the default deployment mode
@@ -51,10 +51,9 @@ It intentionally does not standardize:
 |---|---|---|---|
 | 0 | `docs/` (Git) | durable source of truth | Markdown |
 | 1 | Basic Memory | retrieval over documentation | BM sqlite + embeddings |
-| 2 | ConPort | transient operational context | ConPort sqlite (+ internal vectors) |
-| 3 | Chroma | semantic code search | Chroma PersistentClient sqlite |
+| 2 | Chroma | semantic code search | Chroma PersistentClient sqlite |
 
-ConPort internal vectors, the Chroma code index, and Basic Memory embeddings are never mixed. Keeping them separate keeps each retrieval layer precise instead of noisy.
+The Chroma code index and Basic Memory embeddings are never mixed. Keeping them separate keeps each retrieval layer precise instead of noisy.
 
 ## Freshness-Gated Querying
 
@@ -88,11 +87,10 @@ ai-standards-managed infrastructure lives under `.ai-standards/`:
 
 ## Deployment Skill
 
-When `chroma` is enabled, `ai-sync sync-templates` also propagates a deployment skill (`deploy-ai-knowledge-stack`) to the agents listed in the manifest. The skill deploys the whole stack (ConPort, Basic Memory, Chroma) in an order that eliminates common setup races. See the decision record for details.
+When `chroma` is enabled, `ai-sync sync-templates` also propagates a deployment skill (`deploy-ai-retrieval-stack`) to the agents listed in the manifest. The skill deploys the enabled retrieval layers (Basic Memory, Chroma) in an order that eliminates common setup races. See the decision record for details.
 
 ## Relationship To Other Features
 
-- `conport` remains transient operational memory and handoff storage.
 - `basic-memory` remains a retrieval layer over Git-tracked Markdown documentation.
 - `structured-artifacts` defines which Markdown artifacts count as canonical.
 - `design-first-collaboration` keeps intent and boundaries explicit before deployment.
@@ -103,7 +101,6 @@ When `chroma` is enabled, `ai-sync sync-templates` also propagates a deployment 
 
 ```toml
 features = [
-  "conport",
   "basic-memory",
   "chroma",
   "structured-artifacts",
@@ -122,7 +119,7 @@ Avoid:
 
 - `Trust the semantic search result as exhaustive.`
 - `Query Chroma without refreshing after a large change.`
-- `Mix the code index with ConPort or Basic Memory stores.`
+- `Mix the code index with Basic Memory stores.`
 
 Prefer:
 

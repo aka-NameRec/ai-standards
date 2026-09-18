@@ -9,7 +9,7 @@ permalink: ai-standards/chroma-usage.ru
 
 Это руководство объясняет, как использовать фичу `chroma` из `ai-standards` в downstream-проектах.
 
-`chroma` стандартизует семантический поиск по исходному коду репозитория как слой, намеренно отдельный от оперативной памяти ConPort и retrieval-слоя документации Basic Memory.
+`chroma` стандартизует семантический поиск по исходному коду репозитория как слой, намеренно отдельный от retrieval-слоя документации Basic Memory.
 
 ## Цели
 
@@ -31,7 +31,7 @@ permalink: ai-standards/chroma-usage.ru
 Фича стандартизует общую политику для:
 
 - использования Chroma как слоя семантического поиска по исходным файлам
-- удержания индекса кода отдельным от хранилищ ConPort и Basic Memory
+- удержания индекса кода отдельным от хранилищ Basic Memory
 - freshness-gated-запросов (обновление перед запросом, блокировка при ошибке обновления)
 - инкрементальной индексации по content-hash с atomic resumable-манифестом
 - локального `PersistentClient` как режима развёртывания по умолчанию
@@ -51,10 +51,9 @@ permalink: ai-standards/chroma-usage.ru
 |---|---|---|---|
 | 0 | `docs/` (Git) | durable source of truth | Markdown |
 | 1 | Basic Memory | retrieval по документации | sqlite + embeddings BM |
-| 2 | ConPort | transient operational context | sqlite ConPort (+ внутр. векторы) |
-| 3 | Chroma | семантический поиск по коду | sqlite Chroma PersistentClient |
+| 2 | Chroma | семантический поиск по коду | sqlite Chroma PersistentClient |
 
-Внутренние векторы ConPort, индекс кода Chroma и embeddings Basic Memory никогда не смешиваются. Раздельность удерживает каждый retrieval-слой точным, а не шумным.
+Индекс кода Chroma и embeddings Basic Memory никогда не смешиваются. Раздельность удерживает каждый retrieval-слой точным, а не шумным.
 
 ## Freshness-gated запросы
 
@@ -88,11 +87,10 @@ Similarity-поиск сужает исследование, но не дока�
 
 ## Навык развёртывания
 
-При включённой `chroma` `ai-sync sync-templates` также распространяет навык развёртывания (`deploy-ai-knowledge-stack`) на агентов, перечисленных в манифесте. Навык разворачивает весь стек (ConPort, Basic Memory, Chroma) в порядке, устраняющем типичные гонки настройки. Подробности — в decision record.
+При включённой `chroma` `ai-sync sync-templates` также распространяет навык развёртывания (`deploy-ai-retrieval-stack`) на агентов, перечисленных в манифесте. Навык разворачивает включённые retrieval-слои (Basic Memory, Chroma) в порядке, устраняющем типичные гонки настройки. Подробности — в decision record.
 
 ## Связь с другими фичами
 
-- `conport` остаётся transient operational memory и handoff-хранилищем.
 - `basic-memory` остаётся retrieval-слоем над Git-tracked Markdown-документацией.
 - `structured-artifacts` определяет, какие Markdown-артефакты считаются каноническими.
 - `design-first-collaboration` удерживает интент и границы явными до развёртывания.
@@ -103,7 +101,6 @@ Similarity-поиск сужает исследование, но не дока�
 
 ```toml
 features = [
-  "conport",
   "basic-memory",
   "chroma",
   "structured-artifacts",
@@ -122,7 +119,7 @@ features = [
 
 - `Доверяй результату семантического поиска как исчерпывающему.`
 - `Запрашивать Chroma без обновления после большого изменения.`
-- `Смешивать индекс кода с хранилищами ConPort или Basic Memory.`
+- `Смешивать индекс кода с хранилищами Basic Memory.`
 
 Предпочитать:
 

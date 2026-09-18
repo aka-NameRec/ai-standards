@@ -158,7 +158,6 @@ These are not merely "be careful" areas. They are review points.
 - `design-first-collaboration` defines how intent, boundaries, and non-goals are established.
 - `reasoning-hygiene` improves the quality of the agent's self-review and evidence handling.
 - `structured-artifacts` provides the change plans and decision records that can carry the session envelope.
-- `conport` stores active context, recent findings, and evolving memory between runs.
 
 `autonomy-boundaries` tells the agent when to stop leaning on those inputs and request human verification.
 

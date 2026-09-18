@@ -109,8 +109,8 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="codex",
-            source_relative_path="templates/ai-infrastructure/deploy-ai-knowledge-stack.SKILL.md",
-            destination_relative_path=".codex/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md",
+            source_relative_path="templates/ai-infrastructure/deploy-ai-retrieval-stack.SKILL.md",
+            destination_relative_path=".codex/skills/ai-infrastructure/deploy-ai-retrieval-stack/SKILL.md",
             feature="chroma",
         ),
         AgentTemplate(
@@ -147,8 +147,8 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="cursor",
-            source_relative_path="templates/ai-infrastructure/deploy-ai-knowledge-stack.cursor.mdc",
-            destination_relative_path=".cursor/rules/deploy-ai-knowledge-stack.mdc",
+            source_relative_path="templates/ai-infrastructure/deploy-ai-retrieval-stack.cursor.mdc",
+            destination_relative_path=".cursor/rules/deploy-ai-retrieval-stack.mdc",
             feature="chroma",
         ),
         AgentTemplate(
@@ -185,8 +185,8 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="claude",
-            source_relative_path="templates/ai-infrastructure/deploy-ai-knowledge-stack.claude.md",
-            destination_relative_path=".claude/commands/deploy-ai-knowledge-stack.md",
+            source_relative_path="templates/ai-infrastructure/deploy-ai-retrieval-stack.claude.md",
+            destination_relative_path=".claude/commands/deploy-ai-retrieval-stack.md",
             feature="chroma",
         ),
         AgentTemplate(
@@ -223,8 +223,8 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="kilo",
-            source_relative_path="templates/ai-infrastructure/deploy-ai-knowledge-stack.SKILL.md",
-            destination_relative_path=".agents/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md",
+            source_relative_path="templates/ai-infrastructure/deploy-ai-retrieval-stack.SKILL.md",
+            destination_relative_path=".agents/skills/ai-infrastructure/deploy-ai-retrieval-stack/SKILL.md",
             feature="chroma",
         ),
         AgentTemplate(
@@ -276,6 +276,17 @@ INFRA_TEMPLATES: tuple[AgentTemplate, ...] = (
         destination_relative_path=".ai-standards/code-review-report.md",
         feature="code-review",
     ),
+)
+
+# Destinations of templates that no longer ship. When a managed template is
+# renamed or withdrawn, ``sync-templates`` removes its deployed copies so a
+# stale skill does not linger in projects. Only copies carrying the managed
+# marker are removed; a file the user edited past the marker is never touched.
+RETIRED_TEMPLATE_DESTINATIONS: tuple[str, ...] = (
+    ".codex/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md",
+    ".cursor/rules/deploy-ai-knowledge-stack.mdc",
+    ".claude/commands/deploy-ai-knowledge-stack.md",
+    ".agents/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md",
 )
 
 
@@ -736,6 +747,45 @@ def _is_claude_bridge_content(content: str) -> bool:
     return CLAUDE_BRIDGE_MARKER in content
 
 
+def _read_managed_destination(destination_path: Path) -> str:
+    """Read a deployed template copy, or raise with actionable context."""
+    try:
+        return destination_path.read_text(encoding="utf-8")
+    except OSError as error:
+        raise SyncError(
+            f"Cannot read managed template destination {destination_path}: {error}"
+        ) from error
+
+
+def _retire_retired_templates(project_root: Path) -> list[TemplateSyncResult]:
+    """Remove deployed copies of templates that no longer ship.
+
+    A copy qualifies only when it still carries the managed marker: a file the
+    user rewrote past the marker is left alone, mirroring ``_sync_agent_template``
+    refusing to overwrite unmanaged content. Directories emptied by the removal
+    are pruned, but never above the agent-specific skills/rules root.
+    """
+    results: list[TemplateSyncResult] = []
+    for relative_path in RETIRED_TEMPLATE_DESTINATIONS:
+        destination_path = project_root / relative_path
+        if not destination_path.exists():
+            continue
+        if not _is_managed_template_content(_read_managed_destination(destination_path)):
+            continue
+        try:
+            destination_path.unlink()
+        except OSError as error:
+            raise SyncError(
+                f"Cannot retire managed template destination {destination_path}: {error}"
+            ) from error
+        parent = destination_path.parent
+        while parent != project_root and not any(parent.iterdir()):
+            parent.rmdir()
+            parent = parent.parent
+        results.append(TemplateSyncResult(status="retired", destination_path=destination_path))
+    return results
+
+
 def sync_project_templates(project_root: Path) -> list[TemplateSyncResult]:
     manifest = _load_manifest(project_root)
     enabled_features = set(manifest.features)
@@ -749,6 +799,7 @@ def sync_project_templates(project_root: Path) -> list[TemplateSyncResult]:
         if template.feature is not None and template.feature not in enabled_features:
             continue
         results.append(_sync_agent_template(project_root, template))
+    results.extend(_retire_retired_templates(project_root))
     return results
 
 

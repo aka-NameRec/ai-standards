@@ -1,6 +1,5 @@
 [features]
 response-language-style = ["process/response-language-style"]
-conport = ["tools/conport"]
 basic-memory = ["tools/basic-memory"]
 chroma = ["tools/chroma"]
 design-first-collaboration = ["process/design-first-collaboration"]

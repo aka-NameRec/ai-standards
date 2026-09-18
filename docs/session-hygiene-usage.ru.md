@@ -120,13 +120,12 @@ Fresh chat должен начинаться с:
 - decision records
 - module contracts или migration notes
 - `docs/ai-memory/**` или эквивалентные working-memory artifacts, если проект их использует
-- ConPort handoff или active context, если доступны
+- handoff или active context из локальной памяти проекта, если доступны
 
 Загружайте только то, что relevant для next slice. Session hygiene не должна становиться broad context loading by default.
 
 ## Связь с другими features
 
-- `conport` хранит transient operational context и session handoffs между сессиями.
 - `basic-memory` может доставать релевантное Git-tracked knowledge и working-memory notes без широкой перезагрузки контекста.
 - `structured-artifacts` даёт change plans, decision records и module contracts, которые делают handoffs конкретными.
 - `autonomy-boundaries` определяет, когда long autonomous execution должен остановиться для human review.
@@ -141,7 +140,6 @@ Fresh chat должен начинаться с:
 
 ```toml
 features = [
-  "conport",
   "design-first-collaboration",
   "reasoning-hygiene",
   "autonomy-boundaries",

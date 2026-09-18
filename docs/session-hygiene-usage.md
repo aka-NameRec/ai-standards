@@ -120,13 +120,12 @@ At phase boundaries, re-read relevant sources instead of relying only on chat me
 - decision records
 - module contracts or migration notes
 - `docs/ai-memory/**` or equivalent working-memory artifacts when the project uses them
-- ConPort handoff or active context when available
+- local project memory handoff or active context when available
 
 Reload only what is relevant to the next slice. Session hygiene should not become broad context loading by default.
 
 ## Relationship To Other Features
 
-- `conport` stores transient operational context and session handoffs between sessions.
 - `basic-memory` can retrieve relevant Git-tracked knowledge and working-memory notes without broad context reloads.
 - `structured-artifacts` provides change plans, decision records, and module contracts that make handoffs concrete.
 - `autonomy-boundaries` defines when long autonomous execution must stop for human review.
@@ -141,7 +140,6 @@ If the project uses a Markdown retrieval layer such as Basic Memory, use it to f
 
 ```toml
 features = [
-  "conport",
   "design-first-collaboration",
   "reasoning-hygiene",
   "autonomy-boundaries",

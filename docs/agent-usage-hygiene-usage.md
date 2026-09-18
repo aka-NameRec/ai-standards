@@ -97,7 +97,6 @@ Avoid:
 - `reasoning-hygiene` keeps analysis focused on assumptions, risks, and verification.
 - `autonomy-boundaries` prevents long sessions from drifting beyond reviewable slices.
 - `structured-artifacts` provides change plans, contracts, and decision records that reduce transient context load.
-- `conport` can preserve durable project memory outside the active model context.
 
 `agent-usage-hygiene` does not replace these features. It makes their context-economy value explicit and adds prompt-activated economy behavior.
 
@@ -105,7 +104,6 @@ Avoid:
 
 ```toml
 features = [
-  "conport",
   "design-first-collaboration",
   "reasoning-hygiene",
   "autonomy-boundaries",

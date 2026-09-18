@@ -100,7 +100,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project --output-name 
 Use four layers:
 
 - `fragments`: direct core rules that should always be rendered.
-- `features`: optional capabilities such as `conport`, `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
+- `features`: optional capabilities such as `basic-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
 - `stacks`: technology-specific or architecture-specific rules such as `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring`, or `spring-data-jpa`.
 - `tooling.agents`: optional agent adapters such as `codex`, `claude`, `kilo`, and `cursor` for managed local workflow templates.
 
@@ -117,7 +117,6 @@ fragments = [
 ]
 
 features = [
-  "conport",
   "design-first-collaboration",
   "reasoning-hygiene",
   "autonomy-boundaries",
@@ -425,7 +424,7 @@ Use `reasoning-hygiene` when a project benefits from reusable rules for:
 
 - which reasoning behaviors are worth standardizing
 - which prompt patterns are too brittle or model-specific to normalize
-- how this feature complements `design-first-collaboration`, `conport`, and `structured-artifacts`
+- how this feature complements `design-first-collaboration`, `project-memory`, and `structured-artifacts`
 
 Detailed operational guidance lives in:
 
@@ -575,7 +574,7 @@ Use `session-hygiene` when a project benefits from reusable rules for:
 - fresh chats are preferred when long-session context becomes harder to trust than explicit artifacts
 - shared defaults should avoid brittle message-count or token-count thresholds
 
-ConPort remains useful for transient operational context and handoff storage. If a project uses Basic Memory or another Markdown retrieval layer, prefer it for locating relevant Git-tracked knowledge instead of relying on broad context reloads.
+Operational context and handoff state live in local project memory (`docs/local/**`, see the `project-memory` feature). If a project uses Basic Memory or another Markdown retrieval layer, prefer it for locating relevant Git-tracked knowledge instead of relying on broad context reloads.
 
 Detailed operational guidance lives in:
 
@@ -618,7 +617,7 @@ Related task documents on the knowledge-tree method:
 
 ## Using Chroma In a Project
 
-`chroma` is an optional feature for projects that want a semantic code-search layer over repository source files, kept separate from ConPort operational memory and Basic Memory documentation retrieval.
+`chroma` is an optional feature for projects that want a semantic code-search layer over repository source files, kept separate from Basic Memory documentation retrieval.
 
 Use `chroma` when a project benefits from reusable rules for:
 
@@ -629,13 +628,13 @@ Use `chroma` when a project benefits from reusable rules for:
 
 `ai-standards` owns the reusable policy:
 
-- Chroma is a semantic code-search layer, separate from ConPort and Basic Memory stores
+- Chroma is a semantic code-search layer, separate from Basic Memory stores
 - all queries go through a freshness-gate wrapper (refresh before query, block on failure)
 - similarity narrows investigation but does not prove completeness
 - indexing is incremental by content hash with an atomic resumable manifest
 - local `PersistentClient` (embedded storage) is the default deployment mode
 
-Enabling `chroma` in a manifest does three things at once: renders the usage fragment into `AGENTS.md`, syncs the code-index infrastructure templates under `.ai-standards/` (`scripts/code_index.py` and `code-index.toml`), and propagates a `deploy-ai-knowledge-stack` skill/command/rule to the declared agents. The deployment skill deploys the whole AI knowledge stack (ConPort, Basic Memory, Chroma) in a race-free order.
+Enabling `chroma` in a manifest does three things at once: renders the usage fragment into `AGENTS.md`, syncs the code-index infrastructure templates under `.ai-standards/` (`scripts/code_index.py` and `code-index.toml`), and propagates a `deploy-ai-retrieval-stack` skill/command/rule to the declared agents. The deployment skill deploys the enabled retrieval layers (Basic Memory, Chroma) in a race-free order.
 
 Detailed operational guidance lives in:
 
