@@ -4,6 +4,18 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- **New feature `rule-engineering`** (user issue #17, phases 0–1; decision record `docs/decisions/2026-09-19-adopt-rule-engineering-initiative.md`): one Rule Engineering process for every normative rule regardless of source — nine quality properties (atomic, unambiguous, actionable, properly scoped, observable, unique by behavioral overlap, non-conflicting with explicit precedence, correct abstraction level, portable), the interpretation surface concept, the engineering flow from candidate knowledge to accept/adapt/reject with a mandatory validation form per rule, and context placement principles. Existing rules are not mass-rewritten; adoption is incremental.
+- Baseline artifact for the initiative: `docs/artifacts/2026-09-19-rule-engineering-baseline.md` (both languages) — repository measures at release 2.4.0, current rule-related behavior, and candidate scenarios for future comparison.
+- Usage guides `docs/rule-engineering-usage.md` / `.ru.md`; feature registered in `registry.toml` with `feature_meta` `2.5.0` and enabled in the self-hosted manifest.
+
+### Changed
+
+- **The README `Import External Rules` flow is restated as a special case of Rule Engineering** (both languages): the standard import prompt now routes every candidate through the Rule Engineering properties and requires a validation form per accepted rule. No renderer behavior changed.
+
 ## [2.4.0] — 2026-09-18
 
 ### Changed

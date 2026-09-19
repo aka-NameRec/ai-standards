@@ -11,6 +11,7 @@
 - [Agent Adapters](#agent-adapters)
 - [Import External Rules](#import-external-rules)
 - [Feature Groups And Dependencies](#feature-groups-and-dependencies)
+- [Using Rule Engineering In a Project](#using-rule-engineering-in-a-project)
 - [Using Reasoning Hygiene In a Project](#using-reasoning-hygiene-in-a-project)
 - [Using Autonomy Boundaries In a Project](#using-autonomy-boundaries-in-a-project)
 - [Using Review Lenses In a Project](#using-review-lenses-in-a-project)
@@ -104,7 +105,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project --output-name 
 Use four layers:
 
 - `fragments`: direct core rules that should always be rendered.
-- `features`: optional capabilities such as `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, and `agent-usage-hygiene`.
+- `features`: optional capabilities such as `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, `agent-usage-hygiene`, and `rule-engineering`.
 - `stacks`: technology-specific or architecture-specific rules such as `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring`, or `spring-data-jpa`.
 - `tooling.agents`: optional agent adapters such as `codex`, `claude`, `kilo`, and `cursor` for managed local workflow templates.
 
@@ -351,19 +352,20 @@ Managed adapter files include an `ai-standards` marker. `sync-templates` updates
 
 ## Import External Rules
 
-Do not copy external rule sets directly into `ai-standards`. Normalize and adopt only the reusable parts.
+Do not copy external rule sets directly into `ai-standards`. Importing is a special case of the `rule-engineering` feature: extract candidate behaviors from the source, engineer each into an atomic, unambiguous, observable rule, place it on the right context layer, and define its validation.
 
-Recommended import flow:
+The import flow, mapped onto Rule Engineering:
 
 1. Read the external source and summarize its structure.
-2. Extract candidate rules.
-3. Classify each rule as `keep`, `adapt`, or `reject`.
-4. Reject vague, project-specific, redundant, or conflicting rules.
+2. Extract candidate rules — candidate normative knowledge.
+3. Engineer each candidate through the Rule Engineering flow: atomicity, ambiguity, scope, overlap, conflicts, abstraction level.
+4. Reject vague, project-specific, redundant, or conflicting candidates, and state why.
 5. Normalize accepted rules into concise imperative instructions.
-6. Place them in the correct fragment under `fragments/`.
-7. Update `registry.toml` if a new stack or feature is introduced.
-8. Record provenance near the imported fragment.
-9. Run `uv run ruff check`, `uv run mypy`, and `uv run pytest`.
+6. Place them in the correct fragment under `fragments/` — the context layer selection step.
+7. Define at least one form of validation for each accepted rule.
+8. Update `registry.toml` if a new stack or feature is introduced.
+9. Record provenance near the imported fragment.
+10. Run `uv run ruff check`, `uv run mypy`, and `uv run pytest`.
 
 ### Standard Import Prompt
 
@@ -387,23 +389,26 @@ Target:
 Required workflow:
 1. Read the source and summarize its structure.
 2. Extract candidate rules.
-3. Classify each candidate as:
+3. Engineer each candidate through Rule Engineering: make it atomic and unambiguous, clarify preconditions and scope, check lexical/semantic/behavioral overlap with existing rules, check conflicts and precedence, and select the abstraction level.
+4. Classify each candidate as:
    - keep as reusable
    - adapt
    - reject
-4. For every rejected item, state why it was rejected.
-5. Normalize accepted rules into concise, imperative instructions matching ai-standards style.
-6. Avoid duplicates with existing fragments.
-7. Add provenance notes in the fragment header or adjacent documentation:
+5. For every rejected item, state why it was rejected.
+6. Normalize accepted rules into concise, imperative instructions matching ai-standards style.
+7. Define at least one form of validation for each accepted rule (static validation, deterministic assertion, behavioral scenario, human rubric, or cross-agent comparison).
+8. Avoid duplicates with existing fragments — behavioral overlap decides, not wording.
+9. Add provenance notes in the fragment header or adjacent documentation:
    - source URL
    - adoption date
    - adaptation notes
-8. If the source suggests a new stack, create a new stack fragment and register it.
-9. Run project checks after changes.
-10. In the final report, show:
+10. If the source suggests a new stack, create a new stack fragment and register it.
+11. Run project checks after changes.
+12. In the final report, show:
    - files changed
    - adopted rules
    - rejected rules
+   - validation form per accepted rule
    - conflicts or ambiguities needing human review
 
 Constraints:
@@ -437,6 +442,7 @@ Features group by concern:
 
 **Execution governance**
 
+- `rule-engineering` — one engineering flow for every normative rule, whatever its source
 - `design-first-collaboration`
 - `autonomy-boundaries`
 - `reasoning-hygiene`
@@ -455,6 +461,31 @@ Dependencies:
 - `module-contract-gate` keeps canonical contracts in repository artifacts; retrieval may only locate them
 - `autonomy-boundaries` integrates with working-state persistence: persisting state never authorizes crossing a boundary
 - `structural-code-intelligence` requires `retrieval-routing` and stays out of the recommended stack until its A/B/C evaluation justifies adoption
+- `rule-engineering` works standalone; executing its validation forms belongs to the separate evals specification (issue #18)
+
+## Using Rule Engineering In a Project
+
+`rule-engineering` is an optional feature that turns rule writing into an engineering discipline: one process for every normative rule, whatever its source, and an existing rule re-passes it on a material change.
+
+Use `rule-engineering` when a project wants rules to be:
+
+- atomic and unambiguous instead of accumulated prose
+- checked for behavioral overlap and conflicts before acceptance
+- placed deliberately — always-loaded rule, skill, reference, retrieval, script/tool, project knowledge, or adapter
+- verifiable — each rule names at least one form of validation
+
+`ai-standards` owns the durable policy:
+
+- the nine rule quality properties and the interpretation surface concept
+- the engineering flow from candidate knowledge to accept/adapt/reject
+- the boundary against mass rewrites: adoption is incremental
+
+Detailed operational guidance lives in:
+
+- English guide: [docs/rule-engineering-usage.md](docs/rule-engineering-usage.md)
+- Russian guide: [docs/rule-engineering-usage.ru.md](docs/rule-engineering-usage.ru.md)
+
+Scenario contracts that execute the validation forms will live under `docs/scenarios/` in this repository; running them belongs to the `ai-standards-evals` specification (issue #18).
 
 ## Using Reasoning Hygiene In a Project
 

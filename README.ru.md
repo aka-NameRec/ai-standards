@@ -11,6 +11,7 @@
 - [Agent Adapters](#agent-adapters)
 - [Заимствование внешних правил](#заимствование-внешних-правил)
 - [Группы фич и зависимости](#группы-фич-и-зависимости)
+- [Использование Rule Engineering в проекте](#использование-rule-engineering-в-проекте)
 - [Использование Reasoning Hygiene в проекте](#использование-reasoning-hygiene-в-проекте)
 - [Использование Autonomy Boundaries в проекте](#использование-autonomy-boundaries-в-проекте)
 - [Использование Review Lenses в проекте](#использование-review-lenses-в-проекте)
@@ -100,7 +101,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project
 Используются четыре слоя:
 
 - `fragments`: прямые базовые правила, которые должны включаться всегда.
-- `features`: опциональные возможности вроде `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene` и `agent-usage-hygiene`.
+- `features`: опциональные возможности вроде `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, `agent-usage-hygiene` и `rule-engineering`.
 - `stacks`: правила, зависящие от технологии или архитектурного стиля, например `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring` или `spring-data-jpa`.
 - `tooling.agents`: опциональные agent adapters вроде `codex`, `claude`, `kilo` и `cursor` для управляемых локальных workflow templates.
 
@@ -347,19 +348,20 @@ Templates, попадающие под `.ai-standards/`, являются agent-
 
 ## Заимствование внешних правил
 
-Не копируйте внешние наборы правил напрямую в `ai-standards`. Нормализуйте и заимствуйте только переиспользуемые части.
+Не копируйте внешние наборы правил напрямую в `ai-standards`. Импорт — частный случай feature `rule-engineering`: извлеките из источника кандидатные поведения, доведите каждое до атомарного, однозначного, наблюдаемого правила, разместите его на правильном слое контекста и задайте его валидацию.
 
-Рекомендуемый import flow:
+Поток импорта в терминах Rule Engineering:
 
 1. Прочитать внешний источник и кратко описать его структуру.
-2. Извлечь кандидаты на правила.
-3. Классифицировать каждое правило как `keep`, `adapt` или `reject`.
-4. Отвергнуть расплывчатые, проектные, избыточные или конфликтующие правила.
+2. Извлечь кандидатов на правила — кандидатное нормативное знание.
+3. Провести каждого кандидата через поток Rule Engineering: атомарность, однозначность, границы применимости, пересечения, конфликты, уровень абстракции.
+4. Отвергнуть расплывчатые, проектные, избыточные или конфликтующие кандидатные правила и указать причину.
 5. Нормализовать принятые правила в короткие повелительные инструкции.
-6. Поместить их в подходящий фрагмент под `fragments/`.
-7. Обновить `registry.toml`, если появился новый стек или новая возможность.
-8. Зафиксировать происхождение рядом с принятым фрагментом.
-9. Запустить `uv run ruff check`, `uv run mypy` и `uv run pytest`.
+6. Поместить их в подходящий фрагмент под `fragments/` — шаг выбора слоя контекста.
+7. Задать хотя бы одну форму валидации для каждого принятого правила.
+8. Обновить `registry.toml`, если появился новый стек или новая возможность.
+9. Зафиксировать происхождение рядом с принятым фрагментом.
+10. Запустить `uv run ruff check`, `uv run mypy` и `uv run pytest`.
 
 ### Стандартный запрос для импорта
 
@@ -383,23 +385,26 @@ Target:
 Required workflow:
 1. Read the source and summarize its structure.
 2. Extract candidate rules.
-3. Classify each candidate as:
+3. Engineer each candidate through Rule Engineering: make it atomic and unambiguous, clarify preconditions and scope, check lexical/semantic/behavioral overlap with existing rules, check conflicts and precedence, and select the abstraction level.
+4. Classify each candidate as:
    - keep as reusable
    - adapt
    - reject
-4. For every rejected item, state why it was rejected.
-5. Normalize accepted rules into concise, imperative instructions matching ai-standards style.
-6. Avoid duplicates with existing fragments.
-7. Add provenance notes in the fragment header or adjacent documentation:
+5. For every rejected item, state why it was rejected.
+6. Normalize accepted rules into concise, imperative instructions matching ai-standards style.
+7. Define at least one form of validation for each accepted rule (static validation, deterministic assertion, behavioral scenario, human rubric, or cross-agent comparison).
+8. Avoid duplicates with existing fragments — behavioral overlap decides, not wording.
+9. Add provenance notes in the fragment header or adjacent documentation:
    - source URL
    - adoption date
    - adaptation notes
-8. If the source suggests a new stack, create a new stack fragment and register it.
-9. Run project checks after changes.
-10. In the final report, show:
+10. If the source suggests a new stack, create a new stack fragment and register it.
+11. Run project checks after changes.
+12. In the final report, show:
    - files changed
    - adopted rules
    - rejected rules
+   - validation form per accepted rule
    - conflicts or ambiguities needing human review
 
 Constraints:
@@ -433,6 +438,7 @@ Constraints:
 
 **Управление исполнением**
 
+- `rule-engineering` — один инженерный поток для любого нормативного правила, откуда бы оно ни пришло
 - `design-first-collaboration`
 - `autonomy-boundaries`
 - `reasoning-hygiene`
@@ -451,6 +457,31 @@ Constraints:
 - `module-contract-gate` держит канонические контракты в артефактах репозитория; retrieval может их только находить
 - `autonomy-boundaries` интегрируется с сохранением рабочего состояния: сохранение состояния никогда не разрешает пересечь границу
 - `structural-code-intelligence` требует `retrieval-routing` и остаётся вне рекомендуемого стека, пока evaluation A/B/C не подтвердит включение
+- `rule-engineering` работает самостоятельно; исполнение форм валидации относится к отдельной evals-спецификации (issue #18)
+
+## Использование Rule Engineering в проекте
+
+`rule-engineering` — опциональная feature, превращающая написание правил в инженерную дисциплину: один процесс для любого нормативного правила, каков бы ни был его источник, а существующее правило повторно проходит его при существенном изменении.
+
+Используйте `rule-engineering`, когда проект хочет, чтобы правила были:
+
+- атомарными и однозначными, а не накопленной прозой
+- проверенными на поведенческие пересечения и конфликты до принятия
+- осознанно размещёнными — always-loaded rule, skill, reference, retrieval, script/tool, project knowledge или adapter
+- проверяемыми — каждое правило называет хотя бы одну форму валидации
+
+`ai-standards` владеет долговременной политикой:
+
+- девять свойств качества правила и понятие interpretation surface
+- инженерный поток от кандидатного знания до accept/adapt/reject
+- граница против массовых перезаписей: внедрение инкрементальное
+
+Подробное практическое руководство:
+
+- Английский гайд: [docs/rule-engineering-usage.md](docs/rule-engineering-usage.md)
+- Русский гайд: [docs/rule-engineering-usage.ru.md](docs/rule-engineering-usage.ru.md)
+
+Контракты сценариев, исполняющие формы валидации, появятся в `docs/scenarios/` этого репозитория; их исполнение относится к спецификации `ai-standards-evals` (issue #18).
 
 ## Использование Reasoning Hygiene в проекте
 

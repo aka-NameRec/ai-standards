@@ -2880,3 +2880,53 @@ def test_structural_code_intelligence_renders_as_experimental(tmp_path: Path) ->
     assert "never encode a specific tool's commands" in result.content
     assert "normative module contract" in result.content
     assert "captures what the code structurally is" in result.content
+
+
+def test_rule_engineering_feature_can_be_rendered(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK +
+        'fragments = ["core/base", "core/architecture"]\n'
+        'features = ["rule-engineering"]\n'
+        'stacks = ["python"]\n'
+        'local_overrides = ["docs/ai/project-rules.md"]\n'
+        "\n"
+        "[metadata]\n"
+        'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    assert "## Rule Engineering" in result.content
+    assert (
+        "Normative knowledge earns its place through engineering, not through import."
+        in result.content
+    )
+    assert "let behavioral overlap decide" in result.content
+    assert "never a goal in itself" in result.content
+
+
+def test_rule_engineering_fragment_keeps_its_rules() -> None:
+    fragment = (
+        REPO_ROOT / "fragments" / "process" / "rule-engineering.md"
+    ).read_text(encoding="utf-8")
+    flat = " ".join(fragment.split())
+
+    assert "Parts that can be violated independently become separate rules" in flat
+    assert (
+        "static validation, deterministic assertion, behavioral scenario, "
+        "human rubric, or cross-agent comparison"
+    ) in flat
+    assert (
+        "the number of material decisions an agent must invent "
+        "between reading a rule and acting on it"
+    ) in flat
+    assert "agent-specific mechanics live in adapters" in flat
