@@ -1,7 +1,7 @@
 ---
 title: 'РЕШЕНИЕ: принять инициативу Rule Engineering'
 type: decision
-permalink: ai-standards/decisions/2026-09-19-adopt-rule-engineering-initiative-1
+permalink: ai-standards/decisions/2026-09-19-adopt-rule-engineering-initiative.ru-1
 ---
 
 # РЕШЕНИЕ: принять инициативу Rule Engineering

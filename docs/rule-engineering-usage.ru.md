@@ -1,6 +1,6 @@
 ---
 title: Руководство по Rule Engineering
-permalink: ai-standards/rule-engineering-usage-1
+permalink: ai-standards/rule-engineering-usage.ru-1
 ---
 
 # Руководство по Rule Engineering

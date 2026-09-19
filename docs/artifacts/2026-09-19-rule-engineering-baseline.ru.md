@@ -1,6 +1,6 @@
 ---
 title: 'Базовая линия: инициатива Rule Engineering (issue #17)'
-permalink: ai-standards/artifacts/2026-09-19-rule-engineering-baseline-1
+permalink: ai-standards/artifacts/2026-09-19-rule-engineering-baseline.ru-1
 ---
 
 # Базовая линия: инициатива Rule Engineering (issue #17)

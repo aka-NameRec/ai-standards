@@ -1,6 +1,6 @@
 ---
 title: 'План изменений: инициатива Rule Engineering (issue #17)'
-permalink: ai-standards/artifacts/2026-09-19-rule-engineering-change-plan-1
+permalink: ai-standards/artifacts/2026-09-19-rule-engineering-change-plan.ru-1
 ---
 
 # План изменений: инициатива Rule Engineering (issue #17)
