@@ -230,7 +230,7 @@ scenarios = []
 fragment = "process/code-review"
 section = "Relationship To Review Lenses"
 behavior = "The bare trigger and the lenses keep separate activations, enabling review-lenses does not change the bare trigger, and the standard-code-review skill is the superset entry point with its own activation phrases."
-scenarios = []
+scenarios = ["TRG-001"]
 
 [rules.RVW-030]
 fragment = "process/code-review"
@@ -288,25 +288,25 @@ scenarios = []
 source = "templates/skill-engineering/skill-engineering.SKILL.md"
 section = "Skill Engineering"
 behavior = "A skill is created only when trigger, repeatable procedure, reusable guidance, and observable completion criteria exist together; otherwise an invariant or plain ability is the better layer."
-scenarios = []
+scenarios = ["SK-001"]
 
 [rules.SE-002]
 source = "templates/skill-engineering/skill-engineering.SKILL.md"
 section = "Authoring (skill-authoring)"
 behavior = "Every skill is authored through the Rule Engineering flow, and a non-trivial skill records its worksheet as an artifact."
-scenarios = []
+scenarios = ["SK-001"]
 
 [rules.SE-003]
 source = "templates/skill-engineering/skill-engineering.SKILL.md"
 section = "Authoring (skill-authoring)"
 behavior = "The skill description states what the skill does and carries the concrete positive and negative trigger phrases that later activation testing measures against."
-scenarios = []
+scenarios = ["TRG-002"]
 
 [rules.SE-004]
 source = "templates/skill-engineering/skill-engineering.SKILL.md"
 section = "Authoring (skill-authoring)"
 behavior = "Detail beyond the execution critical path is deferred to reference sections, and general knowledge the model already has is not restated."
-scenarios = []
+scenarios = ["SK-001"]
 
 [rules.SE-005]
 source = "templates/skill-engineering/skill-engineering.SKILL.md"

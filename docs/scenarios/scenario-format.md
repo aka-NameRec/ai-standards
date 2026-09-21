@@ -44,9 +44,27 @@ standards-side interface it consumes.
    mechanically.
 9. `## Observations` and `## Relations` per the knowledge-tree note rules.
 
+## Scenario Kinds
+
+Two kinds share the file layout and ID rules above; the intro paragraph names
+the kind.
+
+- **Behavior scenario** — intro starts `Behavioral scenario …` (EN) /
+  `Поведенческий сценарий …` (RU); structure: `## Fixture`, `## Enabled
+  Features`, `## Prompt`, `## Expected Observable Invariants`, `## Forbidden
+  Outcomes`, optional `## Scoring Rubric`, `## Observations`, `## Relations`.
+- **Activation trigger set** — intro starts `Activation trigger set …` (EN) /
+  `Набор триггер-кейсов …` (RU); verifies activation correctness for one
+  skill. Structure: `## Enabled Features`, then `## Positive Cases`,
+  `## Negative Cases`, `## Boundary Cases` — each a table with one row per
+  case: the verbatim `prompt` and the `expected should_trigger` decision —
+  then `## Observations`, `## Relations`. There is no single Fixture or
+  Prompt: each case is its own prompt, executed against the deployed skill.
+
 The Russian pair mirrors the structure with localized headings (`Фикстура`,
 `Включённые features`, `Ожидаемые наблюдаемые инварианты`, `Запрещённые
-исходы`, `Наблюдения`, `Связи`); the `## Prompt` heading stays English in both.
+исходы`, `Наблюдения`, `Связи`; `Позитивные кейсы`, `Негативные кейсы`,
+`Пограничные кейсы`); the `## Prompt` heading stays English in both.
 
 ## Policy Tests
 
@@ -71,7 +89,8 @@ must:
 5. report per-scenario verdicts and support the cross-harness compatibility
    matrix;
 6. support baseline versus candidate comparisons of standards revisions on
-   identical scenarios.
+   identical scenarios, including with-skill versus without-skill (ablation)
+   runs for skill scenarios, holding model and environment constant.
 
 Divergence between harnesses on the same scenario is a finding to analyze —
 shared rule problem, adapter problem, harness limitation, or model variance.

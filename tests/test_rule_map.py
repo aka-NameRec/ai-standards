@@ -128,6 +128,22 @@ FORMAT_HEADINGS_RU = (
     "## Наблюдения",
     "## Связи",
 )
+TRIGGER_HEADINGS_EN = (
+    "## Enabled Features",
+    "## Positive Cases",
+    "## Negative Cases",
+    "## Boundary Cases",
+    "## Observations",
+    "## Relations",
+)
+TRIGGER_HEADINGS_RU = (
+    "## Включённые features",
+    "## Позитивные кейсы",
+    "## Негативные кейсы",
+    "## Пограничные кейсы",
+    "## Наблюдения",
+    "## Связи",
+)
 
 
 def _has_fenced_prompt(content: str) -> bool:
@@ -143,14 +159,22 @@ def _has_fenced_prompt(content: str) -> bool:
     return any(line.startswith("```") for line in lines[start + 1 : end])
 
 
+def _is_trigger_set(content: str) -> bool:
+    return "Activation trigger set" in content
+
+
 def test_scenario_files_follow_the_format_contract() -> None:
     """docs/scenarios/scenario-format.md defines this structure; tests enforce it."""
     known_rules = set(_load_rule_map())
     for scenario_id, path in _scenario_files().items():
         content = path.read_text(encoding="utf-8")
-        for heading in FORMAT_HEADINGS_EN:
+        headings = TRIGGER_HEADINGS_EN if _is_trigger_set(content) else FORMAT_HEADINGS_EN
+        for heading in headings:
             assert heading in content, f"{scenario_id}: missing heading {heading!r}"
-        assert _has_fenced_prompt(content), f"{scenario_id}: prompt must be a fenced block"
+        if not _is_trigger_set(content):
+            assert _has_fenced_prompt(content), (
+                f"{scenario_id}: prompt must be a fenced block"
+            )
         referenced = set(re.findall(r"`([A-Z]{2,5}-\d{3})`", content))
         unknown = referenced - known_rules
         assert not unknown, f"{scenario_id}: unknown rule ids {sorted(unknown)}"
@@ -160,5 +184,7 @@ def test_scenario_ru_pairs_follow_the_format_contract() -> None:
     for scenario_id, path in _scenario_files().items():
         ru_pair = path.with_name(path.name.replace(".md", ".ru.md"))
         content = ru_pair.read_text(encoding="utf-8")
-        for heading in FORMAT_HEADINGS_RU:
+        is_trigger = _is_trigger_set(path.read_text(encoding="utf-8"))
+        headings = TRIGGER_HEADINGS_RU if is_trigger else FORMAT_HEADINGS_RU
+        for heading in headings:
             assert heading in content, f"{scenario_id}: missing heading {heading!r}"
