@@ -1,0 +1,50 @@
+# Rule traceability map: stable identifiers for normative rules that evals
+# reference (issue #17, Phase 2). IDs live here only — they are never rendered
+# into AGENTS.md. The policy tests in tests/test_rule_map.py verify that every
+# referenced fragment and section exists.
+#
+# Schema (one table per rule):
+#   fragment  — fragment path relative to fragments/, without the .md suffix
+#   section   — heading text inside that fragment anchoring the normative text
+#   behavior  — one-line statement of the expected observable behavior
+#   scenarios — eval scenario IDs from the ai-standards-evals specification
+#               (issue #18); stays empty until Phase 3+ produces scenarios
+#
+# ID rules: pattern <PREFIX>-<NNN>; an ID is never reused for a different rule;
+# retiring a rule keeps its ID reserved.
+
+[rules.RE-001]
+fragment = "process/rule-engineering"
+section = "Rule Engineering"
+behavior = "Every normative rule from any source passes the Rule Engineering flow before joining the standards, and an existing rule re-passes it on a material change."
+scenarios = []
+
+[rules.RE-002]
+fragment = "process/rule-engineering"
+section = "Rule Quality Properties"
+behavior = "A candidate rule is acceptable only when it is atomic, unambiguous, actionable, properly scoped, observable, unique (behavioral overlap decides), non-conflicting, at the correct abstraction level, and portable."
+scenarios = []
+
+[rules.RE-003]
+fragment = "process/rule-engineering"
+section = "Interpretation Surface"
+behavior = "Wording minimizes the material decisions an agent must invent between reading a rule and acting on it, except where the task genuinely requires contextual judgment."
+scenarios = []
+
+[rules.RE-004]
+fragment = "process/rule-engineering"
+section = "Engineering Flow"
+behavior = "Engineering follows the flow from candidate knowledge to accept/adapt/reject, and every accepted rule defines at least one validation form: static validation, deterministic assertion, behavioral scenario, human rubric, or cross-agent comparison."
+scenarios = []
+
+[rules.RE-005]
+fragment = "process/rule-engineering"
+section = "Engineering Flow"
+behavior = "Vague, redundant, and conflicting candidates are rejected, and notable rejections state why."
+scenarios = []
+
+[rules.RE-006]
+fragment = "process/rule-engineering"
+section = "Context Placement"
+behavior = "Knowledge is placed at the layer that delivers it at the right moment; reducing always-loaded content is a consequence of placement, never a goal in itself, and never at the cost of an unverified behavior change."
+scenarios = []
