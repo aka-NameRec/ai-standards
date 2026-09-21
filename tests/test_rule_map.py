@@ -13,7 +13,9 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RULE_MAP_PATH = REPO_ROOT / "rule_map.toml"
+SCENARIOS_DIR = REPO_ROOT / "docs" / "scenarios"
 RULE_ID_PATTERN = re.compile(r"^[A-Z]{2,5}-\d{3}$")
+SCENARIO_ID_PATTERN = re.compile(r"^([A-Z]{2,5}-\d{3})-")
 
 
 def _load_rule_map() -> dict[str, dict[str, Any]]:
@@ -68,3 +70,35 @@ def test_rule_ids_stay_out_of_rendered_content() -> None:
     """IDs are tooling metadata: the self-hosted render must not contain them."""
     agents_md = (REPO_ROOT / "AGENTS.md").read_text(encoding="utf-8")
     assert "RE-00" not in agents_md, "rule IDs must never render into AGENTS.md"
+    assert "RVW-0" not in agents_md, "rule IDs must never render into AGENTS.md"
+
+
+def _scenario_files() -> dict[str, Path]:
+    files: dict[str, Path] = {}
+    if not SCENARIOS_DIR.is_dir():
+        return files
+    for path in sorted(SCENARIOS_DIR.glob("*.md")):
+        if path.name.endswith(".ru.md"):
+            continue
+        match = SCENARIO_ID_PATTERN.match(path.name)
+        assert match, f"scenario file name must start with an id: {path.name}"
+        assert match.group(1) not in files, f"duplicate scenario id: {path.name}"
+        files[match.group(1)] = path
+    return files
+
+
+def test_scenario_files_match_the_id_convention() -> None:
+    scenario_files = _scenario_files()
+    assert scenario_files, "the scenarios directory must hold at least one contract"
+    for scenario_id, path in scenario_files.items():
+        ru_pair = path.with_name(path.name.replace(".md", ".ru.md"))
+        assert ru_pair.is_file(), f"{scenario_id}: missing localized pair {ru_pair.name}"
+
+
+def test_rule_map_scenario_references_resolve() -> None:
+    known_scenarios = set(_scenario_files())
+    for rule_id, rule in _load_rule_map().items():
+        for scenario_id in rule["scenarios"]:
+            assert scenario_id in known_scenarios, (
+                f"{rule_id}: scenario reference {scenario_id} has no contract file"
+            )

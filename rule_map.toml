@@ -7,11 +7,14 @@
 #   fragment  — fragment path relative to fragments/, without the .md suffix
 #   section   — heading text inside that fragment anchoring the normative text
 #   behavior  — one-line statement of the expected observable behavior
-#   scenarios — eval scenario IDs from the ai-standards-evals specification
-#               (issue #18); stays empty until Phase 3+ produces scenarios
+#   scenarios — eval scenario IDs; scenario contracts live in docs/scenarios/
+#               as <ID>-<slug>.md (+ .ru.md); execution belongs to the
+#               ai-standards-evals specification (issue #18)
 #
 # ID rules: pattern <PREFIX>-<NNN>; an ID is never reused for a different rule;
-# retiring a rule keeps its ID reserved.
+# retiring a rule keeps its ID reserved. Prefixes: RE-* rules of the
+# rule-engineering fragment; RVW-* rules of the code-review fragment; CR-###
+# scenario IDs for code-review scenarios.
 
 [rules.RE-001]
 fragment = "process/rule-engineering"
@@ -47,4 +50,199 @@ scenarios = []
 fragment = "process/rule-engineering"
 section = "Context Placement"
 behavior = "Knowledge is placed at the layer that delivers it at the right moment; reducing always-loaded content is a consequence of placement, never a goal in itself, and never at the cost of an unverified behavior change."
+scenarios = []
+
+# Code Review fragment — decomposition from the Phase 3 dogfooding artifact
+# docs/artifacts/2026-09-21-code-review-rule-engineering-dogfooding.md.
+
+[rules.RVW-001]
+fragment = "process/code-review"
+section = "Code Review"
+behavior = "A bare review request runs this workflow; a request that names its own scope, mode, or lens takes priority over the default."
+scenarios = []
+
+[rules.RVW-002]
+fragment = "process/code-review"
+section = "Code Review"
+behavior = "The review covers the current diff or the files the user names, and never expands into unrelated files."
+scenarios = []
+
+[rules.RVW-003]
+fragment = "process/code-review"
+section = "Code Review"
+behavior = "Reporting is the default; editing beyond the small-fix exception waits for an explicit request and then applies the smallest coherent patch."
+scenarios = []
+
+[rules.RVW-004]
+fragment = "process/code-review"
+section = "What To Check"
+behavior = "Correctness is checked first: logic errors, missed edge cases, and failure paths ignoring the error-handling rules in force."
+scenarios = []
+
+[rules.RVW-005]
+fragment = "process/code-review"
+section = "What To Check"
+behavior = "Changed modules are checked against active module contracts, accepted decision records, and the module map; a violation cites the exact clause, and a major module without a contract is reported as a (no contract) note."
+scenarios = []
+
+[rules.RVW-006]
+fragment = "process/code-review"
+section = "What To Check"
+behavior = "The review requires reuse of an existing project primitive and flags duplication the change introduces, including two new copies of one intent added by the same change."
+scenarios = ["CR-001"]
+
+[rules.RVW-007]
+fragment = "process/code-review"
+section = "What To Check"
+behavior = "Avoidable cost is judged against realistic data volumes, and the review says when the cost is currently free."
+scenarios = []
+
+[rules.RVW-008]
+fragment = "process/code-review"
+section = "What To Check"
+behavior = "Quality is checked: readability, contract stability, test coverage of edge cases, and traps that only surface in production."
+scenarios = []
+
+[rules.RVW-009]
+fragment = "process/code-review"
+section = "What To Check"
+behavior = "A notable problem that predates the diff is reported marked (pre-existing), never attributed to the change, and never expands into an unrequested audit."
+scenarios = ["CR-003"]
+
+[rules.RVW-010]
+fragment = "process/code-review"
+section = "What Makes A Finding Reportable"
+behavior = "Every finding cites a concrete file and a line when one is available; without a location there is no finding."
+scenarios = []
+
+[rules.RVW-011]
+fragment = "process/code-review"
+section = "What Makes A Finding Reportable"
+behavior = "Every finding names the specific violated rule, and when nothing maps the review says so instead of inventing a rule."
+scenarios = []
+
+[rules.RVW-012]
+fragment = "process/code-review"
+section = "What Makes A Finding Reportable"
+behavior = "Claims are verified against the code, not the diff; an unverified claim is not written."
+scenarios = []
+
+[rules.RVW-013]
+fragment = "process/code-review"
+section = "What Makes A Finding Reportable"
+behavior = "Each finding is detailed enough that another agent could apply the fix without asking a clarifying question."
+scenarios = []
+
+[rules.RVW-014]
+fragment = "process/code-review"
+section = "What Makes A Finding Reportable"
+behavior = "Fewer high-confidence findings win: an honestly empty section beats a manufactured nitpick, and a risky suggestion is reported rather than guessed."
+scenarios = ["CR-002"]
+
+[rules.RVW-015]
+fragment = "process/code-review"
+section = "Report Shape"
+behavior = "The report reproduces the worked example's shape exactly; when the example file is absent the review says so and uses the stated fallback order."
+scenarios = ["CR-002"]
+
+[rules.RVW-016]
+fragment = "process/code-review"
+section = "Report Shape"
+behavior = "The report opens with the ai-standards version line taken from the generated header, or states that the version is undetermined instead of guessing."
+scenarios = []
+
+[rules.RVW-017]
+fragment = "process/code-review"
+section = "Report Shape"
+behavior = "Open findings carry coloured markers, fixed findings become checked with a fixed tail, deliberately kept findings gain a left-as-is tail, and there is no verdict or resolution section."
+scenarios = []
+
+[rules.RVW-018]
+fragment = "process/code-review"
+section = "Report Shape"
+behavior = "What Was Done and How It Was Done are always present as short prose without invented rationale."
+scenarios = []
+
+[rules.RVW-019]
+fragment = "process/code-review"
+section = "Report Shape"
+behavior = "Verification names what was actually run with results and what was not checked, never carries results across repositories, and marks stale results."
+scenarios = ["CR-002"]
+
+[rules.RVW-020]
+fragment = "process/code-review"
+section = "Report Shape"
+behavior = "Dependencies appears only when the change requires a change in another repository, naming the repository and the need."
+scenarios = []
+
+[rules.RVW-021]
+fragment = "process/code-review"
+section = "Report Shape"
+behavior = "The Task line is omitted when no tracked reference is known; tracked ids come from real sources and URLs are never guessed."
+scenarios = []
+
+[rules.RVW-022]
+fragment = "process/code-review"
+section = "Report Shape"
+behavior = "The whole report is written in the chat language including headers, and the marker glyphs stay as they are."
+scenarios = []
+
+[rules.RVW-023]
+fragment = "process/code-review"
+section = "Report Shape"
+behavior = "A change spanning several repositories produces one report per repository."
+scenarios = []
+
+[rules.RVW-024]
+fragment = "process/code-review"
+section = "Report Shape"
+behavior = "The report is posted in chat inside a fenced Markdown block by default and saved to a file only when asked, naming the destination used."
+scenarios = []
+
+[rules.RVW-025]
+fragment = "process/code-review"
+section = "Report Shape"
+behavior = "A resend request reclassifies the findings already on record instead of reviewing the diff from scratch."
+scenarios = []
+
+[rules.RVW-026]
+fragment = "process/code-review"
+section = "Fixing While Reviewing"
+behavior = "A small fix whose safety is establishable by reading alone is made during the review and recorded as a checked finding with a fixed tail."
+scenarios = []
+
+[rules.RVW-027]
+fragment = "process/code-review"
+section = "Fixing While Reviewing"
+behavior = "Migrations, lock files, dependencies, build configuration, public contracts, refactors, the git index, and anything needing a test run are reported, not fixed."
+scenarios = []
+
+[rules.RVW-028]
+fragment = "process/code-review"
+section = "Fixing While Reviewing"
+behavior = "The order is review, then fix, then report, and fixes are also listed in chat separately from the report."
+scenarios = []
+
+[rules.RVW-029]
+fragment = "process/code-review"
+section = "Relationship To Review Lenses"
+behavior = "The bare trigger and the lenses keep separate activations, enabling review-lenses does not change the bare trigger, and the standard-code-review skill is the superset entry point with its own activation phrases."
+scenarios = []
+
+[rules.RVW-030]
+fragment = "process/code-review"
+section = "Normalization Rules"
+behavior = "The report shape is defined by the worked example and nowhere else, staying identical across runs and tools."
+scenarios = []
+
+[rules.RVW-031]
+fragment = "process/code-review"
+section = "Normalization Rules"
+behavior = "Framework-specific review heuristics live in the relevant stack fragments, not in this workflow."
+scenarios = []
+
+[rules.RVW-032]
+fragment = "process/code-review"
+section = "Normalization Rules"
+behavior = "No tool- or vendor-specific review-bot output formats are encoded; those stay in local adapters."
 scenarios = []
