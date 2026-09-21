@@ -5,7 +5,9 @@
 #
 # Schema (one table per rule):
 #   fragment  — fragment path relative to fragments/, without the .md suffix
-#   section   — heading text inside that fragment anchoring the normative text
+#   source    — repo-root-relative path including extension; used instead of
+#               `fragment` when the rule lives in a template skill
+#   section   — heading text inside that source anchoring the normative text
 #   behavior  — one-line statement of the expected observable behavior
 #   scenarios — eval scenario IDs; scenario contracts live in docs/scenarios/
 #               as <ID>-<slug>.md (+ .ru.md); execution belongs to the
@@ -13,8 +15,9 @@
 #
 # ID rules: pattern <PREFIX>-<NNN>; an ID is never reused for a different rule;
 # retiring a rule keeps its ID reserved. Prefixes: RE-* rules of the
-# rule-engineering fragment; RVW-* rules of the code-review fragment; CR-###
-# scenario IDs for code-review scenarios.
+# rule-engineering fragment; RVW-* rules of the code-review fragment;
+# CA-* rules of the context-architecture fragment; SE-* rules of the
+# skill-engineering skill; CR-### scenario IDs for code-review scenarios.
 
 [rules.RE-001]
 fragment = "process/rule-engineering"
@@ -277,4 +280,60 @@ scenarios = []
 fragment = "process/context-architecture"
 section = "Control Plane Invariant"
 behavior = "Always-loaded content is reduced only with a behavior-preserving comparison against the current state."
+scenarios = []
+
+# Skill Engineering skill — the single skill-engineering domain (Phase 6).
+
+[rules.SE-001]
+source = "templates/skill-engineering/skill-engineering.SKILL.md"
+section = "Skill Engineering"
+behavior = "A skill is created only when trigger, repeatable procedure, reusable guidance, and observable completion criteria exist together; otherwise an invariant or plain ability is the better layer."
+scenarios = []
+
+[rules.SE-002]
+source = "templates/skill-engineering/skill-engineering.SKILL.md"
+section = "Authoring (skill-authoring)"
+behavior = "Every skill is authored through the Rule Engineering flow, and a non-trivial skill records its worksheet as an artifact."
+scenarios = []
+
+[rules.SE-003]
+source = "templates/skill-engineering/skill-engineering.SKILL.md"
+section = "Authoring (skill-authoring)"
+behavior = "The skill description states what the skill does and carries the concrete positive and negative trigger phrases that later activation testing measures against."
+scenarios = []
+
+[rules.SE-004]
+source = "templates/skill-engineering/skill-engineering.SKILL.md"
+section = "Authoring (skill-authoring)"
+behavior = "Detail beyond the execution critical path is deferred to reference sections, and general knowledge the model already has is not restated."
+scenarios = []
+
+[rules.SE-005]
+source = "templates/skill-engineering/skill-engineering.SKILL.md"
+section = "Authoring (skill-authoring)"
+behavior = "Determinism matches risk: heuristics for low-risk judgment, structured procedures for repeatable flows, scripts or tools for fragile exact operations."
+scenarios = []
+
+[rules.SE-006]
+source = "templates/skill-engineering/skill-engineering.SKILL.md"
+section = "Authoring (skill-authoring)"
+behavior = "The skill body assumes no specific agent, vendor, or harness, stays self-contained, and never points into standards-repository internals."
+scenarios = []
+
+[rules.SE-007]
+source = "templates/skill-engineering/skill-engineering.SKILL.md"
+section = "Authoring (skill-authoring)"
+behavior = "The skill states what counts as done, concretely enough that a scenario can verify execution from the outcome alone."
+scenarios = []
+
+[rules.SE-008]
+source = "templates/skill-engineering/skill-engineering.SKILL.md"
+section = "Validation"
+behavior = "Skill validation answers four independent questions in order — structural validity, activation correctness, behavioral correctness, behavioral efficacy — and structural validity alone is never treated as proof of quality."
+scenarios = []
+
+[rules.SE-009]
+source = "templates/skill-engineering/skill-engineering.SKILL.md"
+section = "Lifecycle"
+behavior = "A skill advances only when the corresponding validation question is answered, and deprecation records the reason without reusing the retired ID or name."
 scenarios = []

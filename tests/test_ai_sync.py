@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from scripts.ai_sync import (
+    AGENT_TEMPLATES,
     CLAUDE_BRIDGE_FILE,
     CLAUDE_BRIDGE_MARKER,
     DEFAULT_OUTPUT_NAME,
@@ -30,8 +31,8 @@ from scripts.ai_sync import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-CURRENT_AI_STANDARDS_VERSION = "2.3.0"
-CURRENT_RELEASE_DATE = "2026-09-03"
+CURRENT_AI_STANDARDS_VERSION = "2.4.0"
+CURRENT_RELEASE_DATE = "2026-09-18"
 CURRENT_RELEASE_PIN = f"{CURRENT_AI_STANDARDS_VERSION}-{CURRENT_RELEASE_DATE}"
 MANIFEST_RELEASE_BLOCK = f'ai_standards_version = "{CURRENT_RELEASE_PIN}"\n'
 
@@ -2930,6 +2931,23 @@ def test_rule_engineering_fragment_keeps_its_rules() -> None:
         "between reading a rule and acting on it"
     ) in flat
     assert "agent-specific mechanics live in adapters" in flat
+
+
+def test_skill_engineering_templates_registered_for_all_agents() -> None:
+    for agent in ("codex", "cursor", "claude", "kilo"):
+        entries = [
+            template
+            for template in AGENT_TEMPLATES[agent]
+            if template.feature == "skill-engineering"
+        ]
+        assert len(entries) == 1, (
+            f"{agent}: exactly one skill-engineering template expected"
+        )
+        assert entries[0].source_relative_path.startswith("templates/skill-engineering/")
+        destination = entries[0].destination_relative_path
+        assert destination.startswith(".agents/") or destination.startswith(
+            (".codex/", ".cursor/", ".claude/")
+        )
 
 
 def test_context_architecture_feature_can_be_rendered(tmp_path: Path) -> None:

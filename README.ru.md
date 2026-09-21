@@ -13,6 +13,7 @@
 - [Группы фич и зависимости](#группы-фич-и-зависимости)
 - [Использование Rule Engineering в проекте](#использование-rule-engineering-в-проекте)
 - [Использование Context Architecture в проекте](#использование-context-architecture-в-проекте)
+- [Использование Skill Engineering в проекте](#использование-skill-engineering-в-проекте)
 - [Использование Reasoning Hygiene в проекте](#использование-reasoning-hygiene-в-проекте)
 - [Использование Autonomy Boundaries в проекте](#использование-autonomy-boundaries-в-проекте)
 - [Использование Review Lenses в проекте](#использование-review-lenses-в-проекте)
@@ -102,7 +103,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project
 Используются четыре слоя:
 
 - `fragments`: прямые базовые правила, которые должны включаться всегда.
-- `features`: опциональные возможности вроде `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, `agent-usage-hygiene`, `rule-engineering` и `context-architecture`.
+- `features`: опциональные возможности вроде `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, `agent-usage-hygiene`, `rule-engineering`, `context-architecture` и `skill-engineering`.
 - `stacks`: правила, зависящие от технологии или архитектурного стиля, например `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring` или `spring-data-jpa`.
 - `tooling.agents`: опциональные agent adapters вроде `codex`, `claude`, `kilo` и `cursor` для управляемых локальных workflow templates.
 
@@ -441,6 +442,7 @@ Constraints:
 **Управление исполнением**
 
 - `rule-engineering` — один инженерный поток для любого нормативного правила, откуда бы оно ни пришло
+- `skill-engineering` — один домен для авторинга, валидации и развития навыков
 - `design-first-collaboration`
 - `autonomy-boundaries`
 - `reasoning-hygiene`
@@ -461,6 +463,7 @@ Constraints:
 - `structural-code-intelligence` требует `retrieval-routing` и остаётся вне рекомендуемого стека, пока evaluation A/B/C не подтвердит включение
 - `rule-engineering` работает самостоятельно; исполнение форм валидации относится к отдельной evals-спецификации (issue #18)
 - `context-architecture` формализует выбор слоя, которым заканчивается `rule-engineering`; включение одного без другого оставляет дыру
+- `skill-engineering` несёт `rule-engineering` как политическую базу и деплоит навык `skill-engineering` проектам, которые пишут собственные навыки
 
 ## Использование Rule Engineering в проекте
 
@@ -509,6 +512,25 @@ Constraints:
 - Русский гайд: [docs/context-architecture-usage.ru.md](docs/context-architecture-usage.ru.md)
 
 Feature меняет решения о размещении и запускает классификационный обзор; сам по себе он существующий контент не перемещает.
+
+## Использование Skill Engineering в проекте
+
+`skill-engineering` — опциональная feature, деплоящая навык `skill-engineering` — один домен для авторинга, валидации и развития навыков, где `skill-authoring` — первая секция. Сам навык создан через Rule Engineering; ведомость опубликована.
+
+Используйте `skill-engineering`, когда проект пишет собственные навыки и хочет, чтобы они:
+
+- имели обоснование триггер + процедура + руководства + наблюдаемое завершение — или не создавались вовсе
+- создавались через поток Rule Engineering с записанной ведомостью
+- строились на progressive disclosure, экономии контекста, детерминизме по риску и переносимом самодостаточном ядре
+- валидировались по четырём независимым вопросам — структурная, активационная, поведенческая, эффективность — прежде чем идти по lifecycle
+
+`ai-standards` владеет долговременной политикой:
+
+- набор обоснования и правила авторинга (`SE-001`–`SE-009` в `rule_map.toml`)
+- четыре вопроса валидации и гейты lifecycle
+- граница против распухания навыков: один домен, пока usage-данные не покажут независимые триггеры
+
+Подробное практическое руководство — в самом развёрнутом навыке; ведомость dogfooding: [docs/artifacts/2026-09-21-skill-engineering-dogfooding.ru.md](docs/artifacts/2026-09-21-skill-engineering-dogfooding.ru.md) (английская: [docs/artifacts/2026-09-21-skill-engineering-dogfooding.md](docs/artifacts/2026-09-21-skill-engineering-dogfooding.md)).
 
 ## Использование Reasoning Hygiene в проекте
 

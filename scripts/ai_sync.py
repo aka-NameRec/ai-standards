@@ -137,6 +137,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="codex",
+            source_relative_path="templates/skill-engineering/skill-engineering.SKILL.md",
+            destination_relative_path=".codex/skills/skill-engineering/skill-engineering/SKILL.md",
+            feature="skill-engineering",
+        ),
+        AgentTemplate(
+            agent="codex",
             source_relative_path="templates/standards-update/update-ai-standards.SKILL.md",
             destination_relative_path=".codex/skills/standards-update/update-ai-standards/SKILL.md",
             feature=None,
@@ -172,6 +178,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/knowledge-capture/capture-knowledge.cursor.mdc",
             destination_relative_path=".cursor/rules/capture-knowledge.mdc",
             feature="knowledge-capture",
+        ),
+        AgentTemplate(
+            agent="cursor",
+            source_relative_path="templates/skill-engineering/skill-engineering.cursor.mdc",
+            destination_relative_path=".cursor/rules/skill-engineering.mdc",
+            feature="skill-engineering",
         ),
         AgentTemplate(
             agent="cursor",
@@ -213,6 +225,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="claude",
+            source_relative_path="templates/skill-engineering/skill-engineering.claude.md",
+            destination_relative_path=".claude/commands/skill-engineering.md",
+            feature="skill-engineering",
+        ),
+        AgentTemplate(
+            agent="claude",
             source_relative_path="templates/standards-update/update-ai-standards.claude.md",
             destination_relative_path=".claude/commands/update-ai-standards.md",
             feature=None,
@@ -248,6 +266,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/knowledge-capture/capture-knowledge.SKILL.md",
             destination_relative_path=".agents/skills/knowledge-capture/capture-knowledge/SKILL.md",
             feature="knowledge-capture",
+        ),
+        AgentTemplate(
+            agent="kilo",
+            source_relative_path="templates/skill-engineering/skill-engineering.SKILL.md",
+            destination_relative_path=".agents/skills/skill-engineering/skill-engineering/SKILL.md",
+            feature="skill-engineering",
         ),
         AgentTemplate(
             agent="kilo",

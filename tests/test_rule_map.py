@@ -39,18 +39,24 @@ def test_rule_ids_are_well_formed_and_unique() -> None:
         seen.add(rule_id)
 
 
+def _rule_source_path(rule: dict[str, Any]) -> Path:
+    if "source" in rule:
+        return REPO_ROOT / str(rule["source"])
+    return REPO_ROOT / "fragments" / f"{rule['fragment']}.md"
+
+
 def test_rule_fragments_and_sections_exist() -> None:
     for rule_id, rule in _load_rule_map().items():
-        fragment_path = REPO_ROOT / "fragments" / f"{rule['fragment']}.md"
-        assert fragment_path.is_file(), f"{rule_id}: missing fragment {rule['fragment']}"
-        content = fragment_path.read_text(encoding="utf-8")
+        source_path = _rule_source_path(rule)
+        assert source_path.is_file(), f"{rule_id}: missing source {source_path.name}"
+        content = source_path.read_text(encoding="utf-8")
         headings = {
             line.lstrip("#").strip()
             for line in content.splitlines()
             if line.startswith("#")
         }
         assert rule["section"] in headings, (
-            f"{rule_id}: section {rule['section']!r} not found in {rule['fragment']}"
+            f"{rule_id}: section {rule['section']!r} not found in {source_path.name}"
         )
 
 

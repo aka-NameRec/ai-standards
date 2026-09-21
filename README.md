@@ -13,6 +13,7 @@
 - [Feature Groups And Dependencies](#feature-groups-and-dependencies)
 - [Using Rule Engineering In a Project](#using-rule-engineering-in-a-project)
 - [Using Context Architecture In a Project](#using-context-architecture-in-a-project)
+- [Using Skill Engineering In a Project](#using-skill-engineering-in-a-project)
 - [Using Reasoning Hygiene In a Project](#using-reasoning-hygiene-in-a-project)
 - [Using Autonomy Boundaries In a Project](#using-autonomy-boundaries-in-a-project)
 - [Using Review Lenses In a Project](#using-review-lenses-in-a-project)
@@ -106,7 +107,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project --output-name 
 Use four layers:
 
 - `fragments`: direct core rules that should always be rendered.
-- `features`: optional capabilities such as `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, `agent-usage-hygiene`, `rule-engineering`, and `context-architecture`.
+- `features`: optional capabilities such as `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, `agent-usage-hygiene`, `rule-engineering`, `context-architecture`, and `skill-engineering`.
 - `stacks`: technology-specific or architecture-specific rules such as `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring`, or `spring-data-jpa`.
 - `tooling.agents`: optional agent adapters such as `codex`, `claude`, `kilo`, and `cursor` for managed local workflow templates.
 
@@ -445,6 +446,7 @@ Features group by concern:
 **Execution governance**
 
 - `rule-engineering` — one engineering flow for every normative rule, whatever its source
+- `skill-engineering` — one domain for authoring, validating, and evolving skills
 - `design-first-collaboration`
 - `autonomy-boundaries`
 - `reasoning-hygiene`
@@ -465,6 +467,7 @@ Dependencies:
 - `structural-code-intelligence` requires `retrieval-routing` and stays out of the recommended stack until its A/B/C evaluation justifies adoption
 - `rule-engineering` works standalone; executing its validation forms belongs to the separate evals specification (issue #18)
 - `context-architecture` formalizes the layer selection that `rule-engineering` ends with; enabling one without the other leaves a gap
+- `skill-engineering` carries `rule-engineering` as its policy base and deploys the `skill-engineering` skill for projects that author their own skills
 
 ## Using Rule Engineering In a Project
 
@@ -513,6 +516,25 @@ Detailed operational guidance lives in:
 - Russian guide: [docs/context-architecture-usage.ru.md](docs/context-architecture-usage.ru.md)
 
 The feature changes placement decisions and starts a classification review; it does not move existing content by itself.
+
+## Using Skill Engineering In a Project
+
+`skill-engineering` is an optional feature that deploys the `skill-engineering` skill — one domain for authoring, validating, and evolving skills, with `skill-authoring` as its first section. The skill itself was authored through Rule Engineering; the worksheet is public.
+
+Use `skill-engineering` when a project authors its own skills and wants them:
+
+- justified by trigger + procedure + guidance + observable completion — or not created at all
+- authored through the Rule Engineering flow, with the worksheet recorded
+- built on progressive disclosure, context economy, risk-matched determinism, and a portable, self-contained core
+- validated along four independent questions — structural, activation, behavioral, efficacy — before advancing through the lifecycle
+
+`ai-standards` owns the durable policy:
+
+- the justification set and the authoring rules (`SE-001`–`SE-009` in `rule_map.toml`)
+- the four validation questions and the lifecycle gates
+- the boundary against skill sprawl: one domain until usage data shows independent triggers
+
+Detailed operational guidance lives in the deployed skill itself; the dogfooding worksheet is [docs/artifacts/2026-09-21-skill-engineering-dogfooding.md](docs/artifacts/2026-09-21-skill-engineering-dogfooding.md) (Russian: [docs/artifacts/2026-09-21-skill-engineering-dogfooding.ru.md](docs/artifacts/2026-09-21-skill-engineering-dogfooding.ru.md)).
 
 ## Using Reasoning Hygiene In a Project
 
