@@ -80,19 +80,19 @@ scenarios = []
 fragment = "process/code-review"
 section = "What To Check"
 behavior = "Correctness is checked first: logic errors, missed edge cases, and failure paths ignoring the error-handling rules in force."
-scenarios = []
+scenarios = ["CR-004"]
 
 [rules.RVW-005]
 fragment = "process/code-review"
 section = "What To Check"
 behavior = "Changed modules are checked against active module contracts, accepted decision records, and the module map; a violation cites the exact clause, and a major module without a contract is reported as a (no contract) note."
-scenarios = []
+scenarios = ["CR-006"]
 
 [rules.RVW-006]
 fragment = "process/code-review"
 section = "What To Check"
 behavior = "The review requires reuse of an existing project primitive and flags duplication the change introduces, including two new copies of one intent added by the same change."
-scenarios = ["CR-001"]
+scenarios = ["CR-001", "CR-005"]
 
 [rules.RVW-007]
 fragment = "process/code-review"
@@ -104,7 +104,7 @@ scenarios = []
 fragment = "process/code-review"
 section = "What To Check"
 behavior = "Quality is checked: readability, contract stability, test coverage of edge cases, and traps that only surface in production."
-scenarios = []
+scenarios = ["CR-009"]
 
 [rules.RVW-009]
 fragment = "process/code-review"
@@ -122,13 +122,13 @@ scenarios = []
 fragment = "process/code-review"
 section = "What Makes A Finding Reportable"
 behavior = "Every finding names the specific violated rule, and when nothing maps the review says so instead of inventing a rule."
-scenarios = []
+scenarios = ["CR-004"]
 
 [rules.RVW-012]
 fragment = "process/code-review"
 section = "What Makes A Finding Reportable"
 behavior = "Claims are verified against the code, not the diff; an unverified claim is not written."
-scenarios = []
+scenarios = ["CR-007"]
 
 [rules.RVW-013]
 fragment = "process/code-review"
@@ -140,7 +140,7 @@ scenarios = []
 fragment = "process/code-review"
 section = "What Makes A Finding Reportable"
 behavior = "Fewer high-confidence findings win: an honestly empty section beats a manufactured nitpick, and a risky suggestion is reported rather than guessed."
-scenarios = ["CR-002"]
+scenarios = ["CR-002", "CR-007"]
 
 [rules.RVW-015]
 fragment = "process/code-review"
@@ -170,7 +170,7 @@ scenarios = []
 fragment = "process/code-review"
 section = "Report Shape"
 behavior = "Verification names what was actually run with results and what was not checked, never carries results across repositories, and marks stale results."
-scenarios = ["CR-002"]
+scenarios = ["CR-002", "CR-008"]
 
 [rules.RVW-020]
 fragment = "process/code-review"
