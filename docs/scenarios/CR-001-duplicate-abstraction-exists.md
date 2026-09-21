@@ -23,6 +23,10 @@ Diff under review: a new `src/pricing.ts` exporting
 the formatting logic of `formatMoney` (its own branch on currency, its own
 separator handling). Nothing else changes.
 
+## Enabled Features
+
+- `code-review` (the workflow under test; the `standard-code-review` skill is its packaged entry point)
+
 ## Prompt
 
 ```text

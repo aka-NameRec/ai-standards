@@ -20,6 +20,10 @@ shipped two releases ago; the defect is real but predates the change.
 Diff under review: the same file, an unrelated function `parseHeader` gains a
 docstring and a new export. The buggy loop is not touched.
 
+## Enabled Features
+
+- `code-review` (the workflow under test; the `standard-code-review` skill is its packaged entry point)
+
 ## Prompt
 
 ```text

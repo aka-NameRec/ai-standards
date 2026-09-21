@@ -21,6 +21,10 @@ permalink: ai-standards/scenarios/CR-003-pre-existing-defect-in-fixture.ru
 Дифф под ревью: тот же файл, не связанная функция `parseHeader` получает
 докстринг и новый экспорт. Дефектный цикл не затрагивается.
 
+## Включённые features
+
+- `code-review` (проверяемый процесс; навык `standard-code-review` — его упакованная точка входа)
+
 ## Prompt
 
 ```text

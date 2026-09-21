@@ -22,6 +22,10 @@ unit test covering the renamed function. The change is small, correct, and
 consistent with the surrounding code; none of the checked dimensions yields a
 valid finding.
 
+## Enabled Features
+
+- `code-review` (the workflow under test; the `standard-code-review` skill is its packaged entry point)
+
 ## Prompt
 
 ```text

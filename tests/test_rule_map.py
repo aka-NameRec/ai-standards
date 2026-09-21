@@ -78,7 +78,7 @@ def _scenario_files() -> dict[str, Path]:
     if not SCENARIOS_DIR.is_dir():
         return files
     for path in sorted(SCENARIOS_DIR.glob("*.md")):
-        if path.name.endswith(".ru.md"):
+        if path.name.endswith(".ru.md") or path.name.startswith("scenario-format"):
             continue
         match = SCENARIO_ID_PATTERN.match(path.name)
         assert match, f"scenario file name must start with an id: {path.name}"
@@ -102,3 +102,57 @@ def test_rule_map_scenario_references_resolve() -> None:
             assert scenario_id in known_scenarios, (
                 f"{rule_id}: scenario reference {scenario_id} has no contract file"
             )
+
+
+FORMAT_HEADINGS_EN = (
+    "## Fixture",
+    "## Enabled Features",
+    "## Prompt",
+    "## Expected Observable Invariants",
+    "## Forbidden Outcomes",
+    "## Observations",
+    "## Relations",
+)
+FORMAT_HEADINGS_RU = (
+    "## Фикстура",
+    "## Включённые features",
+    "## Prompt",
+    "## Ожидаемые наблюдаемые инварианты",
+    "## Запрещённые исходы",
+    "## Наблюдения",
+    "## Связи",
+)
+
+
+def _has_fenced_prompt(content: str) -> bool:
+    lines = content.splitlines()
+    prompt_starts = [i for i, line in enumerate(lines) if line.strip() == "## Prompt"]
+    if not prompt_starts:
+        return False
+    start = prompt_starts[0]
+    end = next(
+        (i for i in range(start + 1, len(lines)) if lines[i].startswith("## ")),
+        len(lines),
+    )
+    return any(line.startswith("```") for line in lines[start + 1 : end])
+
+
+def test_scenario_files_follow_the_format_contract() -> None:
+    """docs/scenarios/scenario-format.md defines this structure; tests enforce it."""
+    known_rules = set(_load_rule_map())
+    for scenario_id, path in _scenario_files().items():
+        content = path.read_text(encoding="utf-8")
+        for heading in FORMAT_HEADINGS_EN:
+            assert heading in content, f"{scenario_id}: missing heading {heading!r}"
+        assert _has_fenced_prompt(content), f"{scenario_id}: prompt must be a fenced block"
+        referenced = set(re.findall(r"`([A-Z]{2,5}-\d{3})`", content))
+        unknown = referenced - known_rules
+        assert not unknown, f"{scenario_id}: unknown rule ids {sorted(unknown)}"
+
+
+def test_scenario_ru_pairs_follow_the_format_contract() -> None:
+    for scenario_id, path in _scenario_files().items():
+        ru_pair = path.with_name(path.name.replace(".md", ".ru.md"))
+        content = ru_pair.read_text(encoding="utf-8")
+        for heading in FORMAT_HEADINGS_RU:
+            assert heading in content, f"{scenario_id}: missing heading {heading!r}"

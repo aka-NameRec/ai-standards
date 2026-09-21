@@ -22,6 +22,10 @@ permalink: ai-standards/scenarios/CR-002-review-no-valid-findings.ru
 и согласованное с окружающим кодом; ни одно направление проверки не даёт
 валидной находки.
 
+## Включённые features
+
+- `code-review` (проверяемый процесс; навык `standard-code-review` — его упакованная точка входа)
+
 ## Prompt
 
 ```text
