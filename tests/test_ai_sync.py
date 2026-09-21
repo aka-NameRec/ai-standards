@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tomllib
 from pathlib import Path
+from typing import cast
 
 import pytest
 
@@ -31,8 +32,12 @@ from scripts.ai_sync import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-CURRENT_AI_STANDARDS_VERSION = "2.4.0"
-CURRENT_RELEASE_DATE = "2026-09-18"
+_release_meta = cast(
+    dict[str, str],
+    tomllib.loads((REPO_ROOT / "meta.toml").read_text(encoding="utf-8"))["release"],
+)
+CURRENT_AI_STANDARDS_VERSION = _release_meta["version"]
+CURRENT_RELEASE_DATE = _release_meta["date"]
 CURRENT_RELEASE_PIN = f"{CURRENT_AI_STANDARDS_VERSION}-{CURRENT_RELEASE_DATE}"
 MANIFEST_RELEASE_BLOCK = f'ai_standards_version = "{CURRENT_RELEASE_PIN}"\n'
 

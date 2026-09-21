@@ -1,4 +1,4 @@
-ai_standards_version = "2.4.0-2026-09-18"
+ai_standards_version = "2.5.0-2026-09-21"
 
 fragments = [
   "core/base",
