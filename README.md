@@ -12,6 +12,7 @@
 - [Import External Rules](#import-external-rules)
 - [Feature Groups And Dependencies](#feature-groups-and-dependencies)
 - [Using Rule Engineering In a Project](#using-rule-engineering-in-a-project)
+- [Using Context Architecture In a Project](#using-context-architecture-in-a-project)
 - [Using Reasoning Hygiene In a Project](#using-reasoning-hygiene-in-a-project)
 - [Using Autonomy Boundaries In a Project](#using-autonomy-boundaries-in-a-project)
 - [Using Review Lenses In a Project](#using-review-lenses-in-a-project)
@@ -105,7 +106,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project --output-name 
 Use four layers:
 
 - `fragments`: direct core rules that should always be rendered.
-- `features`: optional capabilities such as `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, `agent-usage-hygiene`, and `rule-engineering`.
+- `features`: optional capabilities such as `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, `agent-usage-hygiene`, `rule-engineering`, and `context-architecture`.
 - `stacks`: technology-specific or architecture-specific rules such as `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring`, or `spring-data-jpa`.
 - `tooling.agents`: optional agent adapters such as `codex`, `claude`, `kilo`, and `cursor` for managed local workflow templates.
 
@@ -427,6 +428,7 @@ Features group by concern:
 - `retrieval-routing` — the connecting policy layer over every retrieval capability
 - `basic-memory` — Markdown retrieval layer over canonical knowledge and local working memory
 - `project-memory` — tool-independent local working memory taxonomy and lifecycle
+- `context-architecture` — the formal placement model over the seven context layers
 - `session-hygiene` — when working state must be preserved or reloaded
 - `agent-usage-hygiene` — context discipline on the usage side
 
@@ -462,6 +464,7 @@ Dependencies:
 - `autonomy-boundaries` integrates with working-state persistence: persisting state never authorizes crossing a boundary
 - `structural-code-intelligence` requires `retrieval-routing` and stays out of the recommended stack until its A/B/C evaluation justifies adoption
 - `rule-engineering` works standalone; executing its validation forms belongs to the separate evals specification (issue #18)
+- `context-architecture` formalizes the layer selection that `rule-engineering` ends with; enabling one without the other leaves a gap
 
 ## Using Rule Engineering In a Project
 
@@ -486,6 +489,30 @@ Detailed operational guidance lives in:
 - Russian guide: [docs/rule-engineering-usage.ru.md](docs/rule-engineering-usage.ru.md)
 
 Scenario contracts that execute the validation forms will live under `docs/scenarios/` in this repository; running them belongs to the `ai-standards-evals` specification (issue #18).
+
+## Using Context Architecture In a Project
+
+`context-architecture` is an optional feature that turns "where does this knowledge live?" into a checked decision: seven layers with purposes, ordered placement questions, and a control-plane invariant for always-loaded instructions.
+
+Use `context-architecture` when a project wants:
+
+- every addition placed deliberately — always-loaded rule, skill, skill reference, retrieval, script/tool, project knowledge, or adapter
+- the first matching placement question to decide, with a latest-loading tie-break
+- `AGENTS.md` to stay a control plane: invariants, routing, gates, precedence, discovery, completion minimums
+- any reduction of always-loaded content gated by a behavior-preserving comparison
+
+`ai-standards` owns the durable policy:
+
+- the seven-layer placement model and the ordered questions
+- the control-plane invariant and the reduction gate
+- the boundary against physical moves without evaluation
+
+Detailed operational guidance lives in:
+
+- English guide: [docs/context-architecture-usage.md](docs/context-architecture-usage.md)
+- Russian guide: [docs/context-architecture-usage.ru.md](docs/context-architecture-usage.ru.md)
+
+The feature changes placement decisions and starts a classification review; it does not move existing content by itself.
 
 ## Using Reasoning Hygiene In a Project
 

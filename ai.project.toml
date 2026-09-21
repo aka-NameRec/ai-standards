@@ -23,6 +23,7 @@ features = [
   "code-review",
   "knowledge-capture",
   "rule-engineering",
+  "context-architecture",
 ]
 
 stacks = [

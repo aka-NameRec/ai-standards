@@ -12,6 +12,7 @@
 - [Заимствование внешних правил](#заимствование-внешних-правил)
 - [Группы фич и зависимости](#группы-фич-и-зависимости)
 - [Использование Rule Engineering в проекте](#использование-rule-engineering-в-проекте)
+- [Использование Context Architecture в проекте](#использование-context-architecture-в-проекте)
 - [Использование Reasoning Hygiene в проекте](#использование-reasoning-hygiene-в-проекте)
 - [Использование Autonomy Boundaries в проекте](#использование-autonomy-boundaries-в-проекте)
 - [Использование Review Lenses в проекте](#использование-review-lenses-в-проекте)
@@ -101,7 +102,7 @@ uv run ai-sync init-claude-bridge --project-root /path/to/project
 Используются четыре слоя:
 
 - `fragments`: прямые базовые правила, которые должны включаться всегда.
-- `features`: опциональные возможности вроде `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, `agent-usage-hygiene` и `rule-engineering`.
+- `features`: опциональные возможности вроде `retrieval-routing`, `basic-memory`, `project-memory`, `chroma`, `design-first-collaboration`, `reasoning-hygiene`, `autonomy-boundaries`, `review-lenses`, `code-review`, `structured-artifacts`, `session-hygiene`, `agent-usage-hygiene`, `rule-engineering` и `context-architecture`.
 - `stacks`: правила, зависящие от технологии или архитектурного стиля, например `layered-architecture`, `backend-layered-architecture`, `frontend-layered-architecture`, `typescript`, `python`, `fastapi`, `sqlalchemy`, `django`, `postgres`, `react`, `nextjs`, `tanstack-query`, `vue`, `nuxt`, `vue-query`, `vite`, `fsd`, `java`, `spring` или `spring-data-jpa`.
 - `tooling.agents`: опциональные agent adapters вроде `codex`, `claude`, `kilo` и `cursor` для управляемых локальных workflow templates.
 
@@ -423,6 +424,7 @@ Constraints:
 - `retrieval-routing` — связующий policy-слой над всеми retrieval-capability
 - `basic-memory` — Markdown retrieval-слой над каноническим знанием и локальной рабочей памятью
 - `project-memory` — инструментально-независимая таксономия и жизненный цикл локальной рабочей памяти
+- `context-architecture` — формальная модель размещения поверх семи слоёв контекста
 - `session-hygiene` — когда рабочее состояние должно сохраняться и перезагружаться
 - `agent-usage-hygiene` — дисциплина контекста со стороны использования
 
@@ -458,6 +460,7 @@ Constraints:
 - `autonomy-boundaries` интегрируется с сохранением рабочего состояния: сохранение состояния никогда не разрешает пересечь границу
 - `structural-code-intelligence` требует `retrieval-routing` и остаётся вне рекомендуемого стека, пока evaluation A/B/C не подтвердит включение
 - `rule-engineering` работает самостоятельно; исполнение форм валидации относится к отдельной evals-спецификации (issue #18)
+- `context-architecture` формализует выбор слоя, которым заканчивается `rule-engineering`; включение одного без другого оставляет дыру
 
 ## Использование Rule Engineering в проекте
 
@@ -482,6 +485,30 @@ Constraints:
 - Русский гайд: [docs/rule-engineering-usage.ru.md](docs/rule-engineering-usage.ru.md)
 
 Контракты сценариев, исполняющие формы валидации, появятся в `docs/scenarios/` этого репозитория; их исполнение относится к спецификации `ai-standards-evals` (issue #18).
+
+## Использование Context Architecture в проекте
+
+`context-architecture` — опциональная feature, превращающая вопрос «где живёт это знание?» в проверяемое решение: семь слоёв с назначениями, упорядоченные placement-вопросы и инвариант control plane для всегда загружаемых инструкций.
+
+Используйте `context-architecture`, когда проект хочет:
+
+- осознанного размещения каждого пополнения — always-loaded rule, skill, skill reference, retrieval, script/tool, project knowledge или adapter
+- решения по первому совпавшему placement-вопросу с тай-брейком «загружает позже»
+- `AGENTS.md` как control plane: инварианты, маршрутизация, гейты, precedence, обнаружение, минимальные требования завершения
+- любого сокращения всегда загружаемого содержимого под гейтом поведенчески-сохраняющего сравнения
+
+`ai-standards` владеет долговременной политикой:
+
+- семислоевая модель размещения и упорядоченные вопросы
+- инвариант control plane и гейт сокращения
+- граница против физических переносов без оценки
+
+Подробное практическое руководство:
+
+- Английский гайд: [docs/context-architecture-usage.md](docs/context-architecture-usage.md)
+- Русский гайд: [docs/context-architecture-usage.ru.md](docs/context-architecture-usage.ru.md)
+
+Feature меняет решения о размещении и запускает классификационный обзор; сам по себе он существующий контент не перемещает.
 
 ## Использование Reasoning Hygiene в проекте
 

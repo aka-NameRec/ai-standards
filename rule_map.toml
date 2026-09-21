@@ -246,3 +246,35 @@ fragment = "process/code-review"
 section = "Normalization Rules"
 behavior = "No tool- or vendor-specific review-bot output formats are encoded; those stay in local adapters."
 scenarios = []
+
+# Context Architecture fragment — the formal placement model (Phase 4).
+
+[rules.CA-001]
+fragment = "process/context-architecture"
+section = "Placement Model"
+behavior = "Every knowledge addition occupies exactly one of the seven context layers whose purpose matches it: always-loaded rules, skill, skill reference, retrieval, script/tool, project knowledge, or adapter."
+scenarios = []
+
+[rules.CA-002]
+fragment = "process/context-architecture"
+section = "Placement Questions"
+behavior = "The ordered placement questions determine the layer for each addition, and the first match wins."
+scenarios = []
+
+[rules.CA-003]
+fragment = "process/context-architecture"
+section = "Placement Questions"
+behavior = "When two layers fit, the one that loads the knowledge latest while still guaranteeing it arrives when needed is chosen."
+scenarios = []
+
+[rules.CA-004]
+fragment = "process/context-architecture"
+section = "Control Plane Invariant"
+behavior = "Always-loaded instructions carry only universal invariants, routing, mandatory gates, precedence, discovery instructions, and minimum completion requirements — never task-specific operational detail."
+scenarios = []
+
+[rules.CA-005]
+fragment = "process/context-architecture"
+section = "Control Plane Invariant"
+behavior = "Always-loaded content is reduced only with a behavior-preserving comparison against the current state."
+scenarios = []

@@ -16,6 +16,7 @@ session-hygiene = ["process/session-hygiene"]
 agent-usage-hygiene = ["process/agent-usage-hygiene"]
 knowledge-capture = ["process/knowledge-capture"]
 rule-engineering = ["process/rule-engineering"]
+context-architecture = ["process/context-architecture"]
 
 # Version of the ai-standards release that introduced each feature. The
 # update-ai-standards skill uses these values to announce what is new for a
@@ -34,6 +35,7 @@ code-review = "2.2.0"
 knowledge-capture = "2.2.0"
 module-contract-gate = "2.2.0"
 rule-engineering = "2.5.0"
+context-architecture = "2.5.0"
 
 [stacks]
 layered-architecture = ["stacks/layered-architecture"]

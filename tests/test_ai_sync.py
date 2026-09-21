@@ -2930,3 +2930,43 @@ def test_rule_engineering_fragment_keeps_its_rules() -> None:
         "between reading a rule and acting on it"
     ) in flat
     assert "agent-specific mechanics live in adapters" in flat
+
+
+def test_context_architecture_feature_can_be_rendered(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK +
+        'fragments = ["core/base", "core/architecture"]\n'
+        'features = ["context-architecture"]\n'
+        'stacks = ["python"]\n'
+        'local_overrides = ["docs/ai/project-rules.md"]\n'
+        "\n"
+        "[metadata]\n"
+        'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root)
+
+    assert "## Context Architecture" in result.content
+    assert "the first match wins" in result.content
+    assert "loads the knowledge latest while still guaranteeing it arrives" in result.content
+    assert "never task-specific operational detail" in result.content
+
+
+def test_context_architecture_fragment_keeps_its_rules() -> None:
+    fragment = (
+        REPO_ROOT / "fragments" / "process" / "context-architecture.md"
+    ).read_text(encoding="utf-8")
+    flat = " ".join(fragment.split())
+
+    assert "always-loaded rules | universal invariants, routing rules, mandatory gates" in flat
+    assert "Needed for almost every task?" in flat
+    assert "behavior-preserving comparison against the current state" in flat
