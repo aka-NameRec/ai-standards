@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+
+- The `code-review` fragment's default file-save destination for review reports pointed at the retired `docs/ai-memory/**` area (issue #20): now `docs/local/code-review/<YYYY-MM-DD>-<topic-slug>.md`, and the enabling feature is `project-memory` (the owner of the `docs/local/**` area), not `structured-artifacts`. Issue #12, if accepted, replaces this line again with the `temp/` flow.
+
 ## [2.5.0] — 2026-09-21
 
 ### Added
