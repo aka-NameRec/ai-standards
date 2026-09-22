@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 import sys
@@ -269,11 +270,56 @@ def build_tag_name(repo_root: Path) -> str:
     return f"{release.version}-{release.release_date}"
 
 
-def create_tag(repo_root: Path) -> str:
+def verify_evals_report(
+    report_path: Path,
+    tag_name: str,
+    evals_revision: str | None,
+    head_sha: str,
+) -> dict[str, object]:
+    """Validate the behavioral verification report for the release being tagged.
+
+    The report must end with ``verdict: PASS`` and its ``standards_revision``
+    must identify the tagged revision: the tag name itself, ``main``, the HEAD
+    commit, or the explicit ``--evals-revision`` override.
+    """
+    if not report_path.is_file():
+        raise VersioningError(f"Evals report not found: {report_path}")
+    data = cast("dict[str, object]", json.loads(report_path.read_text(encoding="utf-8")))
+    if data.get("kind") != "release-report":
+        raise VersioningError(
+            f"{report_path}: expected a release-report document (kind=release-report)."
+        )
+    verdict = data.get("verdict")
+    if verdict != "PASS":
+        raise VersioningError(
+            f"{report_path}: evals report verdict is {verdict!r}; "
+            "behavioral verification must PASS before tagging."
+        )
+    report_revision = data.get("standards_revision")
+    allowed = {tag_name, "main", head_sha, head_sha[:12]}
+    if evals_revision is not None:
+        allowed.add(evals_revision)
+    if report_revision not in allowed:
+        raise VersioningError(
+            f"{report_path}: report revision {report_revision!r} does not match the "
+            f"tagged release (expected one of {sorted(allowed)}); run the eval suite "
+            "against the revision being tagged."
+        )
+    return data
+
+
+def create_tag(
+    repo_root: Path,
+    evals_report: Path | None = None,
+    evals_revision: str | None = None,
+) -> str:
     ensure_clean_worktree(repo_root)
     ensure_main_branch(repo_root)
     tag_name = build_tag_name(repo_root)
     ensure_tag_absent(repo_root, tag_name)
+    if evals_report is not None:
+        head_sha = _run_git(repo_root, ["rev-parse", "HEAD"]).stdout.strip()
+        verify_evals_report(evals_report, tag_name, evals_revision, head_sha)
     release = _load_release_state(repo_root)
     result = _run_git(
         repo_root,
@@ -335,10 +381,29 @@ def save(
 
 
 @app.command()
-def tag() -> None:
+def tag(
+    evals_report: Annotated[
+        Path | None,
+        typer.Option(
+            "--evals-report",
+            help="Release-report.json from ai-standards-evals; required for tagging.",
+        ),
+    ] = None,
+    evals_revision: Annotated[
+        str | None,
+        typer.Option(
+            "--evals-revision",
+            help="Explicit revision string the evals report was produced for.",
+        ),
+    ] = None,
+) -> None:
     """Create an annotated release tag from meta.toml on main."""
 
-    tag_name = create_tag(_repo_root())
+    tag_name = create_tag(
+        _repo_root(),
+        evals_report=evals_report,
+        evals_revision=evals_revision,
+    )
     typer.echo(tag_name)
 
 

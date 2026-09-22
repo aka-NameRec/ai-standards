@@ -721,6 +721,7 @@ Russian localized version: [project-rules.ru.md](project-rules.ru.md)
 - Use `bump-version` for release-version preview, save, and tag operations in this repository.
 - `bump-version save` is allowed only on a clean git worktree.
 - `bump-version tag` is allowed only on a clean git worktree and only from the `main` branch.
+- `bump-version tag` requires behavioral verification: run the `ai-standards-evals` suite for the release revision and pass `--evals-report <release-report.json>`; the report must end with `verdict: PASS` and its `standards_revision` must identify the tagged revision (tag name, `main`, or HEAD). Without the report the tag command refuses.
 - Use `ai-sync` for rendering and validating `AGENTS.md` in this repository.
 - Release tagging remains a separate step from version saving and from git commits.
 - If a merged change set updates the repository release version, create and push the corresponding annotated release tag as the required follow-up step.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -9,6 +10,7 @@ from scripts.bump_version import (
     bump_version,
     create_tag,
     save_release,
+    verify_evals_report,
 )
 
 
@@ -234,3 +236,75 @@ def test_create_tag_creates_annotated_release_tag(tmp_path: Path) -> None:
     tag_message = _run_git(repo_root, "tag", "-n99", tag_name)
     assert tag_message.returncode == 0
     assert "Release 1.2.0 (2026-05-01)" in tag_message.stdout
+
+
+def _write_release_report(
+    path: Path,
+    verdict: str = "PASS",
+    revision: str = "2.6.0-2026-10-01",
+) -> Path:
+    report = {
+        "kind": "release-report",
+        "verdict": verdict,
+        "standards_revision": revision,
+        "scenarios": {},
+    }
+    path.write_text(json.dumps(report), encoding="utf-8")
+    return path
+
+
+def test_verify_evals_report_accepts_matching_pass(tmp_path: Path) -> None:
+    report = _write_release_report(tmp_path / "release-report.json")
+
+    data = verify_evals_report(report, "2.6.0-2026-10-01", None, "abc123def456")
+
+    assert data["verdict"] == "PASS"
+
+
+def test_verify_evals_report_accepts_main_and_explicit_revision(tmp_path: Path) -> None:
+    report = _write_release_report(
+        tmp_path / "release-report.json", revision="main"
+    )
+
+    data = verify_evals_report(report, "2.6.0-2026-10-01", None, "abc123def456")
+    assert data["verdict"] == "PASS"
+
+    data = verify_evals_report(
+        report, "2.6.0-2026-10-01", "rules-change/18-eval-scenario-contracts", "abc"
+    )
+    assert data["verdict"] == "PASS"
+
+
+def test_verify_evals_report_refuses_fail_verdict(tmp_path: Path) -> None:
+    report = _write_release_report(
+        tmp_path / "release-report.json", verdict="FAIL"
+    )
+
+    try:
+        verify_evals_report(report, "2.6.0-2026-10-01", None, "abc")
+    except VersioningError as error:
+        assert "must PASS" in str(error)
+        return
+    raise AssertionError("Expected verify_evals_report to refuse a FAIL report")
+
+
+def test_verify_evals_report_refuses_revision_mismatch(tmp_path: Path) -> None:
+    report = _write_release_report(
+        tmp_path / "release-report.json", revision="some-other-branch"
+    )
+
+    try:
+        verify_evals_report(report, "2.6.0-2026-10-01", None, "abc123def456")
+    except VersioningError as error:
+        assert "does not match" in str(error)
+        return
+    raise AssertionError("Expected verify_evals_report to refuse a revision mismatch")
+
+
+def test_verify_evals_report_refuses_missing_file(tmp_path: Path) -> None:
+    try:
+        verify_evals_report(tmp_path / "absent.json", "2.6.0-2026-10-01", None, "abc")
+    except VersioningError as error:
+        assert "not found" in str(error)
+        return
+    raise AssertionError("Expected verify_evals_report to refuse a missing report")

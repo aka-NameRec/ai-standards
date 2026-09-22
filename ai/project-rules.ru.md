@@ -40,6 +40,7 @@
 - Для preview, save и tag операций над release version в этом репозитории используйте `bump-version`.
 - `bump-version save` разрешён только на чистом git worktree.
 - `bump-version tag` разрешён только на чистом git worktree и только из ветки `main`.
+- `bump-version tag` требует поведенческой верификации: выполните набор `ai-standards-evals` для ревизии релиза и передайте `--evals-report <release-report.json>`; отчёт должен завершаться `verdict: PASS`, а его `standards_revision` — указывать тегируемую ревизию (имя тега, `main` или HEAD). Без отчёта команда тегирования откажет.
 - Для сборки и проверки `AGENTS.md` в этом репозитории используйте `ai-sync`.
 - Создание релизного тега остаётся отдельным шагом по отношению к сохранению версии и git commit.
 - Если merged change set меняет release version репозитория, соответствующий annotated release tag должен быть создан и запушен как обязательный follow-up шаг.
