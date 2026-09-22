@@ -482,11 +482,8 @@ Source provenance:
 - Default to reporting. Editing is limited to the small fixes allowed by `Fixing While Reviewing` below; anything beyond that waits for an explicit request, and then applies the smallest coherent patch.
 
 ### What To Check
-- Correctness first: logic errors, missed edge cases, and failure paths that ignore the `Error Handling` rules in force here.
-- Then Architecture & Conventions: violations of this project's architecture rules and of any active stack fragments. Check the changed modules against their active module contracts (records under `docs/architecture/**` marked `type: module-contract` in the frontmatter; a root-level `MODULE_CONTRACT.md` is a legacy form still worth reading — ownership, non-goals, invariants), against accepted decision records under `docs/architecture/**`, and against the module map when one exists; a violation cites the exact contract clause it breaks. A changed major module with no contract is reported as a `(no contract)` note — a gap to fill, not a defect.
-- Then Reuse: code that should have reused an existing project primitive, and duplication the change introduces on its own. Two new copies added by one change satisfy "prefer existing primitives", because neither copy is an existing primitive, and are duplication all the same; so is one intent expressed two different ways in sibling files.
-- Then Efficiency: avoidable cost, such as repeated queries, per-row or per-render work that could be hoisted, and client-side handling of something the server should do. Judge it against realistic data volumes and say when the cost is currently free.
-- Then Quality: readability, contract stability, test coverage of edge cases, and traps that only surface in production.
+- Run the review passes that the report's finding sections name, in that order: Correctness, then Architecture & Conventions, then Reuse, Efficiency, and Quality.
+- When the `standard-code-review` skill is deployed, its `references/procedure.md` holds the full pass-by-pass procedure — follow it when running the standard review.
 - Report a notable problem that predates the diff as well, marked `(pre-existing)` so it does not read as blame for this change. Whether to fix it stays the author's call, it can be offered as a follow-up instead, and it must not expand into an unrequested audit of the surrounding code.
 
 ### What Makes A Finding Reportable
@@ -511,10 +508,9 @@ Source provenance:
 - A later "resend the report" updates it: reclassify the findings already on record against what has since been fixed — by an explicit fix pass or by an ordinary follow-up like "fix the first one" — rather than reviewing the diff again from scratch.
 
 ### Fixing While Reviewing
-- Reporting stays the default. The one exception is a small fix whose safety can be established by reading alone, without running anything: make it, and record it as a ✅ finding with a `→ fixed:` tail like any other.
-- Safe to fix without asking: wrong or missing translations, typos in user-facing strings and comments, a defensive tightening that cannot change behaviour on current data, a missing `.gitignore` entry for generated junk, and plain inconsistencies with the surrounding code such as the wrong import or the wrong constant.
-- Report instead of fixing: anything touching migrations, lock files, dependencies, or build configuration; changes to public types and contracts other code depends on; refactors, however obviously correct, because that is the author's decision and not a defect; the state of the git index; and anything whose safety would need a test run to establish.
-- Review first, then fix, then write the report, so the report describes the state after the fixes. List the fixes in the chat as well, separately from the report, so they can be reviewed on their own.
+- Reporting stays the default. A small fix whose safety is established by reading alone, without running anything, may be applied and recorded as a ✅ finding with a `→ fixed:` tail like any other.
+- Anything else — migrations, lock files, dependencies, build configuration, public types and contracts, refactors, the state of the git index, and anything whose safety would need a test run — is reported, not fixed.
+- When the `standard-code-review` skill is deployed, its `references/procedure.md` carries the full policy with the safe-to-fix and report-instead lists.
 
 ### Relationship To Review Lenses
 - This workflow answers a plain "code review" request and covers correctness and convention conformance alongside cleanup. `review-lenses` keeps its own explicit activation and its narrower three-lens cleanup model, and remains the one to use in CI.

@@ -1448,16 +1448,22 @@ def test_sync_deploys_parseable_chroma_infra_templates(tmp_path: Path) -> None:
 
 
 def test_code_review_fragment_names_module_contracts() -> None:
+    """M1 moved the pass procedure into the skill reference; the module-contract
+    pointers live there now, while the fragment keeps the routing pointer."""
     fragment = (
         REPO_ROOT / "fragments" / "process" / "code-review.md"
+    ).read_text(encoding="utf-8")
+    procedure = (
+        REPO_ROOT / "templates" / "code-review" / "standard-code-review.procedure.md"
     ).read_text(encoding="utf-8")
     template = (
         REPO_ROOT / "templates" / "code-review-report.md"
     ).read_text(encoding="utf-8")
 
-    assert "type: module-contract" in fragment
-    assert "docs/architecture/**" in fragment
-    assert "(no contract)" in fragment
+    assert "references/procedure.md" in fragment
+    assert "type: module-contract" in procedure
+    assert "docs/architecture/**" in procedure
+    assert "(no contract)" in procedure
     assert "violates: docs/architecture/2026-08-11-module-contract-payments.md" in template
 
 
@@ -1705,6 +1711,7 @@ def test_sync_deploys_standard_review_adapters_when_code_review_enabled(tmp_path
         "standard-code-review.md",
         "update-ai-standards.md",
         "SKILL.md",
+        "procedure.md",
         "SKILL.md",
         "standard-code-review.mdc",
         "update-ai-standards.mdc",

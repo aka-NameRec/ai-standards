@@ -263,6 +263,14 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="kilo",
+            source_relative_path="templates/code-review/standard-code-review.procedure.md",
+            destination_relative_path=(
+                ".agents/skills/code-review/standard-code-review/references/procedure.md"
+            ),
+            feature="code-review",
+        ),
+        AgentTemplate(
+            agent="kilo",
             source_relative_path="templates/knowledge-capture/capture-knowledge.SKILL.md",
             destination_relative_path=".agents/skills/knowledge-capture/capture-knowledge/SKILL.md",
             feature="knowledge-capture",
