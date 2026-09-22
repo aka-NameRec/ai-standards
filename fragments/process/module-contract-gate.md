@@ -1,10 +1,3 @@
-<!--
-Source provenance:
-- Promoted from the contributor draft `docs/archive/0tkgv0g-module-contract-discovery-gate.md`
-  (exchange of 2026-07-28; validated against the rule surface on 2026-08-28).
-- Placement and adjustments: docs/decisions/2026-08-28-module-contract-gate-feature-placement.md.
--->
-
 ## Module Contract Discovery Gate
 
 Before changing production code — the project's own source and configuration that a change
@@ -23,69 +16,47 @@ the agent must complete module-contract discovery for the affected code area.
 
 ### Task Start
 
-At the start of a coding task:
-
-1. Establish whether the project declares contract artifacts at all: query the Basic Memory
-   index when `basic-memory` is enabled, otherwise run one cheap check such as
-   `rg --files docs/architecture -g '*module-contract*'` plus a look for a legacy root
-   `MODULE_CONTRACT.md`.
-2. If the project declares none, discovery is complete with that result: say so in one line
-   and continue under the normal rules.
-3. Otherwise, query the index (when available) for the project name, `module contract`,
-   `docs/architecture`, the task id when available, and the modules, classes, or packages
-   likely to be touched.
-4. If no index is available, stale, or insufficient, say so before broad discovery — for
-   example: "the module-contract index is unavailable, so I will scan `docs/architecture`
-   and contract markers directly, which costs extra context" — and then scan with targeted
-   commands such as `rg --files docs/architecture -g '*module-contract*'` and
-   `rg -n "type: module-contract|START_MODULE_CONTRACT|module contract|контракт модуля"`.
+At the start of a coding task: establish whether the project declares contract artifacts at
+all — query the Basic Memory index when `basic-memory` is enabled, otherwise run a targeted
+scan of `docs/architecture` and look for a legacy `MODULE_CONTRACT.md`. If none are
+declared, discovery is complete with that result: say so in one line and continue under the
+normal rules; otherwise discover the contracts for the affected area.
 
 ### Before Editing A File
 
-Before editing a code file, decide whether the file is covered by a module contract. A file
-is covered when any of these hold:
-
-- the contract explicitly names the class, function, package, module, endpoint, job, table,
-  event, or adapter;
-- the file is inside a directory or module the contract declares;
-- the file produces, consumes, validates, caches, persists, transforms, or transports data
-  the contract describes;
-- the change may affect the contract's responsibilities, inputs, outputs, invariants, side
-  effects, error boundaries, recovery behavior, observability, or verification requirements;
-- the file's tests exercise behavior the contract names.
-
-If coverage is unclear, treat the contract as relevant, read it, and state the uncertainty.
+Before editing a code file, decide whether the file is covered by a module contract: by
+explicit naming, by location, by the data flows it handles, by the responsibilities the
+change may affect, or by its tests. If coverage is unclear, treat the contract as relevant,
+read it, and state the uncertainty.
 
 ### Use During Reasoning
 
-For every relevant contract, use it to constrain the change: scope and non-goals; allowed
-behavior changes; error handling and recovery rules; backward-compatibility expectations;
-required tests or smoke checks; and whether the task is ordinary implementation work or a
-contract change. If the intended change contradicts a contract, stop and report that the
-task requires a contract change — never silently implement behavior that violates the
-existing contract. Escalating a contract change is the stop condition `Autonomy Boundaries`
-already defines for public contract changes, applied here at write time.
+Contracts constrain the change: scope and non-goals, allowed behavior changes, error
+handling and recovery, required verification. If the intended change contradicts a contract,
+stop and report that the task requires a contract change — never silently implement behavior
+that violates the existing contract. Escalating a contract change is the stop condition
+`Autonomy Boundaries` already defines for public contract changes.
 
 ### During The Session
 
-Re-run contract discovery when the task moves into a new module or layer; when `git status`
-or `git diff` shows changes under `docs/architecture/**` or to `MODULE_CONTRACT.md`; when a
-new class, package, or module joins the edit set; or when verification failures suggest a
-misunderstood boundary or invariant.
-
-### Index Entries
-
-When `basic-memory` is enabled, a module-contract index entry should carry the repository
-name, the source contract path, a freshness marker (commit or file hash when available), and
-the covered modules, packages, or data flows. An entry without a source path or freshness
-marker is a hint: read the repository file before relying on it.
+Re-run contract discovery when the task moves into a new module or layer, when contract
+artifacts change, when new units join the edit set, or when verification failures suggest a
+misunderstood boundary.
 
 ### Reporting
 
-In the implementation summary, add one short contract note when contracts were relevant:
-which contracts were read, which files were treated as covered, whether the change preserves
-or changes the contract, and which verification ran against contract requirements. If no
-relevant contract was found, say that discovery was performed and name the remaining risk.
+When contracts were relevant, the implementation summary carries one short contract note:
+which contracts were read, which files were treated as covered, whether the contract is
+preserved or changed, and what verification ran against it. If no relevant contract was
+found, say that discovery was performed and name the remaining risk.
+
+### Reference
+
+The full discovery commands, the coverage criteria, the reasoning detail, the index-entry
+shape, and the reporting detail live in
+`.ai-standards/references/module-contract-gate.md`, deployed by `ai-sync sync-templates`
+when this feature is enabled — read it when the gate fires. If the file is absent, the
+project has not run `ai-sync sync-templates`; proceed with the rules above.
 
 ### Strict Rule
 
