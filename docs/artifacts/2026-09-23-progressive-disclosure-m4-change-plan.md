@@ -85,3 +85,23 @@ policies (`What Was Done`, `How It Was Done`, `Verification`, `Dependencies`,
 4. Baseline vs candidate comparison on the scenario suite (existing CR-001–009
    plus CR-010/CR-011), LLM judge included, reports stored under
    `ai-standards-evals/reports/`. Merge gate: no unexplained regressions.
+
+## Outcome (recorded after implementation)
+
+- The first candidate epoch failed the eval gate: without the localization
+  legend always-loaded, fallback-path reports (no templates, Russian ambient
+  context) degraded into mixed-language forms — the same failure class as the
+  rejected M3 attempt. Re-planned within the approved design: the fragment's
+  fallback bullet keeps a minimal Russian section legend (~230 bytes), the
+  full policy stays in the reference.
+- Final comparison (2 epochs per revision, LLM judge included): ACCEPT, no
+  downgrades; CR-010 CR variance only (fenced-posting form). Reports:
+  `ai-standards-evals/reports/20260923-std-change-0001-comparison.md`; the
+  rejected epoch is archived under `reports/archive-std-change-0001-epoch1/`.
+- Measured: `Code Review` section 7,781 → 5,835 bytes; self-hosted
+  `AGENTS.md` 61,888 → 60,034 bytes. M5 remains the larger win.
+- Scorer calibrations made honestly in `ai-standards-evals` and recorded in
+  its README: missing-coverage findings on test paths do not count as scope
+  violations; the pre-existing mark is judged as an outcome, not exact
+  wording; the CR-012 fallback matcher judges order and presence, not
+  headings; `collect_runs`/`discover_runs` cover matrix layouts.
