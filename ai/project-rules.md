@@ -43,4 +43,5 @@ Russian localized version: [project-rules.ru.md](project-rules.ru.md)
 - `bump-version tag` requires behavioral verification: run the `ai-standards-evals` suite for the release revision and pass `--evals-report <release-report.json>`; the report must end with `verdict: PASS` and its `standards_revision` must identify the tagged revision (tag name, `main`, or HEAD). Without the report the tag command refuses.
 - Use `ai-sync` for rendering and validating `AGENTS.md` in this repository.
 - Release tagging remains a separate step from version saving and from git commits.
+- A branch that changes `fragments/**` or `templates/**` is merged into `main` only with an attached eval comparison (baseline vs candidate behavioral verdicts and LLM judge results from `ai-standards-evals`); merging without an ACCEPT verdict requires an explicit user decision.
 - If a merged change set updates the repository release version, create and push the corresponding annotated release tag as the required follow-up step.
