@@ -240,7 +240,9 @@ class CodeIndex:
             for distance, metadata, document in zip(distances, metadatas, documents):
                 rows.append((float(distance), config["name"], metadata, document))
 
-        for rank, (distance, name, metadata, document) in enumerate(sorted(rows)[:limit], 1):
+        for rank, (distance, name, metadata, document) in enumerate(
+            sorted(rows, key=lambda r: (r[0], r[1]))[:limit], 1
+        ):
             excerpt = document[:1200].replace("\x00", "")
             print(
                 f"\n[{rank}] distance={distance:.4f} collection={name} "
