@@ -837,6 +837,20 @@ def test_module_contract_gate_fragment_keeps_its_guarantees() -> None:
     assert "`Autonomy Boundaries`" in flat
 
 
+def test_code_review_fragment_keeps_the_version_line_guarantee() -> None:
+    """The M3 compression attempt (rejected by the eval gate, issue #18) dropped
+    the motivation behind the version line and the agent stopped emitting the
+    line at all; the fragment must keep the line, its fallback, and the reason
+    it exists."""
+    fragment = (
+        REPO_ROOT / "fragments" / "process" / "code-review.md"
+    ).read_text(encoding="utf-8")
+
+    assert "Open the report with an `ai-standards <version>` line" in fragment
+    assert "the version is undetermined instead of guessing" in fragment
+    assert "says which rule set the review ran under" in fragment
+
+
 def test_response_language_style_feature_can_be_rendered(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()
