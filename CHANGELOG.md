@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Scenario contracts `CR-010`–`CR-012`** (issue #22, change set `STD-CHANGE-0001`; both languages, bound to `RVW-015`–`RVW-018`, `RVW-022`, `RVW-024`, `RVW-030` in `rule_map.toml`): CR-010 pins the report metadata invariants (version line, marker discipline, `What Was Done`/`How It Was Done`, chat language, fenced posting) that the rejected M3 attempt showed to be load-bearing; CR-011 pins the reporting-reference routing with templates synced; CR-012 pins the fallback path when templates are absent — a path no earlier scenario observed, because every earlier run materialized the templates.
+
+### Changed
+
+- **M4 progressive-disclosure relocation (issue #22, change set `STD-CHANGE-0001`)**: new template `templates/code-review-reporting.reference.md`, deployed by `sync-templates` as `.ai-standards/references/code-review-reporting.md` gated on the `code-review` feature. The reporting-policy detail — marker semantics, `What Was Done`/`How It Was Done`/`Verification`/`Dependencies`/`Task` policies, multi-repository reports, posting destination, resend handling — now loads at report time instead of living in `AGENTS.md`. The fragment keeps the trigger, scope, finding invariants, shape pointer, fallback order, the verbatim version-line invariant (the M3 lesson), and the chat-language rule; the Russian localization legend moved into the worked example, which the agent reads exactly when the report is written. Self-hosted `AGENTS.md`: 61,888 → 59,756 bytes; the rendered `Code Review` section: 7,781 → 5,557 bytes. Behavior verified by the `ai-standards-evals` regression comparison (baseline `2.6.0-2026-09-23` vs candidate).
+
 ### Fixed
 
 - The `code-review` fragment's default file-save destination for review reports pointed at the retired `docs/ai-memory/**` area (issue #20): now `docs/local/code-review/<YYYY-MM-DD>-<topic-slug>.md`, and the enabling feature is `project-memory` (the owner of the `docs/local/**` area), not `structured-artifacts`. Issue #12, if accepted, replaces this line again with the `temp/` flow.

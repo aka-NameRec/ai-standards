@@ -631,7 +631,7 @@ Use `code-review` when a project wants:
 - what makes a finding reportable: a real file location, a named violated rule, a claim read from the code rather than the diff, no invented rules, no padding
 - the default reporting posture, and the narrow class of fixes a reviewer may make without asking
 
-The report shape itself is defined once, by the worked example in [templates/code-review-report.md](templates/code-review-report.md), deployed into each enabling project as `.ai-standards/code-review-report.md` by `sync-templates`. No document restates it, so changing the format is a single-file edit.
+The report shape itself is defined once, by the worked example in [templates/code-review-report.md](templates/code-review-report.md), deployed into each enabling project as `.ai-standards/code-review-report.md` by `sync-templates`, which also deploys the reporting-policy detail as `.ai-standards/references/code-review-reporting.md` (issue #22, M4): the marker semantics, section policies, and multi-repository, destination, and resend rules load at report time instead of living in `AGENTS.md`. No document restates the shape, so changing the format is a single-file edit.
 
 Because the trigger and the report shape live in the rendered instructions themselves, no `tooling.agents` adapter is required; the workflow behaves the same in Claude Code, Codex, Cursor, and any other `AGENTS.md`-reading tool. It composes with `review-lenses` without conflict — see the relationship notes in the usage guide. A feature-gated `standard-code-review` skill packages the workflow with the full lens passes and an architecture-and-contracts check behind one activator («стандартный code review»).
 

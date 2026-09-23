@@ -814,6 +814,12 @@ def test_code_review_reporting_reference_carries_the_moved_policies() -> None:
     assert "code-review-reporting.md" in fragment
     assert "fall back to this order" in fragment
 
+    # The fallback path carries a minimal Russian section legend: the first
+    # M4 candidate run (eval gate) showed that without it the fallback degrades
+    # into mixed-language reports when the template is absent.
+    for russian_name in ("Что сделано", "Корректность", "Проверки", "Не найдено."):
+        assert russian_name in fragment, f"{russian_name!r} is missing from the fragment fallback"
+
     # Every moved policy remains stated in the reference.
     for moved in (
         "→ fixed:",
