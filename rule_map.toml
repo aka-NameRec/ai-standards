@@ -146,7 +146,7 @@ scenarios = ["CR-002", "CR-007"]
 fragment = "process/code-review"
 section = "Report Shape"
 behavior = "The report reproduces the worked example's shape exactly; when the example file is absent the review says so and uses the stated fallback order."
-scenarios = ["CR-002", "CR-011"]
+scenarios = ["CR-002", "CR-011", "CR-012"]
 
 [rules.RVW-016]
 fragment = "process/code-review"
