@@ -904,7 +904,9 @@ def test_code_review_fragment_keeps_the_version_line_guarantee() -> None:
         REPO_ROOT / "fragments" / "process" / "code-review.md"
     ).read_text(encoding="utf-8")
 
-    assert "Open the report with an `ai-standards <version>` line" in fragment
+    assert (
+        "it opens with an `ai-standards <version>` line" in fragment
+    )  # unconditional on the report form (issue #22 gate, second catch)
     assert "the version is undetermined instead of guessing" in fragment
     assert "says which rule set the review ran under" in fragment
 
