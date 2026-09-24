@@ -18,7 +18,7 @@
 - Unless a project defines a stricter local convention, name files under `docs/decisions/**` and `docs/architecture/**` as `YYYY-MM-DD-<topic-slug>.md`.
 
 ## Canonical Documentation And Agent Working Memory
-- Treat `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge; treat `docs/local/**` (or the project's equivalent working-memory area) as agent-managed working memory rather than canonical truth. Structured artifacts are reviewable project knowledge; working memory holds evolving context, temporary findings, and session state — the two never mix roles.
+- Treat `docs/local/**` (or the project's equivalent working-memory area) as agent-managed working memory rather than canonical truth; treat `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge. Structured artifacts are reviewable project knowledge; working memory holds evolving context, temporary findings, and session state — the two never mix roles.
 - Durable conclusions must be promoted from working memory into canonical documentation only on explicit user request, and working memory should link to canonical documents when they already exist instead of duplicating them.
 
 ## Canonical Documentation Write Policy
