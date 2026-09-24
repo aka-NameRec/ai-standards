@@ -3,7 +3,18 @@ This file is the single definition of the code-review report shape. It is a work
 skeleton: reproduce its sections, their order, and the fields on every finding. Translate every word
 into the language the session is being held in; the 🔴 🟡 🔵 ✅ markers and the `ai-standards` version
 line carry no translatable words and stay as they are. The rules that govern what belongs in a
-finding live in the rendered `AGENTS.md`, under `Code Review`.
+finding live in the rendered `AGENTS.md`, under `Code Review`; the reporting policy detail lives in
+`.ai-standards/references/code-review-reporting.md` when deployed.
+-->
+
+<!--
+Localization legend, for reports written in Russian: Code Review → Код-ревью;
+Task → Задача; What Was Done → Что сделано; How It Was Done → Как сделано;
+Correctness → Корректность; Architecture & Conventions → Архитектура и
+конвенции; Reuse → Переиспользование; Efficiency → Эффективность; Quality →
+Качество; Verification → Проверки; Dependencies → Зависимости; violates →
+нарушает; fixed: → исправлено:; left as-is: → оставлено как есть:;
+None found. → Не найдено.; (pre-existing) → (существовало ранее).
 -->
 
 ## Code Review

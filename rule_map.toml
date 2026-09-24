@@ -17,7 +17,8 @@
 # retiring a rule keeps its ID reserved. Prefixes: RE-* rules of the
 # rule-engineering fragment; RVW-* rules of the code-review fragment;
 # CA-* rules of the context-architecture fragment; SE-* rules of the
-# skill-engineering skill; CR-### scenario IDs for code-review scenarios.
+# skill-engineering skill; BM-* rules of the basic-memory fragment;
+# CR-### scenario IDs for code-review scenarios.
 
 [rules.RE-001]
 fragment = "process/rule-engineering"
@@ -146,25 +147,25 @@ scenarios = ["CR-002", "CR-007"]
 fragment = "process/code-review"
 section = "Report Shape"
 behavior = "The report reproduces the worked example's shape exactly; when the example file is absent the review says so and uses the stated fallback order."
-scenarios = ["CR-002"]
+scenarios = ["CR-002", "CR-011", "CR-012"]
 
 [rules.RVW-016]
 fragment = "process/code-review"
 section = "Report Shape"
 behavior = "The report opens with the ai-standards version line taken from the generated header, or states that the version is undetermined instead of guessing."
-scenarios = []
+scenarios = ["CR-010"]
 
 [rules.RVW-017]
 fragment = "process/code-review"
 section = "Report Shape"
 behavior = "Open findings carry coloured markers, fixed findings become checked with a fixed tail, deliberately kept findings gain a left-as-is tail, and there is no verdict or resolution section."
-scenarios = []
+scenarios = ["CR-010"]
 
 [rules.RVW-018]
 fragment = "process/code-review"
 section = "Report Shape"
 behavior = "What Was Done and How It Was Done are always present as short prose without invented rationale."
-scenarios = []
+scenarios = ["CR-010"]
 
 [rules.RVW-019]
 fragment = "process/code-review"
@@ -188,7 +189,7 @@ scenarios = []
 fragment = "process/code-review"
 section = "Report Shape"
 behavior = "The whole report is written in the chat language including headers, and the marker glyphs stay as they are."
-scenarios = []
+scenarios = ["CR-010"]
 
 [rules.RVW-023]
 fragment = "process/code-review"
@@ -200,7 +201,7 @@ scenarios = []
 fragment = "process/code-review"
 section = "Report Shape"
 behavior = "The report is posted in chat inside a fenced Markdown block by default and saved to a file only when asked, naming the destination used."
-scenarios = []
+scenarios = ["CR-010"]
 
 [rules.RVW-025]
 fragment = "process/code-review"
@@ -236,7 +237,7 @@ scenarios = ["TRG-001"]
 fragment = "process/code-review"
 section = "Normalization Rules"
 behavior = "The report shape is defined by the worked example and nowhere else, staying identical across runs and tools."
-scenarios = []
+scenarios = ["CR-011"]
 
 [rules.RVW-031]
 fragment = "process/code-review"
@@ -336,4 +337,26 @@ scenarios = []
 source = "templates/skill-engineering/skill-engineering.SKILL.md"
 section = "Lifecycle"
 behavior = "A skill advances only when the corresponding validation question is answered, and deprecation records the reason without reusing the retired ID or name."
+scenarios = []
+
+# Basic Memory fragment — stage 3 of issue #22 (M5); sections anchor the
+# compressed always-loaded fragment after the operations moved into the
+# deployed reference.
+
+[rules.BM-001]
+fragment = "tools/basic-memory"
+section = "Note Shape"
+behavior = "A new note carries a frontmatter title in the project's language, repeats it as the # heading, closes with Observations and Relations, and canonical dated artifacts follow YYYY-MM-DD-topic-slug.md file names."
+scenarios = ["BM-001"]
+
+[rules.BM-002]
+fragment = "tools/basic-memory"
+section = "Sync Hygiene"
+behavior = "After VCS operations that may change indexed Markdown, sync health is checked before retrieved context is trusted, and after mass changes an explicit reindex is required."
+scenarios = ["BM-002"]
+
+[rules.BM-003]
+fragment = "tools/basic-memory"
+section = "Basic Memory Usage"
+behavior = "Binary and bulk-data files stay out of the knowledge tree; when they must stay beside the notes citing them, they are masked via gitignore-style patterns and reindexed only after the doctor reports them no more."
 scenarios = []

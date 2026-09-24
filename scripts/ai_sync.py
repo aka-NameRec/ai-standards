@@ -314,9 +314,21 @@ INFRA_TEMPLATES: tuple[AgentTemplate, ...] = (
     ),
     AgentTemplate(
         agent="",
+        source_relative_path="templates/code-review-reporting.reference.md",
+        destination_relative_path=".ai-standards/references/code-review-reporting.md",
+        feature="code-review",
+    ),
+    AgentTemplate(
+        agent="",
         source_relative_path="templates/module-contract-gate.procedure.md",
         destination_relative_path=".ai-standards/references/module-contract-gate.md",
         feature="module-contract-gate",
+    ),
+    AgentTemplate(
+        agent="",
+        source_relative_path="templates/basic-memory-operations.reference.md",
+        destination_relative_path=".ai-standards/references/basic-memory-operations.md",
+        feature="basic-memory",
     ),
 )
 

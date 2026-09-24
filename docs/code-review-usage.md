@@ -26,9 +26,9 @@ uv run ai-sync render --project-root /path/to/project
 uv run ai-sync sync-templates --project-root /path/to/project
 ```
 
-`render` puts the rules into `AGENTS.md` (or the Claude Code `CLAUDE.md` bridge); `sync-templates` deploys the worked example to `.ai-standards/code-review-report.md`, which the rules point at. The template channel is agent-agnostic, so no slash command, custom skill, or `tooling.agents` adapter is needed — the workflow behaves the same in Claude Code, Codex, Cursor, and any other tool that reads the generated instructions file.
+`render` puts the rules into `AGENTS.md` (or the Claude Code `CLAUDE.md` bridge); `sync-templates` deploys the worked example to `.ai-standards/code-review-report.md` and the reporting-policy detail to `.ai-standards/references/code-review-reporting.md`, both of which the rules point at (issue #22, M4). The template channel is agent-agnostic, so no slash command, custom skill, or `tooling.agents` adapter is needed — the workflow behaves the same in Claude Code, Codex, Cursor, and any other tool that reads the generated instructions file.
 
-If `sync-templates` is skipped, the agent says the example is missing and falls back to the section order named in the fragment, so the report degrades rather than breaking.
+If `sync-templates` is skipped, the agent says the example is missing and falls back to the section order named in the fragment, so the report degrades rather than breaking. Scenario `CR-012` in `docs/scenarios/` pins this fallback path behaviorally.
 
 A bare, unqualified request triggers it: `code review`, `review this`, `сделай ревью`, `проверь код`, and similar. A request that already narrows scope, mode, or lens — an explicit `review-lenses` prompt, or "just check for bugs" — takes priority instead.
 

@@ -26,9 +26,9 @@ uv run ai-sync render --project-root /path/to/project
 uv run ai-sync sync-templates --project-root /path/to/project
 ```
 
-`render` помещает правила в `AGENTS.md` (или в мост `CLAUDE.md` для Claude Code); `sync-templates` раскладывает заполненный пример в `.ai-standards/code-review-report.md`, на который правила ссылаются. Канал раскладки agent-agnostic, поэтому не нужны ни slash-команда, ни отдельный skill, ни adapter в `tooling.agents` — поведение одинаково в Claude Code, Codex, Cursor и любом другом инструменте, читающем сгенерированный файл инструкций.
+`render` помещает правила в `AGENTS.md` (или в мост `CLAUDE.md` для Claude Code); `sync-templates` раскладывает заполненный пример в `.ai-standards/code-review-report.md` и деталь политики оформления в `.ai-standards/references/code-review-reporting.md` — на оба файла правила ссылаются (issue #22, M4). Канал раскладки agent-agnostic, поэтому не нужны ни slash-команда, ни отдельный skill, ни adapter в `tooling.agents` — поведение одинаково в Claude Code, Codex, Cursor и любом другом инструменте, читающем сгенерированный файл инструкций.
 
-Если `sync-templates` пропустить, агент сообщит, что примера нет, и откатится к порядку разделов, названному во фрагменте, — отчёт деградирует, а не ломается.
+Если `sync-templates` пропустить, агент сообщит, что примера нет, и откатится к порядку разделов, названному во фрагменте, — отчёт деградирует, а не ломается. Этот fallback-путь поведенчески закреплён сценарием `CR-012` в `docs/scenarios/`.
 
 Триггером служит голый, ничем не уточнённый запрос: `code review`, `сделай ревью`, `проверь код`, `review this` и подобные. Если запрос уже сужает область, режим или ракурс — например, явный вызов `review-lenses` или «просто проверь на баги» — приоритет у него.
 
