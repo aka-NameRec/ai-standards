@@ -68,3 +68,24 @@ always-loaded fragment, with behavioral verification first. Change set
 - relates_to [[Change plan: progressive disclosure M4 — reporting reference and CR-010/CR-011 (issue #22)]]
 - relates_to [[18 — Phase 8: M1–M3 relocation and the release verification gate]]
 - localized counterpart of [[22 — Прогрессивное раскрытие M4: reporting reference, CR-010–CR-012, eval-гейт]]
+
+## Stage 3 Addendum (2026-09-24)
+
+- M5: `templates/basic-memory-operations.reference.md` deployed as
+  `.ai-standards/references/basic-memory-operations.md` (feature
+  `basic-memory`); fragment compressed to routing, genre doctrine, note-shape
+  rule, and sync triggers. New rule prefix `BM-001`–`BM-003` in
+  `rule_map.toml`; scenarios BM-001/BM-002 added to `ai-standards-evals`
+  (file-system and answer-text scoring; no live Basic Memory server).
+- M6: same-content compression of `project-memory.md` (4,547 → 4,256) and
+  `structured-artifacts.md` (4,597 → 4,285); pinned invariant phrasings kept
+  verbatim.
+- Totals: self-hosted `AGENTS.md` 61,888 → 56,508 bytes (−8.7%); Code Review
+  section 7,781 → 5,914; Basic Memory 8,833 → 5,815.
+- Gate history (honest): stage-2 comparison ACCEPT; the stage-3 final
+  comparison first REJECTED on version-line salience — fixed by leading
+  Report Shape with the invariant; the rerun REJECTED again on two
+  formatting-variance flakes (CR-002 version embedded in a heading, CR-004
+  section order), failure classes the baseline exhibits as well. Per the
+  merge gate, merging without ACCEPT requires an explicit user decision —
+  pending. Push also awaits explicit approval.
