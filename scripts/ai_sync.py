@@ -324,6 +324,12 @@ INFRA_TEMPLATES: tuple[AgentTemplate, ...] = (
         destination_relative_path=".ai-standards/references/module-contract-gate.md",
         feature="module-contract-gate",
     ),
+    AgentTemplate(
+        agent="",
+        source_relative_path="templates/basic-memory-operations.reference.md",
+        destination_relative_path=".ai-standards/references/basic-memory-operations.md",
+        feature="basic-memory",
+    ),
 )
 
 # Destinations of templates that no longer ship. When a managed template is

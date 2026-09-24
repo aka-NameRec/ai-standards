@@ -107,91 +107,63 @@ Stored knowledge is not conversation context. Retrieve it when relevant; do not 
 - Swapping an implementation backend must not require rewriting these behavioral rules.
 ## Basic Memory Usage
 - Use Basic Memory as a retrieval and indexing layer over Git-tracked Markdown knowledge when the project explicitly enables this feature.
-- Basic Memory serves two distinct classes of knowledge without mixing their roles: canonical project knowledge (`docs/domain/**`, `docs/decisions/**`, `docs/architecture/**` — Git-tracked, reviewed, durable, authoritative) and local working memory (`docs/local/**` — cross-session, agent-managed, user-local, mutable, never authoritative, not committed by default).
-- Point a Basic Memory project at a dedicated knowledge tree, never at a repository root. A repository root pulls vendored files, build artifacts, and generated output into the knowledge graph as if they were notes.
-- Treat every file inside the knowledge tree as a note. Rendering inputs, generated output, templates, and machine-owned files belong outside it.
-- Keep binary and bulk-data files (images, PDFs, raw logs, CSV dumps) out of the knowledge tree: the indexer treats them as notes and burns reindex time on them. Store them outside the tree, or, while they must stay beside the notes citing them, mask them via a `.gitignore` at the knowledge-tree root (the indexer's project home) or the global `~/.basic-memory/.bmignore` — gitignore-style patterns with no `!` exceptions. Reindex only after `ai-sync doctor` stops reporting them.
-- Keep `local_overrides` and any other rendering input outside the knowledge tree, so metadata written by the indexer can never reach a generated file.
-- Constrain the Basic Memory MCP server to a single project per workspace (for example `bm mcp --project <name>` or the equivalent MCP configuration) so retrieval returns only the current project's artifacts.
-- Disable the Basic Memory MCP server in workspaces that do not have a project, so queries never fall back to a shared default dump.
-- Treat canonical documentation and agent-managed working memory as different layers even when Basic Memory indexes both.
-- Treat `docs/domain/**`, `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge.
-- Treat `docs/local/**` and equivalent working-memory areas as agent-managed working memory rather than canonical truth; canonical-note rules do not apply there, and notes without canonical shape are expected, not defects.
-- Before creating or updating canonical documentation through Basic Memory, search existing canonical documents and working-memory notes to avoid duplicates and surface contradictions.
-- Keep permalink generation enabled once the knowledge tree holds only notes: `memory://` addressing and graph traversal resolve through permalinks, and a project without them degrades to plain search.
-- Treat `ensure_frontmatter_on_sync=false` together with `disable_permalinks=true` as a fallback for a legacy tree that cannot be narrowed yet, not as the default. Either flag alone still lets sync rewrite files that already carry frontmatter, and the pair gives up `memory://` addressing.
-- Do not rely on file names for retrieval: a note is identified by its frontmatter `title`, and the file name only supplies a fallback title for files that have none.
-- Write a note so it needs no repair: give it a frontmatter `title` in the project's own language, repeat that title as the `# ` heading, and close with `## Observations` and `## Relations` sections. Canonical dated artifacts additionally follow the file-name convention `YYYY-MM-DD-topic-slug.md`; living documents and working memory do not, and neither do conventional files a project is required to name a particular way.
-- When a tool derives the file name from the title, rename the file afterwards instead of accepting a name that breaks the convention. A rename keeps the note's permalink unless the indexer is configured to recompute it, so decide which of the two matters before renaming in bulk.
-- Repair an existing tree with one command, `ai-sync doctor --fix`. It reports how the project is wired, applies the repairs that need no judgement — moving rendering inputs out of the tree, restoring missing frontmatter titles and headings, pruning empty directories — and leaves naming and content decisions to review.
-- Do not reimplement checks the indexer already ships. Use `bm orphans` for notes with no relation in either direction, and the schema commands (`infer`, `validate`, `diff`) for per-type field contracts and drift.
-- Keep the two genres of knowledge apart. Problem-space knowledge is the business as it exists: its rules, its language, why a figure is computed the way it is. It is discovered from domain experts and sources, not designed, and it stays true whatever the code does. Solution-space knowledge is what the team chose to build and why, and it dies with the implementation it describes.
-- Give the genres separate homes: problem-space knowledge in `docs/domain/**`, solution-space knowledge in `docs/decisions/**` and `docs/architecture/**`. The path is what an agent sees first, so it is a stronger guard than a `type` buried in frontmatter.
-- Oblige each genre differently. A problem-space note carries its source — who stated the rule, which regulation or agreement, and when it was confirmed — and has no alternatives, because nothing was chosen. A solution-space note carries the options it rejected and the consequences it accepts.
-- Do not split decisions by category. Architectural, design, tooling, and policy decisions share one format; significance decides whether a decision is worth recording, not which category it falls into. The split that matters is between decisions and discovered facts, not among decisions.
-- Link the genres instead of merging them: a decision `implements` the rule it serves, so the reasoning stays traversable from either side. A problem-space rule with nothing implementing it is either unbuilt or dead.
-- Prefer stable knowledge over volatile. Requirements and goals outlive design decisions, so a document that mixes them inherits the shorter life. If a document needs editing after every refactor, volatile knowledge has leaked into it.
-- Assume the knowledge is already in the artifacts. Most of what is worth sharing is present in the code, just not in a convenient form; make it explicit where it lives rather than restating it in a note that then has to be kept true.
-- State an observation only if someone could disagree with it. "`str(digit)` converts a number to a string" is a restatement, not knowledge; "numeric ids are serialized as strings because the external API rejects integers" is knowledge.
-- Keep one source of truth for a fact and reference it from anywhere else, rather than copying it. A task, an issue, and a merge request are delivery vehicles whose history already lives in the tracker; they are not subjects and leave no trace in the knowledge base.
-- Expect most tasks to produce no documentation at all, because most of them change how the product works rather than what it is required to do. Reserve prose for the edge case: a constraint invisible in the code, a choice that looks wrong without context, a deliberate deviation from the established pattern.
-- Do not restate a note's own prose as observations, and do not present speculation as fact — name uncertainty as uncertainty.
-- Fix one closed set of observation categories per project and keep it in a single language, the same one the notes are written in. Categories are queryable, so a vocabulary split between synonyms or between two languages silently halves the result of every query over them. Name the set in the project's own rules rather than here.
-- Run knowledge hygiene on a cadence rather than every session: merge duplicates, split notes that grew past one concept, retire what no longer holds.
-- Prune agent-managed working memory autonomously; treat canonical documentation as append-and-supersede. Mark a superseded document as such with a link to its replacement instead of rewriting it, so the earlier reasoning stays readable.
-- Archive rather than delete: deleting a note drops its observations and relations from the graph. Move it to a folder that records the status and keep the links intact.
-- Rely on Basic Memory's normal filesystem sync for ordinary edits inside indexed directories.
+- Basic Memory serves two distinct classes of knowledge without mixing their roles: canonical project knowledge (`docs/domain/**`, `docs/decisions/**`, `docs/architecture/**` — Git-tracked, reviewed, durable, authoritative) and local working memory (`docs/local/**` — cross-session, agent-managed, user-local, mutable, never authoritative, not committed by default). Treat `docs/local/**` as agent-managed working memory rather than canonical truth; canonical-note rules do not apply there, and notes without canonical shape are expected, not defects.
+- Point a Basic Memory project at a dedicated knowledge tree, never at a repository root; keep rendering inputs, generated output, and machine-owned files outside it. Keep `local_overrides` outside the knowledge tree, so metadata written by the indexer can never reach a generated file.
+- Keep binary and bulk-data files (images, PDFs, raw logs, CSV dumps) out of the knowledge tree; when they must stay beside the notes citing them, mask them via gitignore-style patterns — the masking targets and the reindex timing live in the reference.
+- Constrain the Basic Memory MCP server to a single project per workspace (for example `bm mcp --project <name>`), and disable it in workspaces that do not have a project, so queries never fall back to a shared default dump.
+- Keep the two genres of knowledge apart. Problem-space knowledge is the business as it exists: its rules, its language, why a figure is computed the way it is. It is discovered from domain experts and sources, not designed, and it stays true whatever the code does. Solution-space knowledge is what the team chose to build and why, and it dies with the implementation it describes. Give them separate homes — problem-space in `docs/domain/**`, solution-space in `docs/decisions/**` and `docs/architecture/**`: the path is what an agent sees first, a stronger guard than a `type` buried in frontmatter.
+- Oblige each genre differently. A problem-space note carries its source — who stated the rule, which regulation or agreement, and when it was confirmed — and has no alternatives, because nothing was chosen. A solution-space note carries the options it rejected and the consequences it accepts. Do not split decisions by category; significance decides whether a decision is worth recording. Link the genres instead of merging them: a decision `implements` the rule it serves — a problem-space rule with nothing implementing it is either unbuilt or dead.
+- Prefer stable knowledge over volatile: requirements and goals outlive design decisions. Assume the knowledge is already in the artifacts — make it explicit where it lives rather than restating it in a note that then has to be kept true. Expect most tasks to produce no documentation at all; reserve prose for the edge case: a constraint invisible in the code, a choice that looks wrong without context, a deliberate deviation from the established pattern.
+- State an observation only if someone could disagree with it; do not restate a note's own prose as observations, and do not present speculation as fact — name uncertainty as uncertainty. Keep one source of truth for a fact and reference it from anywhere else: tasks, issues, and merge requests are delivery vehicles, not subjects.
+- Fix one closed set of observation categories per project, in the notes' single language; a vocabulary split silently halves every query over them. Run knowledge hygiene on a cadence rather than every session: merge duplicates, split notes that grew past one concept, retire what no longer holds. Prune working memory autonomously; treat canonical documentation as append-and-supersede with a supersession link.
+- Archive rather than delete: deleting a note drops its observations and relations from the graph. Before creating or updating canonical documentation, search existing canonical documents and working-memory notes to avoid duplicates and surface contradictions.
+- Rely on Basic Memory's normal filesystem sync for ordinary edits inside indexed directories. Use `ai-sync doctor --fix` to repair a tree, `bm orphans` and the schema commands (`infer`, `validate`, `diff`) instead of reimplementing the indexer's checks; the tool semantics and the reindex matrix live in the reference.
+
+### Note Shape
+- Write a note so it needs no repair: a frontmatter `title` in the project's own language, the title repeated as the `# ` heading, and closing `## Observations` and `## Relations` sections. Canonical dated artifacts follow the file-name convention `YYYY-MM-DD-topic-slug.md`; living documents and working memory do not.
+- Do not rely on file names for retrieval: a note is identified by its frontmatter `title`. Naming, rename, and permalink mechanics live in the reference.
+
+### Sync Hygiene
 - After `git pull`, `git merge`, `git rebase`, branch switches, or other VCS operations that may change indexed Markdown, check sync health before relying on retrieved context.
-- After mass file moves, renames, deletes, interrupted indexing, or indexing-configuration changes, run an explicit project reindex.
-- Use a full reindex after changing project routing, indexed root paths, permalink behavior, or frontmatter-sync policy.
-- If project status reports interrupted or incomplete embeddings, rebuild embeddings before treating semantic search as up to date.
+- After mass file moves, renames, deletes, interrupted indexing, or indexing-configuration changes, run an explicit project reindex; rebuild embeddings after interrupted or incomplete embedding reports. The reindex matrix and health-check commands live in the reference.
+
+### Reference
+- The operational detail — masking targets, permalink and legacy-flag behavior, rename mechanics, repair-tool semantics, and the reindex matrix — lives in `.ai-standards/references/basic-memory-operations.md`, deployed by `ai-sync sync-templates` when this feature is enabled; read it when operating the knowledge tree. If the file is absent, the project has not run `ai-sync sync-templates`; proceed with the rules above.
 ## Project Memory
 
 Local cross-session working memory keeps what the agent learned and where the work stands — outside Git history and outside canonical documentation.
 
-- Keep local working memory under `docs/local/**`, gitignored by default (add `/docs/local/` to `.gitignore`). A project may relocate the tree via `[project_memory]` in the manifest.
+- Keep local working memory under `docs/local/**`, gitignored by default (add `/docs/local/` to `.gitignore`); a project may relocate the tree via `[project_memory]` in the manifest.
 - Never treat local working memory as canonical project documentation.
 - Do not write temporary task state, speculative findings, or session continuation data into canonical documentation merely to preserve agent context.
-- Promotion from local working memory to canonical documentation is an explicit semantic operation, never an automatic synchronization step. Promote only knowledge that has become durable, and only when the user or the project workflow permits the corresponding canonical artifact.
+- Promotion from local working memory to canonical documentation is an explicit semantic operation, never an automatic synchronization step: promote only knowledge that has become durable, and only when the user or the project workflow permits the corresponding canonical artifact.
 - Memory is a curated state store, not an execution log: record what future sessions need, not what merely happened.
 
 ### Taxonomy
 
-- `context/` — what we are currently trying to accomplish: goal, scope, constraints, accepted direction, current phase, relevant artifacts, immediate next step. Not a transcript.
+- `context/` — goal, scope, constraints, accepted direction, current phase, relevant artifacts, immediate next step. Not a transcript.
 - `decisions/` — what has been decided locally and why: decision, reason, scope, and status (`provisional`, `confirmed`, `superseded`, `rejected`). Record a local decision when it materially constrains subsequent work; a local `confirmed` decision is confirmed for the current work context and does not automatically become a canonical record.
-- `progress/` — where the work stopped: `done`, `current`, `blocked`, `next`. Update at meaningful phase boundaries and before ending work that is expected to continue in another session.
+- `progress/` — where the work stopped: `done`, `current`, `blocked`, `next`. Update at meaningful phase boundaries and before ending work expected to continue in another session.
 - `patterns/` — reusable project properties discovered during work. Treat a discovered pattern as working knowledge until validated against source code or canonical documentation; update or supersede it when contrary evidence appears; do not accumulate contradictory memories without recording their relationship.
 - `investigations/` — open questions and the evidence found so far, with lifecycle `open`, `resolved`, or `abandoned`. An investigation may disappear, produce a pattern or a decision, or require human consultation.
-- `handoffs/` — resume points: goal, confirmed state, current state, open questions, next action, and links to relevant memory. A handoff must be sufficient to resume the task without replaying the previous conversation, but compact enough to inspect before loading additional context.
+- `handoffs/` — resume points: goal, confirmed state, current state, open questions, next action, links to relevant memory. Sufficient to resume without replaying the conversation, compact enough to inspect before loading more context.
 
 The semantic categories are the standard; the physical split into directories may be configured per project.
 
-### Write Policy
+### Write And Read Policy
 
-Write to local memory when the information will be needed in a later session, materially affects further decisions, is expensive to reconstruct, is the result of an investigation, explains the current status, captures an unresolved question or blocker, or is a confirmed reusable project pattern.
+Write to local memory when the information will be needed in a later session, materially affects further decisions, is expensive to reconstruct, is the result of an investigation, explains the current status, captures an unresolved question or blocker, or is a confirmed reusable project pattern. Do not write what a single obvious file already says, transient tool output, reasoning detail, what already exists canonically, a guess with no useful role, or a duplicate that changes no state.
 
-Do not write what a single obvious file already says, transient tool output, reasoning detail, what already exists canonically, a guess with no useful role, or a duplicate that changes no state.
+Query local memory by the current goal, relevant entities, modules, concepts, decisions, and task identifiers — never read the whole memory tree at session start. To continue previous work: retrieve the relevant context, then the current progress, then the relevant decisions; open patterns and investigations only as the current step requires.
 
-### Read Policy
+### Note Shape And Durable Lessons
 
-- Query local memory by the current goal, relevant entities, modules, concepts, decisions, and task identifiers — never read the whole memory tree at session start.
-- To continue previous work: retrieve the relevant context, then the current progress, then the relevant decisions; open patterns and investigations only as the current step requires.
-
-### Note Shape
-
-- Minimal frontmatter: `title`, `type`, `status`, `updated`, plus `source` when the note records a discovered fact. Canonical-note requirements — dated file names, `## Observations` and `## Relations` sections — do not apply inside the local memory area.
-- Local notes never mix into canonical zones; the knowledge-tree audit treats the local area with relaxed canonical rules.
-
-### Durable Lessons
-
-- After meaningful corrections or repeated mistakes, capture only durable lessons that can prevent the same class of error.
-- Record the pattern, the preventive rule, and the scope where it applies.
-- Do not create mechanical memory churn for one-off or low-signal corrections.
+- Minimal frontmatter: `title`, `type`, `status`, `updated`, plus `source` when the note records a discovered fact. Canonical-note requirements — dated file names, `## Observations` and `## Relations` sections — do not apply inside the local memory area, and local notes never mix into canonical zones.
+- After meaningful corrections or repeated mistakes, capture only durable lessons that can prevent the same class of error: the pattern, the preventive rule, and the scope. No mechanical memory churn for one-off or low-signal corrections.
 
 ### Relationship To Basic Memory
 
-- The taxonomy and lifecycle are tool-independent: plain files under `docs/local/**` satisfy them.
-- The feature works best with `basic-memory`, which indexes the area for targeted retrieval — but it deliberately does not require it. The capability is separated from the way it is supported.
+The taxonomy and lifecycle are tool-independent: plain files under `docs/local/**` satisfy them. The feature works best with `basic-memory`, which indexes the area for targeted retrieval — but it deliberately does not require it.
 ## Chroma Usage
 - Use Chroma as a semantic code-search layer over repository source files when the project explicitly enables this feature.
 - Keep the Chroma code index separate from Basic Memory embeddings; the two stores are never mixed.
@@ -264,54 +236,38 @@ Source provenance:
 - End long autonomous execution with a short summary of what changed, which checks ran, how the result still matches the design anchors, and which points still require human decision.
 - If review would require the human to reverse-engineer hidden decisions from a large diff, autonomy has already gone too far and should have stopped earlier.
 ## Lightweight Structured Artifacts
-- For non-trivial changes, create a short change plan before implementation.
-- Use lightweight artifacts to clarify scope, boundaries, invariants, dependencies, and verification.
+- For non-trivial changes, create a short change plan before implementation; use lightweight artifacts to clarify scope, boundaries, invariants, dependencies, and verification.
 - Keep artifact overhead proportional to the task; do not create process files for small local edits with obvious verification.
 - Prefer short Markdown artifacts that are reviewable in Git over machine-oriented XML or deeply nested formats.
 
 ## Change Plans
-- Create a change plan when the task involves architecture decisions, multiple dependent steps, migration risk, behavior changes across layers, or non-trivial verification.
-- Keep the plan focused on goal, scope, touched modules, intended structure, risks, invariants, and verification.
+- Create a change plan when the task involves architecture decisions, multiple dependent steps, migration risk, behavior changes across layers, or non-trivial verification; keep it focused on goal, scope, touched modules, intended structure, risks, invariants, and verification.
 - For long autonomous execution, add a short session envelope covering non-goals, architectural constraints, stop conditions, and expected review artifacts.
 - Update the outcome section after implementation only when the original plan meaningfully guided the work.
 
 ## Module Contracts
-- Treat a module as the smallest change unit for which one responsibility contract and one set of invariants can be stated clearly.
-- Write a module contract as one record under `docs/architecture/**`: name it `YYYY-MM-DD-module-contract-<module-slug>.md`, give it frontmatter `title` and `type: module-contract`, and state one contract per record.
-- Create a contract record only for major, risky, shared, or architecturally non-obvious modules; not for every folder, CRUD endpoint, or thin wrapper.
-- Use the contract to state ownership, non-goals, inputs, outputs, dependencies, invariants, failure boundaries, and verification.
+- Treat a module as the smallest change unit for which one responsibility contract and one set of invariants can be stated clearly. Create a contract record only for major, risky, shared, or architecturally non-obvious modules; not for every folder, CRUD endpoint, or thin wrapper.
+- Write a module contract as one record under `docs/architecture/**`: name it `YYYY-MM-DD-module-contract-<module-slug>.md`, give it frontmatter `title` and `type: module-contract`, and state one contract per record — ownership, non-goals, inputs, outputs, dependencies, invariants, failure boundaries, and verification.
 - Treat a root-level `MODULE_CONTRACT.md` as a legacy form: recognize and read it during discovery, but do not create new ones.
 
 ## Decision Records
-- Create a short decision record when an architectural or operational choice will matter for future changes and code review.
-- Use decision records and module contracts for durable repository history.
-- Use agent working memory for evolving context, temporary findings, and notes that are not yet accepted as canonical documentation.
-- Keep one decision record focused on one choice, its rationale, alternatives, and consequences.
+- Create a short decision record when an architectural or operational choice will matter for future changes and code review; keep one record focused on one choice, its rationale, alternatives, and consequences.
 - Unless a project defines a stricter local convention, name files under `docs/decisions/**` and `docs/architecture/**` as `YYYY-MM-DD-<topic-slug>.md`.
 
 ## Canonical Documentation And Agent Working Memory
-- Treat `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge.
-- Treat `docs/local/**` (or the project's equivalent working-memory area) as agent-managed working memory rather than canonical truth.
-- Durable conclusions must be promoted from working memory into canonical documentation only on explicit user request.
-- Working memory should link to canonical documents when they already exist instead of duplicating them.
-- Structured artifacts are reviewable project knowledge; working memory holds evolving context, temporary findings, and session state — the two never mix roles.
+- Treat `docs/decisions/**`, `docs/architecture/**`, and equivalent local artifacts as canonical project knowledge; treat `docs/local/**` (or the project's equivalent working-memory area) as agent-managed working memory rather than canonical truth. Structured artifacts are reviewable project knowledge; working memory holds evolving context, temporary findings, and session state — the two never mix roles.
+- Durable conclusions must be promoted from working memory into canonical documentation only on explicit user request, and working memory should link to canonical documents when they already exist instead of duplicating them.
 
 ## Canonical Documentation Write Policy
-- Do not modify canonical documentation unless the user explicitly asks to record, update, reconcile, supersede, or remove durable project knowledge.
-- Before modifying canonical documentation, search related decision records, architecture docs, module contracts, and agent working memory.
-- Prefer updating an existing canonical document over creating a duplicate.
-- If new knowledge contradicts existing canonical documentation, do not silently resolve the conflict unless the user has already made the decision in the current task.
-- When a decision supersedes an older one, preserve the old document as historical context and add a clear supersession link.
+- Do not modify canonical documentation unless the user explicitly asks to record, update, reconcile, supersede, or remove durable project knowledge; before modifying it, search related decision records, architecture docs, module contracts, and agent working memory.
+- Prefer updating an existing canonical document over creating a duplicate. If new knowledge contradicts existing canonical documentation, do not silently resolve the conflict unless the user has already made the decision in the current task; when a decision supersedes an older one, preserve the old document as historical context and add a clear supersession link.
 
 ## Optional Maps And Anchors
-- Use `module-map.md` only for orchestration-heavy, integration-heavy, migration-prone, or repeatedly confusing modules.
-- Do not require module maps for ordinary modules that are already understandable from code and tests.
-- Allow local block anchors only for generated zones, temporary migration blocks, or patch-sensitive areas with a clear operational need.
-- Do not standardize pervasive file-local semantic scaffolding or history comments across the codebase.
+- Use `module-map.md` only for orchestration-heavy, integration-heavy, migration-prone, or repeatedly confusing modules; do not require module maps for ordinary modules that are already understandable from code and tests.
+- Allow local block anchors only for generated zones, temporary migration blocks, or patch-sensitive areas with a clear operational need; do not standardize pervasive file-local semantic scaffolding or history comments across the codebase.
 
 ## Rejected Formalism
-- Do not introduce XML-heavy planning artifacts, mandatory code graphs, or pseudo-XML knowledge overlays as shared standards.
-- If a project truly needs heavier machine-oriented artifacts, opt into them with explicit local rules instead of promoting them into ai-standards.
+- Do not introduce XML-heavy planning artifacts, mandatory code graphs, or pseudo-XML knowledge overlays as shared standards; if a project truly needs heavier machine-oriented artifacts, opt into them with explicit local rules instead of promoting them into ai-standards.
 ## Module Contract Discovery Gate
 
 Before changing production code — the project's own source and configuration that a change

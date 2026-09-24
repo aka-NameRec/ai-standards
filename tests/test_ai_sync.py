@@ -226,10 +226,14 @@ def test_basic_memory_feature_renders_reindexing_guidance(tmp_path: Path) -> Non
 
     result = build_rendered_content(project_root)
 
+    # M5 (issue #22): the routing, the note-shape rule, and the sync triggers
+    # stay always-loaded; the operational detail loads from the reference.
     assert "## Basic Memory Usage" in result.content
     assert "never at a repository root" in result.content
-    assert "Keep permalink generation enabled" in result.content
+    assert "### Note Shape" in result.content
+    assert "### Sync Hygiene" in result.content
     assert "After `git pull`, `git merge`, `git rebase`, branch switches" in result.content
+    assert "basic-memory-operations.md" in result.content
 
 
 def test_java_spring_stack_alias_can_be_rendered(tmp_path: Path) -> None:
@@ -1035,7 +1039,9 @@ def test_structured_artifacts_feature_can_be_rendered(tmp_path: Path) -> None:
     assert (
         "Write a module contract as one record under `docs/architecture/**`: name it "
         "`YYYY-MM-DD-module-contract-<module-slug>.md`, give it frontmatter `title` and "
-        "`type: module-contract`, and state one contract per record." in result.content
+        "`type: module-contract`, and state one contract per record — ownership, "
+        "non-goals, inputs, outputs, dependencies, invariants, failure boundaries, "
+        "and verification." in result.content
     )
 
 
@@ -3078,3 +3084,32 @@ def test_context_architecture_fragment_keeps_its_rules() -> None:
     assert "always-loaded rules | universal invariants, routing rules, mandatory gates" in flat
     assert "Needed for almost every task?" in flat
     assert "behavior-preserving comparison against the current state" in flat
+
+
+def test_basic_memory_operations_reference_carries_the_moved_mechanics() -> None:
+    """M5 (issue #22) moved the basic-memory operational mechanics into the
+    deployed reference; every moved policy must remain stated there, or the
+    behavior would be loaded nowhere."""
+    reference = (
+        REPO_ROOT / "templates" / "basic-memory-operations.reference.md"
+    ).read_text(encoding="utf-8")
+    fragment = (REPO_ROOT / "fragments" / "tools" / "basic-memory.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert "basic-memory-operations.md" in fragment
+
+    normalized = " ".join(reference.split())
+    for moved in (
+        "~/.basic-memory/.bmignore",
+        "gitignore-style patterns",
+        "Reindex only after `ai-sync doctor` stops reporting them",
+        "ensure_frontmatter_on_sync=false",
+        "disable_permalinks=true",
+        "A rename keeps the note's permalink",
+        "applies the repairs that need no judgement",
+        "`bm orphans`",
+        "run an explicit project reindex",
+        "rebuild embeddings",
+    ):
+        assert moved in normalized, f"{moved!r} is missing from the operations reference"

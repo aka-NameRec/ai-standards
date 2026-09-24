@@ -17,7 +17,8 @@
 # retiring a rule keeps its ID reserved. Prefixes: RE-* rules of the
 # rule-engineering fragment; RVW-* rules of the code-review fragment;
 # CA-* rules of the context-architecture fragment; SE-* rules of the
-# skill-engineering skill; CR-### scenario IDs for code-review scenarios.
+# skill-engineering skill; BM-* rules of the basic-memory fragment;
+# CR-### scenario IDs for code-review scenarios.
 
 [rules.RE-001]
 fragment = "process/rule-engineering"
@@ -336,4 +337,26 @@ scenarios = []
 source = "templates/skill-engineering/skill-engineering.SKILL.md"
 section = "Lifecycle"
 behavior = "A skill advances only when the corresponding validation question is answered, and deprecation records the reason without reusing the retired ID or name."
+scenarios = []
+
+# Basic Memory fragment — stage 3 of issue #22 (M5); sections anchor the
+# compressed always-loaded fragment after the operations moved into the
+# deployed reference.
+
+[rules.BM-001]
+fragment = "tools/basic-memory"
+section = "Note Shape"
+behavior = "A new note carries a frontmatter title in the project's language, repeats it as the # heading, closes with Observations and Relations, and canonical dated artifacts follow YYYY-MM-DD-topic-slug.md file names."
+scenarios = ["BM-001"]
+
+[rules.BM-002]
+fragment = "tools/basic-memory"
+section = "Sync Hygiene"
+behavior = "After VCS operations that may change indexed Markdown, sync health is checked before retrieved context is trusted, and after mass changes an explicit reindex is required."
+scenarios = ["BM-002"]
+
+[rules.BM-003]
+fragment = "tools/basic-memory"
+section = "Basic Memory Usage"
+behavior = "Binary and bulk-data files stay out of the knowledge tree; when they must stay beside the notes citing them, they are masked via gitignore-style patterns and reindexed only after the doctor reports them no more."
 scenarios = []
