@@ -89,3 +89,14 @@ always-loaded fragment, with behavioral verification first. Change set
   section order), failure classes the baseline exhibits as well. Per the
   merge gate, merging without ACCEPT requires an explicit user decision —
   pending. Push also awaits explicit approval.
+
+## Gate Closure (2026-09-24)
+
+- The merge gate was reworked in `ai-standards-evals`: deterministic failure
+  classes (dishonesty / formatting / substantive), class-aware downgrade rules,
+  isolated XDG config for spawned agents, one-shot timeout retry.
+- Gate-3 (both sides re-run in the stabilized environment): baseline 2.6.0 —
+  2 epochs, candidate — 2 epochs × 14 scenarios; verdict ACCEPT, zero
+  downgrades; LLM judge 20/20.
+- Both repositories merged into `main` locally per the merge gate; push
+  remains blocked pending explicit user approval.
