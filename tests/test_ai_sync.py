@@ -3153,13 +3153,17 @@ def test_autonomous_task_run_skill_carries_issue_24_invariants() -> None:
     assert "absolute constant of the run" in content
     assert "standing approval of the commit flow" in content
     assert "capture the session knowledge the standard way" in content
-    assert "Merge the branch into the target by the project standard" in content
+    # Landing: the run ends at the final commit; merge only on explicit order.
+    assert "End the run at the final commit on the working branch" in content
+    assert "only when the human explicitly orders it" in content
     assert "Never push to any remote without the user's explicit approval" in content
     # Stop conditions: named blocked requirement in a detailed stop report.
     assert "## Stop Conditions" in content
     assert "(by its id in the task spec) is blocked" in content
     # Completion report and non-goals.
     assert "## Completion Report" in content
+    assert "The run is complete when the branch carries the final commit" in content
+    assert "merging and pushing wait for" in content
     assert "## Non-goals" in content
     # Portable triggers: Russian and English activation phrases in frontmatter.
     assert "работай автономно до завершения" in content
