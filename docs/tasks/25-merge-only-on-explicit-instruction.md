@@ -29,6 +29,12 @@ the landing and the release).
   `docs/decisions/2026-10-11-merge-only-on-explicit-instruction.md` (EN/RU,
   superseding the landing clause of the adoption decision), addendum in the
   authoring worksheet, this task record, CHANGELOG entry.
+- Corrected the release-versioning drift that surfaced in the same session
+  (per-task bumps 2.8.0/2.9.0 reverted; see
+  docs/decisions/2026-10-12-release-versioning-human-decided.md) and restored
+  the CHANGELOG history — sections 2.6.0–2.8.1 (commit `ca08731`):
+  per-task sections had never been created, and shipped entries lingered
+  under `[Unreleased]`.
 - Released as 2.8.1 (patch per the user's decision).
 
 ## Verification

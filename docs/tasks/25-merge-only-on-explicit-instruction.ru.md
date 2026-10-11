@@ -28,6 +28,12 @@ permalink: ai-standards/tasks/25-merge-only-on-explicit-instruction.ru
   `docs/decisions/2026-10-11-merge-only-on-explicit-instruction.md` (EN/RU,
   отменяет формулировку приземления в решении об утверждении навыка),
   аддендум в worksheet, эта task record, запись в CHANGELOG.
+- Исправлен дрейф версионирования, выявленный в той же сессии (позадачные
+  бампы 2.8.0/2.9.0 откачены; см.
+  docs/decisions/2026-10-12-release-versioning-human-decided.ru.md), и
+  восстановлена история CHANGELOG — секции 2.6.0–2.8.1 (коммит `ca08731`):
+  позадачные секции не создавались, и выпущенные записи оставались под
+  `[Unreleased]`.
 - Выпущено как 2.8.1 (patch по решению пользователя).
 
 ## Проверки
