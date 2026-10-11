@@ -148,6 +148,14 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="codex",
+            source_relative_path="templates/autonomous-task-run/autonomous-task-run.SKILL.md",
+            destination_relative_path=(
+                ".codex/skills/autonomy-boundaries/autonomous-task-run/SKILL.md"
+            ),
+            feature="autonomy-boundaries",
+        ),
+        AgentTemplate(
+            agent="codex",
             source_relative_path="templates/standards-update/update-ai-standards.SKILL.md",
             destination_relative_path=".codex/skills/standards-update/update-ai-standards/SKILL.md",
             feature=None,
@@ -192,6 +200,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="cursor",
+            source_relative_path="templates/autonomous-task-run/autonomous-task-run.cursor.mdc",
+            destination_relative_path=".cursor/rules/autonomous-task-run.mdc",
+            feature="autonomy-boundaries",
+        ),
+        AgentTemplate(
+            agent="cursor",
             source_relative_path="templates/standards-update/update-ai-standards.cursor.mdc",
             destination_relative_path=".cursor/rules/update-ai-standards.mdc",
             feature=None,
@@ -233,6 +247,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/skill-engineering/skill-engineering.claude.md",
             destination_relative_path=".claude/commands/skill-engineering.md",
             feature="skill-engineering",
+        ),
+        AgentTemplate(
+            agent="claude",
+            source_relative_path="templates/autonomous-task-run/autonomous-task-run.claude.md",
+            destination_relative_path=".claude/commands/autonomous-task-run.md",
+            feature="autonomy-boundaries",
         ),
         AgentTemplate(
             agent="claude",
@@ -285,6 +305,14 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/skill-engineering/skill-engineering.SKILL.md",
             destination_relative_path=".agents/skills/skill-engineering/skill-engineering/SKILL.md",
             feature="skill-engineering",
+        ),
+        AgentTemplate(
+            agent="kilo",
+            source_relative_path="templates/autonomous-task-run/autonomous-task-run.SKILL.md",
+            destination_relative_path=(
+                ".agents/skills/autonomy-boundaries/autonomous-task-run/SKILL.md"
+            ),
+            feature="autonomy-boundaries",
         ),
         AgentTemplate(
             agent="kilo",
