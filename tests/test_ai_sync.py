@@ -2837,9 +2837,12 @@ def _local_memory_project(tmp_path: Path, gitignore: str | None) -> Path:
     if gitignore is not None:
         (project_root / ".gitignore").write_text(gitignore, encoding="utf-8")
     # A local progress note with no canonical shape at all: no frontmatter,
-    # no Observations/Relations sections, free-form name.
+    # no Observations/Relations sections, but the date-prefixed name the local
+    # naming rule requires.
     (project_root / "docs" / "local" / "progress").mkdir(parents=True)
-    (project_root / "docs" / "local" / "progress" / "catalog-indexing.md").write_text(
+    (
+        project_root / "docs" / "local" / "progress" / "2026-09-20-catalog-indexing.md"
+    ).write_text(
         "# Catalog indexing progress\n\n- [current] Trace index consumer.\n",
         encoding="utf-8",
     )
@@ -2861,7 +2864,8 @@ def test_doctor_relaxes_canonical_rules_inside_local_memory(tmp_path: Path) -> N
     report = run_doctor(project_root)
 
     locations = [finding.location for finding in report.findings]
-    # The local progress note produces no canonical findings at all.
+    # The date-prefixed local note produces no findings at all: canonical body
+    # rules stay relaxed, and the naming rule is satisfied.
     assert not any("docs/local" in location for location in locations)
     # The canonical note is still audited by canonical rules.
     assert any(
@@ -2879,6 +2883,35 @@ def test_doctor_warns_when_local_memory_is_not_gitignored(tmp_path: Path) -> Non
     report = run_doctor(project_root)
 
     assert any(finding.code == "local-memory-not-gitignored" for finding in report.findings)
+
+
+def test_doctor_warns_on_local_note_without_date_prefix(tmp_path: Path) -> None:
+    project_root = _local_memory_project(tmp_path, gitignore="/docs/local/\n")
+    (project_root / "docs" / "local" / "context").mkdir()
+    (project_root / "docs" / "local" / "context" / "session-notes.md").write_text(
+        "# Session notes\n\n- [current] Working set.\n",
+        encoding="utf-8",
+    )
+
+    report = run_doctor(project_root)
+
+    finding = next(
+        finding
+        for finding in report.findings
+        if finding.code == "local-note-without-date-prefix"
+    )
+    assert finding.severity == SEVERITY_WARNING
+    assert finding.location == "docs/local/context/session-notes.md"
+    # A date-prefixed sibling stays quiet.
+    (
+        project_root / "docs" / "local" / "context" / "2026-10-11-session-notes.md"
+    ).write_text("# Session notes\n\n- [current] Working set.\n", encoding="utf-8")
+    report = run_doctor(project_root)
+    assert [
+        finding.location
+        for finding in report.findings
+        if finding.code == "local-note-without-date-prefix"
+    ] == ["docs/local/context/session-notes.md"]
 
 
 def test_doctor_ignores_local_memory_without_the_feature(tmp_path: Path) -> None:

@@ -120,7 +120,7 @@ Stored knowledge is not conversation context. Retrieve it when relevant; do not 
 - Rely on Basic Memory's normal filesystem sync for ordinary edits inside indexed directories. Use `ai-sync doctor --fix` to repair a tree, `bm orphans` and the schema commands (`infer`, `validate`, `diff`) instead of reimplementing the indexer's checks; the tool semantics and the reindex matrix live in the reference.
 
 ### Note Shape
-- Write a note so it needs no repair: a frontmatter `title` in the project's own language, the title repeated as the `# ` heading, and closing `## Observations` and `## Relations` sections. Canonical dated artifacts follow the file-name convention `YYYY-MM-DD-topic-slug.md`; living documents and working memory do not.
+- Write a note so it needs no repair: a frontmatter `title` in the project's own language, the title repeated as the `# ` heading, and closing `## Observations` and `## Relations` sections. Canonical dated artifacts follow the file-name convention `YYYY-MM-DD-topic-slug.md`; living documents keep topic-only names, and local working-memory notes carry the same date prefix (`YYYY-MM-DD-<topic>.md`, see Project Memory).
 - Do not rely on file names for retrieval: a note is identified by its frontmatter `title`. Naming, rename, and permalink mechanics live in the reference.
 
 ### Sync Hygiene
@@ -158,7 +158,8 @@ Query local memory by the current goal, relevant entities, modules, concepts, de
 
 ### Note Shape And Durable Lessons
 
-- Minimal frontmatter: `title`, `type`, `status`, `updated`, plus `source` when the note records a discovered fact. Canonical-note requirements — dated file names, `## Observations` and `## Relations` sections — do not apply inside the local memory area, and local notes never mix into canonical zones.
+- Minimal frontmatter: `title`, `type`, `status`, `updated`, plus `source` when the note records a discovered fact. Canonical-note body requirements — `## Observations` and `## Relations` sections — do not apply inside the local memory area, and local notes never mix into canonical zones.
+- Name every Markdown document created in the local memory area `YYYY-MM-DD-<topic>.md`, exactly the notation of canonical dated artifacts. The date is the note's creation date: content updates never rename the note, and a hygiene merge keeps the older date. The payoff is direct: a note promoted into canonical documentation keeps its file name, and name collisions across the two areas stay rare.
 - After meaningful corrections or repeated mistakes, capture only durable lessons that can prevent the same class of error: the pattern, the preventive rule, and the scope. No mechanical memory churn for one-off or low-signal corrections.
 
 ### Relationship To Basic Memory

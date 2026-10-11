@@ -13,7 +13,7 @@
 - Rely on Basic Memory's normal filesystem sync for ordinary edits inside indexed directories. Use `ai-sync doctor --fix` to repair a tree, `bm orphans` and the schema commands (`infer`, `validate`, `diff`) instead of reimplementing the indexer's checks; the tool semantics and the reindex matrix live in the reference.
 
 ### Note Shape
-- Write a note so it needs no repair: a frontmatter `title` in the project's own language, the title repeated as the `# ` heading, and closing `## Observations` and `## Relations` sections. Canonical dated artifacts follow the file-name convention `YYYY-MM-DD-topic-slug.md`; living documents and working memory do not.
+- Write a note so it needs no repair: a frontmatter `title` in the project's own language, the title repeated as the `# ` heading, and closing `## Observations` and `## Relations` sections. Canonical dated artifacts follow the file-name convention `YYYY-MM-DD-topic-slug.md`; living documents keep topic-only names, and local working-memory notes carry the same date prefix (`YYYY-MM-DD-<topic>.md`, see Project Memory).
 - Do not rely on file names for retrieval: a note is identified by its frontmatter `title`. Naming, rename, and permalink mechanics live in the reference.
 
 ### Sync Hygiene

@@ -27,7 +27,8 @@ Query local memory by the current goal, relevant entities, modules, concepts, de
 
 ### Note Shape And Durable Lessons
 
-- Minimal frontmatter: `title`, `type`, `status`, `updated`, plus `source` when the note records a discovered fact. Canonical-note requirements — dated file names, `## Observations` and `## Relations` sections — do not apply inside the local memory area, and local notes never mix into canonical zones.
+- Minimal frontmatter: `title`, `type`, `status`, `updated`, plus `source` when the note records a discovered fact. Canonical-note body requirements — `## Observations` and `## Relations` sections — do not apply inside the local memory area, and local notes never mix into canonical zones.
+- Name every Markdown document created in the local memory area `YYYY-MM-DD-<topic>.md`, exactly the notation of canonical dated artifacts. The date is the note's creation date: content updates never rename the note, and a hygiene merge keeps the older date. The payoff is direct: a note promoted into canonical documentation keeps its file name, and name collisions across the two areas stay rare.
 - After meaningful corrections or repeated mistakes, capture only durable lessons that can prevent the same class of error: the pattern, the preventive rule, and the scope. No mechanical memory churn for one-off or low-signal corrections.
 
 ### Relationship To Basic Memory
