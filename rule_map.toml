@@ -18,6 +18,7 @@
 # rule-engineering fragment; RVW-* rules of the code-review fragment;
 # CA-* rules of the context-architecture fragment; SE-* rules of the
 # skill-engineering skill; BM-* rules of the basic-memory fragment;
+# PM-* rules of the project-memory fragment;
 # CR-### scenario IDs for code-review scenarios.
 
 [rules.RE-001]
@@ -360,3 +361,11 @@ fragment = "tools/basic-memory"
 section = "Basic Memory Usage"
 behavior = "Binary and bulk-data files stay out of the knowledge tree; when they must stay beside the notes citing them, they are masked via gitignore-style patterns and reindexed only after the doctor reports them no more."
 scenarios = []
+
+# Project Memory fragment — issue #23.
+
+[rules.PM-001]
+fragment = "tools/project-memory"
+section = "Note Shape And Durable Lessons"
+behavior = "A Markdown document created in the local memory area is named YYYY-MM-DD-<topic>.md in the notation of canonical dated artifacts, dated by its creation, so a later promotion into canonical documentation keeps the file name."
+scenarios = ["PM-001"]

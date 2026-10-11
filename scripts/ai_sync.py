@@ -29,11 +29,16 @@ SEVERITY_WARNING = "warning"
 # A canonical note file name: a lowercase ASCII slug, optionally date-prefixed.
 NOTE_NAME_PATTERN = re.compile(r"^(\d{4}-\d{2}-\d{2}-)?[a-z0-9]+(-[a-z0-9]+)*$")
 # The convention claims canonical notes only. Everything else in the tree — living
-# documents, working memory, conventional files like MODULE_CONTRACT.md — is out of scope.
+# documents, conventional files like MODULE_CONTRACT.md — is out of scope; local
+# working memory follows its own date-prefix rule (LOCAL_NOTE_DATE_PREFIX_PATTERN).
 DEFAULT_DATED_NOTE_DIRECTORIES = ("domain", "decisions", "architecture")
 # A localized sibling such as `<name>.ru.md` keeps the base name, so the language tag is
 # stripped before the name is judged.
 LANGUAGE_SUFFIX_PATTERN = re.compile(r"\.[a-z]{2}$")
+# Local working-memory notes carry the same date prefix as canonical dated artifacts
+# (YYYY-MM-DD-<topic>.md), so promoting a note into canonical documentation keeps
+# its file name.
+LOCAL_NOTE_DATE_PREFIX_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}-")
 # The legacy contract form predates the record notation; it stays recognizable but doctor
 # points at the record home under docs/architecture/**.
 LEGACY_CONTRACT_NAME = "MODULE_CONTRACT.md"
@@ -1338,9 +1343,9 @@ def _audit_knowledge_tree(
         notes_checked += 1
         relative_path = note_path.relative_to(project_root).as_posix()
         # Local working memory is not canonical documentation: canonical-note
-        # rules (frontmatter title, Observations/Relations, dated naming) must
-        # not be pushed onto progress/handoff notes, so the area is audited
-        # for readability only.
+        # body rules (frontmatter title, Observations/Relations) must not be
+        # pushed onto progress/handoff notes, so the area is audited for
+        # readability and its own naming rule only.
         if local_memory_dir is not None and _is_inside(note_path, local_memory_dir):
             try:
                 _read_audit_text(note_path)
@@ -1351,6 +1356,24 @@ def _audit_knowledge_tree(
                         code="note-unreadable",
                         location=relative_path,
                         message="Note is not valid UTF-8 text and cannot be indexed.",
+                    )
+                )
+            # Local notes carry the canonical date prefix so a promotion into
+            # canonical documentation keeps the file name. Renaming an existing
+            # note is a human decision, so a miss is reported, never auto-fixed.
+            if not LOCAL_NOTE_DATE_PREFIX_PATTERN.match(note_path.name):
+                findings.append(
+                    DoctorFinding(
+                        severity=SEVERITY_WARNING,
+                        code="local-note-without-date-prefix",
+                        location=relative_path,
+                        message=(
+                            "Local working-memory note lacks the 'YYYY-MM-DD-' date prefix. "
+                            "Name local notes 'YYYY-MM-DD-<topic>.md' — the notation of "
+                            "canonical dated artifacts — so promotion into canonical "
+                            "documentation keeps the file name. Renaming an existing note "
+                            "is a human decision, so it is reported rather than fixed."
+                        ),
                     )
                 )
             continue
