@@ -1293,6 +1293,42 @@ def test_sync_project_templates_creates_agent_adapters_from_manifest(tmp_path: P
     assert "Managed by ai-standards template:" in cursor_rule.read_text(encoding="utf-8")
 
 
+def test_sync_project_templates_deploys_autonomous_task_run_for_kilo(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK +
+        'fragments = ["core/base"]\n'
+        'features = ["autonomy-boundaries"]\n'
+        'stacks = ["python"]\n'
+        'local_overrides = ["docs/ai/project-rules.md"]\n'
+        "\n"
+        "[tooling]\n"
+        'agents = ["kilo"]\n'
+        "\n"
+        "[metadata]\n"
+        'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    results = sync_project_templates(project_root)
+
+    # The feature-gated skill, plus the always-deployed update skill.
+    assert [result.status for result in results] == ["created"] * 2
+    skill = project_root / ".agents/skills/autonomy-boundaries/autonomous-task-run/SKILL.md"
+    assert skill.exists()
+    content = " ".join(skill.read_text(encoding="utf-8").split())
+    assert "## Entry Gate" in content
+    assert "absolute constant of the run" in content
+    assert "Managed by ai-standards template:" in skill.read_text(encoding="utf-8")
+
+
 def test_sync_project_templates_updates_plain_copied_template(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()
@@ -3079,6 +3115,55 @@ def test_skill_engineering_templates_registered_for_all_agents() -> None:
         assert destination.startswith(".agents/") or destination.startswith(
             (".codex/", ".cursor/", ".claude/")
         )
+
+
+def test_autonomous_task_run_templates_registered_for_all_agents() -> None:
+    for agent in ("codex", "cursor", "claude", "kilo"):
+        entries = [
+            template
+            for template in AGENT_TEMPLATES[agent]
+            if template.feature == "autonomy-boundaries"
+        ]
+        assert len(entries) == 1, (
+            f"{agent}: exactly one autonomous-task-run template expected"
+        )
+        assert entries[0].source_relative_path.startswith(
+            "templates/autonomous-task-run/"
+        )
+        destination = entries[0].destination_relative_path
+        assert destination.startswith(".agents/") or destination.startswith(
+            (".codex/", ".cursor/", ".claude/")
+        )
+
+
+def test_autonomous_task_run_skill_carries_issue_24_invariants() -> None:
+    raw = (Path(__file__).resolve().parents[1] / "templates" / "autonomous-task-run" / "autonomous-task-run.SKILL.md").read_text(encoding="utf-8")
+    # Wrapped lines must not hide the normative phrases from the assertions.
+    content = " ".join(raw.split())
+    # Entry gate: approved plan, verifiable task spec with acceptance criteria,
+    # slice-level plan checked pre-flight, repo/task context.
+    assert "## Entry Gate" in content
+    assert "observable acceptance criterion" in content
+    assert "checked before starting" in content
+    assert "merge-target branch are known" in content
+    # Procedure: slice conformance check, drift rule, requirements immutability,
+    # commit/push rules, knowledge capture, merge by standard.
+    assert "guard against requirements drift" in content
+    assert "is not a fix — it is a stop condition" in content
+    assert "absolute constant of the run" in content
+    assert "standing approval of the commit flow" in content
+    assert "capture the session knowledge the standard way" in content
+    assert "Merge the branch into the target by the project standard" in content
+    assert "Never push to any remote without the user's explicit approval" in content
+    # Stop conditions: named blocked requirement in a detailed stop report.
+    assert "## Stop Conditions" in content
+    assert "(by its id in the task spec) is blocked" in content
+    # Completion report and non-goals.
+    assert "## Completion Report" in content
+    assert "## Non-goals" in content
+    # Portable triggers: Russian and English activation phrases in frontmatter.
+    assert "работай автономно до завершения" in content
+    assert "work autonomously until done" in content
 
 
 def test_context_architecture_feature_can_be_rendered(tmp_path: Path) -> None:

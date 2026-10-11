@@ -2,6 +2,7 @@
 - Treat long autonomous execution as an exception, not the default mode of AI-assisted development.
 - Allow long autonomous execution only when the design is already chosen, the scope is bounded, automated verification is strong, rollback is cheap, and the review remains cheaper than manual reimplementation.
 - Keep critical task context outside the model's transient memory through explicit artifacts such as a task spec, change plan, decision record, module contract, or migration note.
+- When the `autonomous-task-run` skill is deployed, a run over an approved plan goes through its entry gate, slice conformance loop, and stop conditions.
 - For long or high-risk execution, record a short session envelope with objective, scope, non-goals, architectural constraints, verification plan, stop conditions, and expected review artifacts.
 - For a non-trivial autonomous slice, define one or more local checkpoints for the riskiest implementation points, not only the end-of-slice verification.
 - Continue autonomously only while the next change still fits a small coherent patch with targeted verification for that patch.
