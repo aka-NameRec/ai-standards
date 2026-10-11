@@ -1,4 +1,4 @@
-ai_standards_version = "2.7.0-2026-09-24"
+ai_standards_version = "2.8.0-2026-10-11"
 fragments = [
   "core/base",
   "core/git-workflow",
