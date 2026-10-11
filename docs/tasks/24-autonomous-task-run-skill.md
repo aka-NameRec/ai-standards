@@ -25,7 +25,9 @@ Completed on the feature branch
   `docs/scenarios/` (EN/RU); execution belongs to `ai-standards-evals`.
 - Knowledge capture: decision record, authoring worksheet/task spec artifact,
   local-memory progress note (all EN/RU where canonical), CHANGELOG entry.
-- Prepared the repository release metadata for version `2.9.0`.
+- Prepared the repository release metadata for version `2.9.0`; the bump was
+  subsequently reverted — the version increases only when a release is cut,
+  and the release moment is a human decision.
 
 ## Verification
 

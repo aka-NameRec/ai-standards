@@ -24,7 +24,9 @@ Completed on the feature branch
 - Added the `ai-sync doctor` report-only check `local-note-without-date-prefix`
   (WARNING, never auto-fixed per the ai-sync module contract) with tests.
 - Renamed the self-hosted non-conforming `docs/local/**` notes opportunistically.
-- Prepared the repository release metadata for version `2.8.0`.
+- Prepared the repository release metadata for version `2.8.0`; the bump was
+  subsequently reverted — the version increases only when a release is cut,
+  and the release moment is a human decision.
 
 ## Verification
 
