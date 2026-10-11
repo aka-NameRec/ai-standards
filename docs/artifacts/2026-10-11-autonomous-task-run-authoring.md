@@ -72,6 +72,17 @@ requirements change), trigger set (TRG-003), structural pytest (REQ-3).
 | S4 | Decision record, task record, local-memory note, CHANGELOG | `doctor` — no new warnings |
 | S5 | `sync-templates` deployment, full verification, release 2.9.0, commit, merge, issue updates | REQ-8 command suite |
 
+## Addendum (2026-10-11, post-release correction)
+
+The landing-order guidance accepted in this worksheet ("merge by standard"
+inside the run, REQ-10) was superseded after the 2.8.0 release review by
+[[DECISION: merge-only-on-explicit-instruction]] (issue #25): the run ends at
+the final commit on the working branch; merging into the target — and
+deleting the merged branch — happens only on the human's explicit
+instruction. The verdict row above stays as the record of what was accepted
+at authoring time; the skill text, `ATR-006`/`ATR-007`, and scenario
+`ATR-001` carry the corrected rule.
+
 ## Observations
 
 - [decision] Two wording adaptations were accepted: "task spec (an ADR where

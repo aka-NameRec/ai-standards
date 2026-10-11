@@ -46,8 +46,10 @@ exactly what is missing:
    records, a task record, a local working-memory update.
 8. Run the project's full verification (tests, lint, type checks, render or
    doctor where applicable).
-9. Merge the branch into the target by the project standard; delete the
-   merged branch unless it is protected.
+9. End the run at the final commit on the working branch: knowledge captured,
+   checks green. Merge the branch into the target only when the human
+   explicitly orders it, then by the project standard; the same instruction
+   governs deleting the merged branch.
 10. Never push to any remote without the user's explicit approval — including
     the main branch.
 
@@ -70,12 +72,14 @@ The stop report states the current state, what was tried, which requirement
 ## Completion Report
 
 End the run with: what changed, each slice's conformance to the requirements,
-which checks ran with results, the merge state, and what remains (push,
-downstream tasks). The run is complete when the work is merged into the
-target branch, every slice conforms to its acceptance criteria, checks are
-green, knowledge is captured, and the report is posted in chat.
+which checks ran with results, and what remains (merge, push, downstream
+tasks). The run is complete when the branch carries the final commit, every
+slice conforms to its acceptance criteria, checks are green, knowledge is
+captured, and the report is posted in chat — merging and pushing wait for
+the human's explicit instruction.
 
 ## Non-goals
 
-No scope expansion; no changes to requirements; no push; no writes to
-canonical documentation beyond the knowledge capture itself.
+No scope expansion; no changes to requirements; no merging and no push
+without the human's instruction; no writes to canonical documentation beyond
+the knowledge capture itself.

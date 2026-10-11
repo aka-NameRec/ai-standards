@@ -406,11 +406,11 @@ scenarios = []
 [rules.ATR-006]
 source = "templates/autonomous-task-run/autonomous-task-run.SKILL.md"
 section = "Completion Report"
-behavior = "The run ends with a completion report covering the changes, per-slice conformance, checks with results, merge state, and remaining items, and completes only when the work is merged, slices conform, checks are green, knowledge is captured, and the report is posted."
+behavior = "The run ends with a completion report covering the changes, per-slice conformance, checks with results, and what remains — merge, push, downstream tasks — and completes only when the branch carries the final commit, slices conform, checks are green, knowledge is captured, and the report is posted."
 scenarios = []
 
 [rules.ATR-007]
 source = "templates/autonomous-task-run/autonomous-task-run.SKILL.md"
 section = "Procedure"
-behavior = "Before merging, session knowledge is captured the standard way — decision records, a task record, a local working-memory update — and the branch merges into the target by the project standard."
+behavior = "Before the run ends, session knowledge is captured the standard way — decision records, a task record, a local working-memory update — and the run ends at the final commit on the working branch; merging into the target branch, and deleting the merged branch, happens only on the human's explicit instruction, by the project standard."
 scenarios = []
