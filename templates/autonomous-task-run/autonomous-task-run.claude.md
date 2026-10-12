@@ -24,11 +24,14 @@ exactly what is missing:
    plan that does not decompose into such slices is a reason to request a
    re-slice, not to start.
 4. The repository, the task id, and the merge-target branch are known; the
-   target project's `AGENTS.md` and working memory are loaded.
+   target project's `AGENTS.md` and working memory are loaded. The
+   knowledge-capture targets the project enables are known.
 
 ## Procedure
 
-1. Create a branch `<purpose>/<task_id>-<slug>` from the merge-target branch.
+1. Create a working branch by the project's branch rules, from the
+   merge-target branch; the shared default shape is
+   `<purpose>/<task_id>-<slug>`.
 2. Execute the slices in order; verify every risky change with the most
    targeted check before moving on.
 3. At the end of each slice, check the result against the task-spec
@@ -42,8 +45,11 @@ exactly what is missing:
 6. Commit without pausing for per-commit message approval: the instruction to
    run autonomously is the standing approval of the commit flow. Commit
    messages still follow the project's standard form.
-7. Before merging, capture the session knowledge the standard way: decision
-   records, a task record, a local working-memory update.
+7. Before merging, capture the session knowledge the standard way — the
+   parts the project's enabled features define: the `capture-knowledge`
+   skill when it is deployed, a local working-memory update when the
+   project maintains one. Record every part the project does not enable
+   in the completion report, with the reason.
 8. Run the project's full verification (tests, lint, type checks, render or
    doctor where applicable).
 9. End the run at the final commit on the working branch: knowledge captured,
@@ -75,7 +81,8 @@ End the run with: what changed, each slice's conformance to the requirements,
 which checks ran with results, and what remains (merge, push, downstream
 tasks). The run is complete when the branch carries the final commit, every
 slice conforms to its acceptance criteria, checks are green, knowledge is
-captured, and the report is posted in chat — merging and pushing wait for
+captured to the extent the project's enabled features define, and the
+report is posted in chat — merging and pushing wait for
 the human's explicit instruction.
 
 ## Non-goals

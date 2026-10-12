@@ -3217,6 +3217,12 @@ def test_autonomous_task_run_skill_carries_issue_24_invariants() -> None:
     assert "absolute constant of the run" in content
     assert "standing approval of the commit flow" in content
     assert "capture the session knowledge the standard way" in content
+    # Issue #26 D3/D4: capture follows the project's enabled features; the
+    # branch shape defers to the project's rules with a shared default.
+    assert "the parts the project's enabled features define" in content
+    assert "Record every part the project does not enable" in content
+    assert "by the project's branch rules" in content
+    assert "the shared default shape is" in content
     # Landing: the run ends at the final commit; merge only on explicit order.
     assert "End the run at the final commit on the working branch" in content
     assert "only when the human explicitly orders it" in content

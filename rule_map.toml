@@ -376,7 +376,7 @@ scenarios = ["PM-001"]
 [rules.ATR-001]
 source = "templates/autonomous-task-run/autonomous-task-run.SKILL.md"
 section = "Entry Gate"
-behavior = "Autonomous execution starts only with an approved plan, a verifiable task spec whose requirements each carry an observable acceptance criterion, a slice-level plan verified before start, and the repository, task id, merge target, and project rules loaded; otherwise the agent requests exactly what is missing."
+behavior = "Autonomous execution starts only with an approved plan, a verifiable task spec whose requirements each carry an observable acceptance criterion, a slice-level plan verified before start, and the repository, task id, merge target, project rules, and the enabled knowledge-capture targets loaded; otherwise the agent requests exactly what is missing."
 scenarios = ["ATR-001"]
 
 [rules.ATR-002]
@@ -406,11 +406,17 @@ scenarios = []
 [rules.ATR-006]
 source = "templates/autonomous-task-run/autonomous-task-run.SKILL.md"
 section = "Completion Report"
-behavior = "The run ends with a completion report covering the changes, per-slice conformance, checks with results, and what remains — merge, push, downstream tasks — and completes only when the branch carries the final commit, slices conform, checks are green, knowledge is captured, and the report is posted."
+behavior = "The run ends with a completion report covering the changes, per-slice conformance, checks with results, and what remains — merge, push, downstream tasks — and completes only when the branch carries the final commit, slices conform, checks are green, knowledge is captured to the extent the project's enabled features define, and the report is posted."
 scenarios = []
 
 [rules.ATR-007]
 source = "templates/autonomous-task-run/autonomous-task-run.SKILL.md"
 section = "Procedure"
-behavior = "Before the run ends, session knowledge is captured the standard way — decision records, a task record, a local working-memory update — and the run ends at the final commit on the working branch; merging into the target branch, and deleting the merged branch, happens only on the human's explicit instruction, by the project standard."
+behavior = "Before the run ends, session knowledge is captured the standard way for the parts the project's enabled features define — the capture-knowledge skill when deployed, a local working-memory update when the project maintains one — with every part the project does not enable recorded in the completion report; the run ends at the final commit on the working branch; merging into the target branch, and deleting the merged branch, happens only on the human's explicit instruction, by the project standard."
+scenarios = []
+
+[rules.ATR-008]
+source = "templates/autonomous-task-run/autonomous-task-run.SKILL.md"
+section = "Procedure"
+behavior = "The working branch is created by the project's branch rules from the merge-target branch; the shared default shape is <purpose>/<task_id>-<slug>."
 scenarios = []

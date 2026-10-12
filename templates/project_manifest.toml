@@ -39,6 +39,11 @@ optional_local_overrides = [
 # [project_memory]
 # local_tree = "local"
 
+# Optional. Task records directory inside the knowledge tree; used by the
+# "knowledge-capture" feature. Default: "tasks".
+# [knowledge_capture]
+# tasks_tree = "tasks"
+
 [tooling]
 agents = []
 
