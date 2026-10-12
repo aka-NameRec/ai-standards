@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Code-review pass procedure deploys for every agent (issue #26, D1; decision record `docs/decisions/2026-10-12-implement-issue-26.md`)**: the pass-by-pass procedure and the fixing policy moved from a kilo-only skill reference to the shared infra template `.ai-standards/references/standard-code-review-procedure.md` (gated on the `code-review` feature, the M4/M5 pattern). All four `standard-code-review` variants (codex, cursor, claude, kilo) now reference the existing shared file; the retired kilo-private `references/procedure.md` is removed on resync; fragment pointers updated. The 2.6.0 regression class (dangling skill references, agents missing the safe-to-fix list) is pinned by a regression test.
+- **Autonomous-run commit approval reconciled with the capture and git rules (issue #26, D2)**: the standing-approval precedence is now stated in all three places — `core/git-workflow` gains the explicit autonomous-run exception (commits only; pushing still requires explicit approval), and the `capture-knowledge` "Never" clause names the same exception.
+- **Local-memory exemption narrowed in the `basic-memory` fragment (issue #26, D5)**: the genre bullet now exempts only canonical-note body requirements (`## Observations`, `## Relations`, frontmatter shape) — the `YYYY-MM-DD-<topic>.md` naming applies, matching the narrowed 2.8.0 state (issue #23); the dangling "see Project Memory" cross-reference is dropped.
+
+### Changed
+- **Autonomous knowledge capture and branch naming follow the project (issue #26, D3/D4)**: `autonomous-task-run` step 7 and the completion condition require only the parts the project's enabled features define, with every skipped part recorded in the completion report; the entry gate requires knowing the enabled capture targets; step 1 defers to the project's branch rules with `<purpose>/<task_id>-<slug>` as the shared default. The task-records directory becomes configurable via `[knowledge_capture] tasks_tree` (default `tasks`, the `[project_memory] local_tree` pattern). Rules `ATR-001`/`ATR-006`/`ATR-007` reworded, `ATR-008` added; invariant tests pin the new clauses.
+- **Upgrade preflight: new skills are confirmed before deployment (issue #26, D6)**: `ai-sync sync-templates` gains `--plan`, printing what it would create, update, or retire without writing; the `update-ai-standards` upgrade procedure runs the plan first and requires confirmation for `Planned create` lines that add new skills or workflow files to already-enabled features, while text refreshes of existing deployments stay silent. Usage guides updated in both languages.
+
 ## [2.8.1] — 2026-10-11
 
 ### Fixed

@@ -45,6 +45,7 @@
 - Direct commits on protected branches are allowed only when the user explicitly authorizes them for the current task, and only for small follow-up changes tightly coupled to work that has just been merged or released.
 - Do not use the protected-branch exception for new feature work, broad refactors, or behavior changes that should receive their own branch lifecycle.
 - Always ask the user to approve the commit message text before committing.
+- Exception: during a run of the `autonomous-task-run` skill, the instruction to run autonomously is the standing approval of the commit flow — commit messages follow the project's standard form without per-commit approval. Pushing still requires explicit approval.
 - Extract the SCM task id from branch names shaped as `<purpose>/<task_id>-<description>`.
 - Use commit messages in the form `task_id. (commit_type) commit_message.`
 ## Architecture & Layering
@@ -107,7 +108,7 @@ Stored knowledge is not conversation context. Retrieve it when relevant; do not 
 - Swapping an implementation backend must not require rewriting these behavioral rules.
 ## Basic Memory Usage
 - Use Basic Memory as a retrieval and indexing layer over Git-tracked Markdown knowledge when the project explicitly enables this feature.
-- Basic Memory serves two distinct classes of knowledge without mixing their roles: canonical project knowledge (`docs/domain/**`, `docs/decisions/**`, `docs/architecture/**` — Git-tracked, reviewed, durable, authoritative) and local working memory (`docs/local/**` — cross-session, agent-managed, user-local, mutable, never authoritative, not committed by default). Treat `docs/local/**` as agent-managed working memory rather than canonical truth; canonical-note rules do not apply there, and notes without canonical shape are expected, not defects.
+- Basic Memory serves two distinct classes of knowledge without mixing their roles: canonical project knowledge (`docs/domain/**`, `docs/decisions/**`, `docs/architecture/**` — Git-tracked, reviewed, durable, authoritative) and local working memory (`docs/local/**` — cross-session, agent-managed, user-local, mutable, never authoritative, not committed by default). Treat `docs/local/**` as agent-managed working memory rather than canonical truth; canonical-note body requirements (`## Observations`, `## Relations`, frontmatter shape) do not apply there — the date-prefix file naming does — and notes without canonical body shape are expected, not defects.
 - Point a Basic Memory project at a dedicated knowledge tree, never at a repository root; keep rendering inputs, generated output, and machine-owned files outside it. Keep `local_overrides` outside the knowledge tree, so metadata written by the indexer can never reach a generated file.
 - Keep binary and bulk-data files (images, PDFs, raw logs, CSV dumps) out of the knowledge tree; when they must stay beside the notes citing them, mask them via gitignore-style patterns — the masking targets and the reindex timing live in the reference.
 - Constrain the Basic Memory MCP server to a single project per workspace (for example `bm mcp --project <name>`), and disable it in workspaces that do not have a project, so queries never fall back to a shared default dump.
@@ -120,7 +121,7 @@ Stored knowledge is not conversation context. Retrieve it when relevant; do not 
 - Rely on Basic Memory's normal filesystem sync for ordinary edits inside indexed directories. Use `ai-sync doctor --fix` to repair a tree, `bm orphans` and the schema commands (`infer`, `validate`, `diff`) instead of reimplementing the indexer's checks; the tool semantics and the reindex matrix live in the reference.
 
 ### Note Shape
-- Write a note so it needs no repair: a frontmatter `title` in the project's own language, the title repeated as the `# ` heading, and closing `## Observations` and `## Relations` sections. Canonical dated artifacts follow the file-name convention `YYYY-MM-DD-topic-slug.md`; living documents keep topic-only names, and local working-memory notes carry the same date prefix (`YYYY-MM-DD-<topic>.md`, see Project Memory).
+- Write a note so it needs no repair: a frontmatter `title` in the project's own language, the title repeated as the `# ` heading, and closing `## Observations` and `## Relations` sections. Canonical dated artifacts follow the file-name convention `YYYY-MM-DD-topic-slug.md`; living documents keep topic-only names, and local working-memory notes carry the same date prefix (`YYYY-MM-DD-<topic>.md`).
 - Do not rely on file names for retrieval: a note is identified by its frontmatter `title`. Naming, rename, and permalink mechanics live in the reference.
 
 ### Sync Hygiene
@@ -413,7 +414,7 @@ Source provenance:
 
 ### What To Check
 - Run the review passes that the report's finding sections name, in that order: Correctness, then Architecture & Conventions, then Reuse, Efficiency, and Quality.
-- When the `standard-code-review` skill is deployed, its `references/procedure.md` holds the full pass-by-pass procedure — follow it when running the standard review.
+- When the `standard-code-review` skill is deployed, `.ai-standards/references/standard-code-review-procedure.md` (deployed by `ai-sync sync-templates` with this feature) holds the full pass-by-pass procedure — follow it when running the standard review.
 - Report a notable problem that predates the diff as well, marked `(pre-existing)` so it does not read as blame for this change. Whether to fix it stays the author's call, it can be offered as a follow-up instead, and it must not expand into an unrequested audit of the surrounding code.
 
 ### What Makes A Finding Reportable
@@ -433,7 +434,7 @@ Source provenance:
 ### Fixing While Reviewing
 - Reporting stays the default. A small fix whose safety is established by reading alone, without running anything, may be applied and recorded as a ✅ finding with a `→ fixed:` tail like any other.
 - Anything else — migrations, lock files, dependencies, build configuration, public types and contracts, refactors, the state of the git index, and anything whose safety would need a test run — is reported, not fixed.
-- When the `standard-code-review` skill is deployed, its `references/procedure.md` carries the full policy with the safe-to-fix and report-instead lists.
+- When the `standard-code-review` skill is deployed, `.ai-standards/references/standard-code-review-procedure.md` carries the full policy with the safe-to-fix and report-instead lists.
 
 ### Relationship To Review Lenses
 - This workflow answers a plain "code review" request and covers correctness and convention conformance alongside cleanup. `review-lenses` keeps its own explicit activation and its narrower three-lens cleanup model, and remains the one to use in CI.
@@ -446,7 +447,7 @@ Source provenance:
 - Do not encode tool- or vendor-specific review-bot output formats; keep those in local adapters.
 ## Knowledge Capture
 
-- When the user asks to capture session knowledge the standard way («зафиксируй знания стандартным образом», зафиксировать решения или задачи), follow the feature-gated `capture-knowledge` skill: decision records for accepted choices, task records under `docs/tasks/`, module contracts only for major modules, README links for maintained docs, local project memory update under `docs/local/**` when `project-memory` is enabled, and `.ru.md` pairs for everything under `docs/`.
+- When the user asks to capture session knowledge the standard way («зафиксируй знания стандартным образом», зафиксировать решения или задачи), follow the feature-gated `capture-knowledge` skill: decision records for accepted choices, task records under the project's task-records directory (default `docs/tasks/`, relocatable via `[knowledge_capture] tasks_tree` in the manifest), module contracts only for major modules, README links for maintained docs, local project memory update under `docs/local/**` when `project-memory` is enabled, and `.ru.md` pairs for everything under `docs/`.
 ## Rule Engineering
 
 Normative knowledge earns its place through engineering, not through import.
