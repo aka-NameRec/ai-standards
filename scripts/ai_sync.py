@@ -800,7 +800,14 @@ def _is_managed_template_content(content: str) -> bool:
     return MANAGED_TEMPLATE_MARKER_PREFIX in content
 
 
-def _sync_agent_template(project_root: Path, template: AgentTemplate) -> TemplateSyncResult:
+def _plan_agent_template(
+    project_root: Path, template: AgentTemplate
+) -> tuple[TemplateSyncResult, str]:
+    """Compute the action a template sync would take, without writing.
+
+    Returns the planned result together with the managed content the apply
+    step would write, so planning and applying never diverge.
+    """
     repo_root = _repo_root()
     source_path = repo_root / template.source_relative_path
     raw_content = source_path.read_text(encoding="utf-8")
@@ -810,22 +817,37 @@ def _sync_agent_template(project_root: Path, template: AgentTemplate) -> Templat
     destination_path = project_root / template.destination_relative_path
 
     if not destination_path.exists():
-        destination_path.parent.mkdir(parents=True, exist_ok=True)
-        destination_path.write_text(managed_content, encoding="utf-8")
-        return TemplateSyncResult(status="created", destination_path=destination_path)
+        return TemplateSyncResult(status="created", destination_path=destination_path), (
+            managed_content
+        )
 
     existing_content = destination_path.read_text(encoding="utf-8")
     if existing_content == managed_content:
-        return TemplateSyncResult(status="up-to-date", destination_path=destination_path)
+        return (
+            TemplateSyncResult(status="up-to-date", destination_path=destination_path),
+            managed_content,
+        )
 
-    if (
-        _is_managed_template_content(existing_content)
-        or existing_content == raw_content
-    ):
-        destination_path.write_text(managed_content, encoding="utf-8")
-        return TemplateSyncResult(status="updated", destination_path=destination_path)
+    if _is_managed_template_content(existing_content) or existing_content == raw_content:
+        return (
+            TemplateSyncResult(status="updated", destination_path=destination_path),
+            managed_content,
+        )
 
-    return TemplateSyncResult(status="skipped-unmanaged", destination_path=destination_path)
+    return (
+        TemplateSyncResult(status="skipped-unmanaged", destination_path=destination_path),
+        managed_content,
+    )
+
+
+def _sync_agent_template(project_root: Path, template: AgentTemplate) -> TemplateSyncResult:
+    planned, managed_content = _plan_agent_template(project_root, template)
+    if planned.status == "created":
+        planned.destination_path.parent.mkdir(parents=True, exist_ok=True)
+        planned.destination_path.write_text(managed_content, encoding="utf-8")
+    elif planned.status == "updated":
+        planned.destination_path.write_text(managed_content, encoding="utf-8")
+    return planned
 
 
 def _build_claude_bridge_content(agents_md_name: str) -> str:
@@ -894,6 +916,39 @@ def sync_project_templates(project_root: Path) -> list[TemplateSyncResult]:
             continue
         results.append(_sync_agent_template(project_root, template))
     results.extend(_retire_retired_templates(project_root))
+    return results
+
+
+def _plan_retired_templates(project_root: Path) -> list[TemplateSyncResult]:
+    """Report managed copies of retired templates the sync would remove."""
+    results: list[TemplateSyncResult] = []
+    for relative_path in RETIRED_TEMPLATE_DESTINATIONS:
+        destination_path = project_root / relative_path
+        if not destination_path.exists():
+            continue
+        if not _is_managed_template_content(_read_managed_destination(destination_path)):
+            continue
+        results.append(TemplateSyncResult(status="retired", destination_path=destination_path))
+    return results
+
+
+def plan_project_templates(project_root: Path) -> list[TemplateSyncResult]:
+    """Compute what ``sync-templates`` would do, without writing anything."""
+    manifest = _load_manifest(project_root)
+    enabled_features = set(manifest.features)
+    results: list[TemplateSyncResult] = []
+    for agent in manifest.agents:
+        for template in AGENT_TEMPLATES[agent]:
+            if template.feature is not None and template.feature not in enabled_features:
+                continue
+            planned, _ = _plan_agent_template(project_root, template)
+            results.append(planned)
+    for template in INFRA_TEMPLATES:
+        if template.feature is not None and template.feature not in enabled_features:
+            continue
+        planned, _ = _plan_agent_template(project_root, template)
+        results.append(planned)
+    results.extend(_plan_retired_templates(project_root))
     return results
 
 
@@ -998,8 +1053,30 @@ def init_project(
 @app.command("sync-templates")
 def sync_templates(
     project_root: Annotated[Path, PROJECT_ROOT_OPTION],
+    plan: Annotated[
+        bool,
+        typer.Option("--plan", help="Show what would change without writing anything."),
+    ] = False,
 ) -> None:
     """Sync agent-specific managed templates declared in ai.project.toml."""
+
+    if plan:
+        results = plan_project_templates(project_root)
+        if not results:
+            typer.echo("No agent templates configured in ai.project.toml.")
+            return
+        for result in results:
+            if result.status == "created":
+                typer.echo(f"Planned create {result.destination_path}")
+            elif result.status == "updated":
+                typer.echo(f"Planned update {result.destination_path}")
+            elif result.status == "retired":
+                typer.echo(f"Planned retire {result.destination_path}")
+            elif result.status == "skipped-unmanaged":
+                typer.echo(f"Skipped unmanaged {result.destination_path}")
+            else:
+                typer.echo(f"Up to date {result.destination_path}")
+        return
 
     results = sync_project_templates(project_root)
     if not results:

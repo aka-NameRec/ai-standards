@@ -27,6 +27,7 @@ from scripts.ai_sync import (
     render,
     run_doctor,
     run_repair,
+    plan_project_templates,
     sync_project_templates,
     write_rendered_content,
 )
@@ -2032,6 +2033,120 @@ def test_render_warns_when_manifest_pin_drifts_from_the_source(
     output = capsys.readouterr().out
     assert "Warning:" in output
     assert "0.0.1" in output
+
+
+def test_plan_reports_creates_without_writing(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["code-review"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + 'agents = ["kilo"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    planned = plan_project_templates(project_root)
+
+    assert planned, "plan must list the templates it would deploy"
+    assert all(result.status == "created" for result in planned)
+    for result in planned:
+        assert not result.destination_path.exists()
+
+    applied = sync_project_templates(project_root)
+    assert [result.destination_path for result in applied][: len(planned)] == [
+        result.destination_path for result in planned
+    ]
+
+
+def test_plan_reports_up_to_date_after_apply(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["code-review"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + 'agents = ["kilo"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    sync_project_templates(project_root)
+
+    planned = plan_project_templates(project_root)
+    assert planned
+    assert all(result.status == "up-to-date" for result in planned)
+
+
+def test_plan_reports_retired_copy_without_removing_it(tmp_path: Path) -> None:
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["code-review"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + 'agents = ["kilo"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+    retired_copy = (
+        project_root
+        / ".agents"
+        / "skills"
+        / "code-review"
+        / "standard-code-review"
+        / "references"
+        / "procedure.md"
+    )
+    retired_copy.parent.mkdir(parents=True)
+    retired_copy.write_text(
+        "<!-- Managed by ai-standards template:"
+        " templates/code-review/standard-code-review.procedure.md -->\n",
+        encoding="utf-8",
+    )
+
+    planned = plan_project_templates(project_root)
+
+    retired = [result for result in planned if result.status == "retired"]
+    assert [result.destination_path for result in retired] == [retired_copy]
+    assert retired_copy.exists()
 
 
 def test_registry_feature_meta_references_known_features() -> None:

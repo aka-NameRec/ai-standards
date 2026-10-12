@@ -53,8 +53,12 @@ Upgrade mode; when the deployed skill is missing or older than this file, run `r
    latest release.
 4. **Bootstrap when needed.** If the deployed skill is missing or older than this file, run
    `render` + `sync-templates` first, so the project holds the current procedure and adapters.
-5. **Refresh enabled features silently.** `render` + `sync-templates`. Text updates to
-   already-enabled features need no confirmation.
+5. **Refresh enabled features with a preflight plan.** Run `render`; then run
+   `sync-templates --plan` and read the plan. A `Planned create` line that adds a
+   new skill or workflow file for an already-enabled feature is not a text update —
+   announce each such file (one line: what it changes, per step 6) and apply only on
+   the user's confirmation. A clean or confirmed plan: run `sync-templates`. Text
+   updates to already-deployed skills and references need no confirmation.
 6. **Announce what is new and not yet enabled.** Features whose `[feature_meta].since` is
    newer than the version part of the deployed pin — the pin is `<version>-<date>`, compare
    `since` against `<version>` — **and that are absent from the manifest `features` list**:
