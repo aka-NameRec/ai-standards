@@ -1560,19 +1560,21 @@ def test_sync_deploys_parseable_chroma_infra_templates(tmp_path: Path) -> None:
 
 
 def test_code_review_fragment_names_module_contracts() -> None:
-    """M1 moved the pass procedure into the skill reference; the module-contract
+    """M1 moved the pass procedure into a shared reference; the module-contract
     pointers live there now, while the fragment keeps the routing pointer."""
     fragment = (
         REPO_ROOT / "fragments" / "process" / "code-review.md"
     ).read_text(encoding="utf-8")
     procedure = (
-        REPO_ROOT / "templates" / "code-review" / "standard-code-review.procedure.md"
+        REPO_ROOT
+        / "templates"
+        / "standard-code-review-procedure.reference.md"
     ).read_text(encoding="utf-8")
     template = (
         REPO_ROOT / "templates" / "code-review-report.md"
     ).read_text(encoding="utf-8")
 
-    assert "references/procedure.md" in fragment
+    assert ".ai-standards/references/standard-code-review-procedure.md" in fragment
     assert "type: module-contract" in procedure
     assert "docs/architecture/**" in procedure
     assert "(no contract)" in procedure
@@ -1816,19 +1818,20 @@ def test_sync_deploys_standard_review_adapters_when_code_review_enabled(tmp_path
 
     # Declaring every agent hands the project the standard-review adapters for the
     # enabled code-review feature, the always-deployed update skill, and the
-    # code-review report and reporting-reference templates.
+    # code-review report, reporting-reference, and shared procedure-reference
+    # templates.
     assert [result.destination_path.name for result in results] == [
         "SKILL.md",
         "SKILL.md",
         "standard-code-review.md",
         "update-ai-standards.md",
         "SKILL.md",
-        "procedure.md",
         "SKILL.md",
         "standard-code-review.mdc",
         "update-ai-standards.mdc",
         "code-review-report.md",
         "code-review-reporting.md",
+        "standard-code-review-procedure.md",
     ]
     for result in results:
         content = result.destination_path.read_text(encoding="utf-8")
@@ -1844,6 +1847,67 @@ def test_sync_deploys_standard_review_adapters_when_code_review_enabled(tmp_path
             assert "standard code review" in content, result.destination_path
     deployed = {result.destination_path.as_posix() for result in results}
     assert not any("simplify-review" in path for path in deployed)
+
+
+def test_standard_code_review_copies_reference_existing_procedure(tmp_path: Path) -> None:
+    """Issue #26 (2.6.0 regression): every deployed standard-code-review copy
+    must point at a procedure file that exists in the same project."""
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["code-review"]\n'
+        + 'stacks = ["python"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n"
+        + "[tooling]\n"
+        + 'agents = ["codex", "claude", "kilo", "cursor"]\n'
+        + "\n"
+        + "[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+    # A project upgraded from 2.8.1 carries the retired kilo-private copy;
+    # the resync must remove it (it still carries the managed marker).
+    retired_copy = (
+        project_root
+        / ".agents"
+        / "skills"
+        / "code-review"
+        / "standard-code-review"
+        / "references"
+        / "procedure.md"
+    )
+    retired_copy.parent.mkdir(parents=True)
+    retired_copy.write_text(
+        "<!-- Managed by ai-standards template:"
+        " templates/code-review/standard-code-review.procedure.md -->\n",
+        encoding="utf-8",
+    )
+
+    sync_project_templates(project_root)
+
+    shared_reference = (
+        project_root / ".ai-standards" / "references" / "standard-code-review-procedure.md"
+    )
+    assert shared_reference.exists()
+    skill_copies = [
+        project_root / ".codex" / "skills" / "code-review" / "standard-code-review" / "SKILL.md",
+        project_root / ".agents" / "skills" / "code-review" / "standard-code-review" / "SKILL.md",
+        project_root / ".claude" / "commands" / "standard-code-review.md",
+        project_root / ".cursor" / "rules" / "standard-code-review.mdc",
+    ]
+    for copy in skill_copies:
+        content = copy.read_text(encoding="utf-8")
+        assert ".ai-standards/references/standard-code-review-procedure.md" in content, copy
+    assert not retired_copy.exists()
 
 
 def test_sync_deploys_update_skill_adapters_regardless_of_features(tmp_path: Path) -> None:
@@ -2006,9 +2070,9 @@ def test_sync_deploys_code_review_report_template_without_any_agents(tmp_path: P
 
     results = sync_project_templates(project_root)
 
-    # The report template and the reporting reference are agent-agnostic: they
-    # land even with no adapters declared.
-    assert [result.status for result in results] == ["created", "created"]
+    # The report template, the reporting reference, and the shared procedure
+    # reference are agent-agnostic: they land even with no adapters declared.
+    assert [result.status for result in results] == ["created", "created", "created"]
     report = project_root / ".ai-standards" / "code-review-report.md"
     assert report.exists()
     content = report.read_text(encoding="utf-8")

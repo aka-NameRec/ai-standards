@@ -4,8 +4,9 @@ Full pass-by-pass procedure for the standard code review workflow (the
 `standard-code-review` skill). The always-loaded `Code Review` rules carry the
 reporting invariants (evidence, no-padding, marker semantics, report shape);
 this reference carries the detail of each pass and the fixing policy. When
-this file is present in the deployed skill, follow it instead of
-reconstructing the passes from the section names.
+this file is deployed in the project
+(`.ai-standards/references/standard-code-review-procedure.md`), follow it
+instead of reconstructing the passes from the section names.
 
 ## Passes
 

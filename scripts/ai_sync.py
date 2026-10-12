@@ -288,14 +288,6 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="kilo",
-            source_relative_path="templates/code-review/standard-code-review.procedure.md",
-            destination_relative_path=(
-                ".agents/skills/code-review/standard-code-review/references/procedure.md"
-            ),
-            feature="code-review",
-        ),
-        AgentTemplate(
-            agent="kilo",
             source_relative_path="templates/knowledge-capture/capture-knowledge.SKILL.md",
             destination_relative_path=".agents/skills/knowledge-capture/capture-knowledge/SKILL.md",
             feature="knowledge-capture",
@@ -353,6 +345,14 @@ INFRA_TEMPLATES: tuple[AgentTemplate, ...] = (
     ),
     AgentTemplate(
         agent="",
+        source_relative_path="templates/standard-code-review-procedure.reference.md",
+        destination_relative_path=(
+            ".ai-standards/references/standard-code-review-procedure.md"
+        ),
+        feature="code-review",
+    ),
+    AgentTemplate(
+        agent="",
         source_relative_path="templates/module-contract-gate.procedure.md",
         destination_relative_path=".ai-standards/references/module-contract-gate.md",
         feature="module-contract-gate",
@@ -374,6 +374,7 @@ RETIRED_TEMPLATE_DESTINATIONS: tuple[str, ...] = (
     ".cursor/rules/deploy-ai-knowledge-stack.mdc",
     ".claude/commands/deploy-ai-knowledge-stack.md",
     ".agents/skills/ai-infrastructure/deploy-ai-knowledge-stack/SKILL.md",
+    ".agents/skills/code-review/standard-code-review/references/procedure.md",
 )
 
 

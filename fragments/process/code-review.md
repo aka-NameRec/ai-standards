@@ -20,7 +20,7 @@ Source provenance:
 
 ### What To Check
 - Run the review passes that the report's finding sections name, in that order: Correctness, then Architecture & Conventions, then Reuse, Efficiency, and Quality.
-- When the `standard-code-review` skill is deployed, its `references/procedure.md` holds the full pass-by-pass procedure — follow it when running the standard review.
+- When the `standard-code-review` skill is deployed, `.ai-standards/references/standard-code-review-procedure.md` (deployed by `ai-sync sync-templates` with this feature) holds the full pass-by-pass procedure — follow it when running the standard review.
 - Report a notable problem that predates the diff as well, marked `(pre-existing)` so it does not read as blame for this change. Whether to fix it stays the author's call, it can be offered as a follow-up instead, and it must not expand into an unrequested audit of the surrounding code.
 
 ### What Makes A Finding Reportable
@@ -40,7 +40,7 @@ Source provenance:
 ### Fixing While Reviewing
 - Reporting stays the default. A small fix whose safety is established by reading alone, without running anything, may be applied and recorded as a ✅ finding with a `→ fixed:` tail like any other.
 - Anything else — migrations, lock files, dependencies, build configuration, public types and contracts, refactors, the state of the git index, and anything whose safety would need a test run — is reported, not fixed.
-- When the `standard-code-review` skill is deployed, its `references/procedure.md` carries the full policy with the safe-to-fix and report-instead lists.
+- When the `standard-code-review` skill is deployed, `.ai-standards/references/standard-code-review-procedure.md` carries the full policy with the safe-to-fix and report-instead lists.
 
 ### Relationship To Review Lenses
 - This workflow answers a plain "code review" request and covers correctness and convention conformance alongside cleanup. `review-lenses` keeps its own explicit activation and its narrower three-lens cleanup model, and remains the one to use in CI.
