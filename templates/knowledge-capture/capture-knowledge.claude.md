@@ -39,7 +39,7 @@ Every new note needs no repair from birth:
 
 ## Never
 
-- Never push or commit without explicit user approval of the message.
+- Never push or commit without explicit user approval of the message; commits made under an autonomous task run's standing approval of the commit flow are the only exception, and pushing never has one.
 - Never synthesize observations or invent note titles that do not exist yet as relation targets.
 - Never batch content edits; capture writes new material — it does not rewrite existing prose.
 
