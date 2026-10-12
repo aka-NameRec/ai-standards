@@ -4,7 +4,7 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [2.8.2] — 2026-10-12
 
 ### Fixed
 - **Code-review pass procedure deploys for every agent (issue #26, D1; decision record `docs/decisions/2026-10-12-implement-issue-26.md`)**: the pass-by-pass procedure and the fixing policy moved from a kilo-only skill reference to the shared infra template `.ai-standards/references/standard-code-review-procedure.md` (gated on the `code-review` feature, the M4/M5 pattern). All four `standard-code-review` variants (codex, cursor, claude, kilo) now reference the existing shared file; the retired kilo-private `references/procedure.md` is removed on resync; fragment pointers updated. The 2.6.0 regression class (dangling skill references, agents missing the safe-to-fix list) is pinned by a regression test.
