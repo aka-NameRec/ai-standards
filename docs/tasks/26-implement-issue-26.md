@@ -7,12 +7,9 @@ permalink: ai-standards/tasks/26-implement-issue-26
 
 ## Status
 
-Implemented on the branch `rules-change/26-implement-issue-26` under the
-`autonomous-task-run` procedure (user instruction 2026-10-12: implement
-autonomously). The run ends at the final commit on the working branch;
-merging into `main` — which additionally requires the `ai-standards-evals`
-comparison per the merge-gate rule — and pushing wait for the human's
-explicit instruction.
+Completed and landed: merged fast-forward into `main` (`964b6c1..c4c7b09`)
+on the user's explicit order after the merge gate returned ACCEPT; the
+working branch was deleted after the merge. Released as 2.8.2.
 
 ## Scope
 
@@ -64,13 +61,16 @@ Commits: `477ce5f` (decision record), `3a179d8` (D1), `d85412c` (D2),
 - Live smoke of the plan mode: `--plan` on a fixture project lists
   `Planned create` lines without writing; apply creates them; a second
   `--plan` reports everything up to date.
+- Eval comparison (STD-CHANGE-0003, `ai-standards-evals` reports
+  `20261012-*`): 16 scenarios × 2 epochs per side, kilo, judge 26/26. First
+  verdict REJECT on a single-epoch `CR-010` scope slip; the exposed
+  non-convergent defect of the new-class rule was fixed by STD-CHANGE-0004
+  (rank-guarded, reproducibility-gated); regenerated comparison: ACCEPT,
+  zero downgrades (upgrades `CR-004`/`CR-005`/`ATR-001`/`CR-010`).
 - Known pre-existing lint debt, untouched by this task: `ruff check .`
   reports 6 errors in `templates/ai-infrastructure/scripts/code_index.py`
   and 1 `E501` in `tests/test_ai_sync.py`; both fail identically on the
   base commit.
-- Not run (landing prerequisite, not part of this slice): the
-  `ai-standards-evals` comparison required by the merge-gate rule for
-  branches touching `fragments/**`/`templates/**`.
 
 ## Related Artifacts
 
