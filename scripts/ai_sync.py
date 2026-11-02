@@ -711,6 +711,9 @@ def _read_fragment(repo_root: Path, fragment_id: str) -> str:
     return _strip_provenance(_strip_frontmatter(fragment_path.read_text(encoding="utf-8"))).strip()
 
 
+REFERENCE_PATH_TOKEN = "{{REFERENCE_PATH}}"
+
+
 def _read_pointer(repo_root: Path, binding: ReferenceBinding) -> str:
     pointer_path = repo_root / binding.pointer_relative_path
     if not pointer_path.exists():
@@ -719,7 +722,11 @@ def _read_pointer(repo_root: Path, binding: ReferenceBinding) -> str:
             "Author fragments/<id>.pointer.md or drop the item from the "
             "manifest reference lists."
         )
-    return _strip_provenance(_strip_frontmatter(pointer_path.read_text(encoding="utf-8"))).strip()
+    content = _strip_provenance(_strip_frontmatter(pointer_path.read_text(encoding="utf-8")))
+    # One fragment can serve several registry names (rule-engineering and
+    # skill-engineering, tanstack-query and vue-query); the token lets one
+    # authored block name the exact deployed file for the ordered item.
+    return content.replace(REFERENCE_PATH_TOKEN, binding.destination_relative_path).strip()
 
 
 def _resolve_reference_bindings(

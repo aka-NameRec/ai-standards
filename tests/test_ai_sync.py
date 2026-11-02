@@ -25,6 +25,7 @@ from scripts.ai_sync import (
     SyncError,
     _budget_warning,
     _build_managed_template_content,
+    _load_registry,
     _read_pointer,
     _resolve_reference_bindings,
     _strip_frontmatter,
@@ -3609,3 +3610,45 @@ def test_empty_reference_lists_render_identically_to_absent_keys(
     with_keys = build_rendered_content(project_root=with_empty)
     absent = build_rendered_content(project_root=without_keys)
     assert with_keys.content == absent.content
+
+
+def test_every_reference_capable_item_has_a_pointer_block() -> None:
+    import tomllib
+
+    registry_data = tomllib.loads((REPO_ROOT / "registry.toml").read_text(encoding="utf-8"))
+    disclosure = registry_data["reference_disclosure"]
+    registry = _load_registry(REPO_ROOT)
+    manifest = Manifest(
+        ai_standards_version="test",
+        fragments=[],
+        features=sorted(disclosure["features"]),
+        stacks=sorted(disclosure["stacks"]),
+        local_overrides=[],
+        optional_local_overrides=[],
+        agents=[],
+        metadata={},
+        knowledge_tree=None,
+        dated_note_directories=None,
+        local_memory_tree=None,
+        reference_features=sorted(disclosure["features"]),
+        reference_stacks=sorted(disclosure["stacks"]),
+    )
+
+    bindings = _resolve_reference_bindings(manifest, registry)
+    assert bindings, "reference disclosure capability lists must not be empty"
+    for binding in bindings:
+        pointer_path = REPO_ROOT / binding.pointer_relative_path
+        assert pointer_path.exists(), f"missing pointer block: {pointer_path}"
+        pointer_content = pointer_path.read_text(encoding="utf-8")
+        assert "REFERENCE_PATH" in pointer_content, (
+            f"pointer block must name the reference path: {pointer_path}"
+        )
+
+
+def test_reference_token_resolves_to_the_ordered_name(tmp_path: Path) -> None:
+    project_root = _make_reference_project(tmp_path, "token-resolution")
+
+    result = build_rendered_content(project_root=project_root)
+
+    assert ".ai-standards/references/stacks/python.md" in result.content
+    assert "{{REFERENCE_PATH}}" not in result.content

@@ -20,6 +20,7 @@
 # skill-engineering skill; BM-* rules of the basic-memory fragment;
 # PM-* rules of the project-memory fragment;
 # ATR-* rules of the autonomous-task-run skill;
+# RD-* rules of the reference disclosure mode (issue #29);
 # CR-### scenario IDs for code-review scenarios.
 
 [rules.RE-001]
@@ -420,3 +421,19 @@ source = "templates/autonomous-task-run/autonomous-task-run.SKILL.md"
 section = "Procedure"
 behavior = "The working branch is created by the project's branch rules from the merge-target branch; the shared default shape is <purpose>/<task_id>-<slug>."
 scenarios = []
+
+# RD-* rules of the reference disclosure mode (issue #29). The normative
+# pointer-block contract lives in the decision record; the deployed reference
+# files are byte copies of the fragments, so per-item rule anchors stay on the
+# fragments and only the mode-level rules anchor here.
+[rules.RD-001]
+source = "docs/decisions/2026-11-02-add-agents-md-progressive-disclosure.md"
+section = "Decision"
+behavior = "When work matches a reference-mode item's trigger, the agent reads the deployed reference file named by the pointer block before performing that work and follows the reference content for it."
+scenarios = ["RD-101", "RD-102", "RD-103", "RD-104", "RD-105", "RD-106", "RD-107", "RD-108", "RD-111", "RD-120"]
+
+[rules.RD-002]
+source = "docs/decisions/2026-11-02-add-agents-md-progressive-disclosure.md"
+section = "Decision"
+behavior = "On work unrelated to any pointer-block trigger, the agent completes the task from the always-loaded core without reading deployed reference files and without blocking on the absent full text."
+scenarios = ["RD-110"]
