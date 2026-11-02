@@ -944,36 +944,69 @@ def _is_managed_template_content(content: str) -> bool:
     return MANAGED_TEMPLATE_MARKER_PREFIX in content
 
 
+def _reference_groups(
+    manifest: Manifest, registry: Registry
+) -> dict[tuple[str, str], list[str]]:
+    """Group reference-mode bindings by destination name.
+
+    A stack entry may resolve to several fragments (``java-spring`` bundles
+    java, spring, and spring-data-jpa); the deployed file for the entry is one
+    document containing every fragment body in registry order, mirroring what
+    the inline render would have carried.
+    """
+    groups: dict[tuple[str, str], list[str]] = {}
+    for binding in _resolve_reference_bindings(manifest, registry):
+        key = (binding.scope, binding.name)
+        fragment_ids = groups.setdefault(key, [])
+        if binding.fragment_id not in fragment_ids:
+            fragment_ids.append(binding.fragment_id)
+    return groups
+
+
 def _reference_templates(manifest: Manifest, registry: Registry) -> list[AgentTemplate]:
     """Managed templates that deploy reference-mode fragment bodies."""
 
-    return [
-        AgentTemplate(
-            agent="",
-            source_relative_path=binding.source_relative_path,
-            destination_relative_path=binding.destination_relative_path,
-            feature=None,
+    templates: list[AgentTemplate] = []
+    for (scope, name), fragment_ids in _reference_groups(manifest, registry).items():
+        templates.append(
+            AgentTemplate(
+                agent="",
+                source_relative_path=f"fragments/{fragment_ids[0]}.md",
+                destination_relative_path=f"{REFERENCES_DIRECTORY}/{scope}/{name}.md",
+                feature=None,
+            )
         )
-        for binding in _resolve_reference_bindings(manifest, registry)
-    ]
+    return templates
 
 
 def _plan_reference_template(
-    project_root: Path, template: AgentTemplate
+    project_root: Path,
+    template: AgentTemplate,
+    fragment_ids: list[str],
 ) -> tuple[TemplateSyncResult, str]:
-    """Plan a reference-file deployment from a provenance-stripped fragment body.
+    """Plan a reference-file deployment from provenance-stripped fragment bodies.
 
     Identical to ``_plan_agent_template`` except the managed content is built
-    from the fragment body without its authoring-time provenance comments, so
-    consumer copies stay lean like the rendered file.
+    from the fragment bodies without their authoring-time provenance comments,
+    so consumer copies stay lean like the rendered file. Multi-fragment entries
+    concatenate their bodies in registry order under one managed document.
     """
     repo_root = _repo_root()
-    source_path = repo_root / template.source_relative_path
-    raw_content = source_path.read_text(encoding="utf-8")
+    bodies = "\n\n".join(
+        _strip_provenance(
+            _strip_frontmatter(
+                (repo_root / f"fragments/{fragment_id}.md").read_text(encoding="utf-8")
+            )
+        ).strip()
+        for fragment_id in fragment_ids
+    )
+    marker_source = f"fragments/{fragment_ids[0]}.md" if len(fragment_ids) == 1 else (
+        f"fragments/{'+'.join(fragment_ids)}.md"
+    )
     managed_content = _build_managed_template_content(
-        template.source_relative_path,
+        marker_source,
         template.destination_relative_path,
-        _strip_provenance(_strip_frontmatter(raw_content)),
+        bodies,
     )
     return _plan_template_content(project_root, template, managed_content)
 
@@ -1003,8 +1036,10 @@ def _plan_template_content(
     )
 
 
-def _sync_reference_template(project_root: Path, template: AgentTemplate) -> TemplateSyncResult:
-    planned, managed_content = _plan_reference_template(project_root, template)
+def _sync_reference_template(
+    project_root: Path, template: AgentTemplate, fragment_ids: list[str]
+) -> TemplateSyncResult:
+    planned, managed_content = _plan_reference_template(project_root, template, fragment_ids)
     if planned.status == "created":
         planned.destination_path.parent.mkdir(parents=True, exist_ok=True)
         planned.destination_path.write_text(managed_content, encoding="utf-8")
@@ -1129,8 +1164,14 @@ def sync_project_templates(project_root: Path) -> list[TemplateSyncResult]:
         if template.feature is not None and template.feature not in enabled_features:
             continue
         results.append(_sync_agent_template(project_root, template))
-    for template in _reference_templates(manifest, registry):
-        results.append(_sync_reference_template(project_root, template))
+    templates = _reference_templates(manifest, registry)
+    groups = _reference_groups(manifest, registry)
+    for template in templates:
+        destination = Path(template.destination_relative_path)
+        groups_key = (destination.parent.name, destination.stem)
+        results.append(
+            _sync_reference_template(project_root, template, groups[groups_key])
+        )
     results.extend(_retire_retired_templates(project_root))
     return results
 
@@ -1165,8 +1206,14 @@ def plan_project_templates(project_root: Path) -> list[TemplateSyncResult]:
             continue
         planned, _ = _plan_agent_template(project_root, template)
         results.append(planned)
-    for template in _reference_templates(manifest, registry):
-        planned, _ = _plan_reference_template(project_root, template)
+    templates = _reference_templates(manifest, registry)
+    groups = _reference_groups(manifest, registry)
+    for template in templates:
+        destination = Path(template.destination_relative_path)
+        groups_key = (destination.parent.name, destination.stem)
+        planned, _ = _plan_reference_template(
+            project_root, template, groups[groups_key]
+        )
         results.append(planned)
     results.extend(_plan_retired_templates(project_root))
     return results

@@ -3652,3 +3652,28 @@ def test_reference_token_resolves_to_the_ordered_name(tmp_path: Path) -> None:
 
     assert ".ai-standards/references/stacks/python.md" in result.content
     assert "{{REFERENCE_PATH}}" not in result.content
+
+
+def test_multi_fragment_stack_deploys_one_concatenated_reference(
+    tmp_path: Path,
+) -> None:
+    project_root = _make_reference_project(
+        tmp_path,
+        "bundle-deployment",
+        stacks='["java-spring"]',
+        reference_stacks='["java-spring"]',
+    )
+
+    results = sync_project_templates(project_root)
+    reference_path = (
+        project_root / ".ai-standards" / "references" / "stacks" / "java-spring.md"
+    )
+    content = reference_path.read_text(encoding="utf-8")
+
+    created = [result for result in results if result.destination_path == reference_path]
+    assert [result.status for result in created] == ["created"]
+    # The bundle entry resolves to three fragments; the deployed file carries
+    # all three bodies instead of the last binding overwriting the others.
+    assert "Use modern Java idioms" in content
+    assert "controllers thin" in content
+    assert "DTOs or projections" in content
