@@ -119,6 +119,7 @@ Renderer-side behaviors are unit tests, not behavioral scenarios: pointer-block 
 
 ## Outcome
 
-- What was delivered.
-- Deviations from the plan.
-- Follow-up work, if any.
+- Delivered: slices 0–6 on `rules-change/29-progressive-disclosure` — decision record and contract update (`e73acc9`), renderer (`067eaaf`), pointer blocks (`9db45d5`), rule map and RD-1xx scenario contracts (`7849022`), bundle-deployment fix (`ce96721`), release prep (this change set). Eval implementation in `ai-standards-evals` STD-CHANGE-0005 (five commits) with the release report PASS on 27 scenarios.
+- Measured: heavy reference order 30,435 bytes, mid 19,221 bytes, self-hosted 31,338 bytes — all under the 32,768-byte Codex budget; RD suite 10/10, stack matrix 24/24, regression green except the two documented waivers.
+- Deviations: pointer blocks carry one trigger rule plus one condensed invariant instead of two-to-three invariants (the 300-byte estimate held only after trimming); `{{REFERENCE_PATH}}` added so one authored block serves bundle names; bundle references deploy as one concatenated document (the first deployment let the last binding overwrite the rest); RD-107's first fixture lacked the deployment and the seeded facts, and was archived as invalid evidence; scenario IDs shifted to `RD-1xx` so rule and scenario namespaces never collide.
+- Follow-ups: `ai-standards-evals` config pin moves to the released 2.9.0 tag after merge; ATR-002 commit-on-main miss is a pre-existing eval finding (fails on the 2.8.1 pin too) with its own fix candidate; skill-based reference delivery stays open until skill activation is verified on Codex/omp.

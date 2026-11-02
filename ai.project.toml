@@ -1,4 +1,4 @@
-ai_standards_version = "2.8.2-2026-10-12"
+ai_standards_version = "2.9.0-2026-11-02"
 
 fragments = [
   "core/base",
@@ -26,8 +26,21 @@ features = [
   "context-architecture",
   "skill-engineering",
 ]
+reference_features = [
+  "code-review",
+  "basic-memory",
+  "project-memory",
+  "chroma",
+  "rule-engineering",
+  "skill-engineering",
+  "knowledge-capture",
+  "context-architecture",
+]
 
 stacks = [
+  "python",
+]
+reference_stacks = [
   "python",
 ]
 

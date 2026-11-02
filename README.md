@@ -318,6 +318,22 @@ Guidance:
 
 `optional_local_overrides` are skipped if the file does not exist, so local private rules do not block rendering.
 
+## Reference Disclosure
+
+`AGENTS.md` has a hard budget in Codex (`project_doc_max_bytes`, 32 KiB by default across every `AGENTS.md` from the project root to the working directory — and Codex silently truncates whatever exceeds it), while Kilo and omp load the file eagerly. Ordering many features and stacks inline overflows that budget, so any ordered feature or stack may instead be rendered in **reference mode**: the manifest lists it under `reference_features` or `reference_stacks` (the name must also stay in `features`/`stacks`, and in the registry's `[reference_disclosure]` capability list):
+
+```toml
+features = [
+  "code-review",
+  "python",
+]
+
+reference_features = ["code-review"]
+reference_stacks = ["python"]
+```
+
+A reference-mode item renders as a compact pointer block — a trigger naming when the rules apply, the reference path, and the critical invariants — while the full fragment text deploys as a managed file through `ai-sync sync-templates`, at `.ai-standards/references/features/<name>.md` or `.ai-standards/references/stacks/<name>.md`, gated by the same ordering. The pointer's imperative rule reads the reference before the triggered work, so compliance becomes behavior; the `ai-standards-evals` repository pins that behavior with the `RD-*` scenarios. `render` and `check` emit a non-fatal warning when the output crosses the 32 768-byte budget. Without the reference lists a manifest renders exactly as before.
+
 ## Agent Adapters
 
 `AGENTS.md` remains the shared project-wide source of truth for general instructions.
