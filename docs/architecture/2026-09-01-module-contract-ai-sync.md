@@ -23,17 +23,21 @@ The single rendering and template-deployment tool of this repository, plus the d
 
 - `ai.project.toml` (manifest), `registry.toml` (feature/stack catalog), `meta.toml` (release metadata), `fragments/**`, `templates/**`
 - per-project `local_overrides` / `optional_local_overrides` (verbatim, leading frontmatter stripped)
+- per-project `reference_features` / `reference_stacks` lists (optional; unknown names rejected at load)
 - optional: Basic Memory indexer config (read-only, feature-gated)
 
 ## Outputs
 
-- rendered `AGENTS.md` (and the Claude bridge import)
-- deployed managed templates: agent adapters under `.codex/`, `.cursor/`, `.claude/`, `.agents/` — including the always-deployed `update-ai-standards` adapters whenever agents are declared; infrastructure under `.ai-standards/`; removal of deployed copies for templates that no longer ship (retired destinations)
+- rendered `AGENTS.md` (and the Claude bridge import): reference-mode items render as authored pointer blocks instead of full fragments; `Source provenance` comment blocks are stripped; a non-fatal warning is emitted above the 32 768-byte Codex project-doc budget
+- deployed managed templates: agent adapters under `.codex/`, `.cursor/`, `.claude/`, `.agents/` — including the always-deployed `update-ai-standards` adapters whenever agents are declared; infrastructure under `.ai-standards/` including reference files under `.ai-standards/references/{stacks,features}/<name>.md` for reference-mode items; removal of deployed copies for templates that no longer ship (retired destinations)
 - `doctor` reports (errors exit non-zero, suitable for CI) and `--fix` filesystem repairs
 
 ## Invariants
 
 - Render is idempotent: re-rendering a clean tree changes nothing; rendered output never contains override frontmatter.
+- A manifest without the reference-mode keys renders byte-for-byte as before reference mode existed.
+- Reference-mode content is assembled, never generated: pointer blocks and deployed reference files come from authored sources; the fragment remains the single source of truth for both.
+- The budget warning is non-fatal in `render` and `check`; nothing else changes behavior when the budget is exceeded.
 - Managed markers match the destination syntax: HTML comments for `.md`/`.mdc`/`.html`, `#` comments otherwise; a shebang stays the first line.
 - `--fix` only applies repairs that follow from a rule: moves rendering inputs out of the tree and repoints the manifest, restores titles/headings, strips indexer-stamped frontmatter, prunes empty directories. It warns when git cannot undo it.
 - Detection of managed files is format-agnostic (marker text prefix, any comment syntax).
