@@ -11,23 +11,31 @@ import pytest
 
 from scripts.ai_sync import (
     AGENT_TEMPLATES,
+    AGENTS_MD_BUDGET_BYTES,
     CLAUDE_BRIDGE_FILE,
     CLAUDE_BRIDGE_MARKER,
     DEFAULT_OUTPUT_NAME,
+    MANAGED_TEMPLATE_MARKER_PREFIX,
     SEVERITY_ERROR,
     SEVERITY_WARNING,
     DoctorReport,
+    Manifest,
+    ReferenceBinding,
+    Registry,
     SyncError,
+    _budget_warning,
     _build_managed_template_content,
+    _read_pointer,
+    _resolve_reference_bindings,
     _strip_frontmatter,
     build_rendered_content,
     check,
     init_claude_bridge,
     init_project,
+    plan_project_templates,
     render,
     run_doctor,
     run_repair,
-    plan_project_templates,
     sync_project_templates,
     write_rendered_content,
 )
@@ -3422,3 +3430,182 @@ def test_basic_memory_operations_reference_carries_the_moved_mechanics() -> None
         "rebuild embeddings",
     ):
         assert moved in normalized, f"{moved!r} is missing from the operations reference"
+
+
+def _make_reference_project(
+    tmp_path: Path,
+    name: str,
+    stacks: str = '["python"]',
+    reference_stacks: str = '["python"]',
+    features: str = '["response-language-style"]',
+) -> Path:
+    project_root = tmp_path / name
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + f"features = {features}\n"
+        + f"stacks = {stacks}\n"
+        + f"reference_stacks = {reference_stacks}\n"
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+    return project_root
+
+
+def test_reference_mode_renders_pointer_block_instead_of_fragment(
+    tmp_path: Path,
+) -> None:
+    project_root = _make_reference_project(tmp_path, "pointer-substitution")
+
+    result = build_rendered_content(project_root=project_root)
+
+    assert "Before editing any Python file, read" in result.content
+    assert ".ai-standards/references/stacks/python.md" in result.content
+    assert "Respect repository-local tooling and module layout" not in result.content
+
+
+def test_reference_mode_requires_the_stack_to_be_enabled(tmp_path: Path) -> None:
+    project_root = _make_reference_project(
+        tmp_path, "not-enabled", stacks='["django"]', reference_stacks='["python"]'
+    )
+
+    with pytest.raises(SyncError, match="not enabled in stacks"):
+        build_rendered_content(project_root=project_root)
+
+
+def test_reference_mode_rejects_unknown_stack(tmp_path: Path) -> None:
+    registry = Registry(
+        features={},
+        stacks={"python": ["stacks/python"]},
+        reference_stacks=("python",),
+    )
+    manifest = Manifest(
+        ai_standards_version="test",
+        fragments=[],
+        features=[],
+        stacks=["no-such-stack"],
+        local_overrides=[],
+        optional_local_overrides=[],
+        agents=[],
+        metadata={},
+        knowledge_tree=None,
+        dated_note_directories=None,
+        local_memory_tree=None,
+        reference_stacks=["no-such-stack"],
+    )
+
+    with pytest.raises(SyncError, match="Unknown stack 'no-such-stack'"):
+        _resolve_reference_bindings(manifest, registry)
+
+
+def test_reference_mode_rejects_non_capable_feature() -> None:
+    registry = Registry(
+        features={"chroma": ["tools/chroma"]},
+        stacks={},
+        reference_features=(),
+    )
+    manifest = Manifest(
+        ai_standards_version="test",
+        fragments=[],
+        features=["chroma"],
+        stacks=[],
+        local_overrides=[],
+        optional_local_overrides=[],
+        agents=[],
+        metadata={},
+        knowledge_tree=None,
+        dated_note_directories=None,
+        local_memory_tree=None,
+        reference_features=["chroma"],
+    )
+
+    with pytest.raises(SyncError, match="not reference-capable"):
+        _resolve_reference_bindings(manifest, registry)
+
+
+def test_missing_pointer_block_fails_with_actionable_context(tmp_path: Path) -> None:
+    binding = ReferenceBinding(scope="stacks", name="python", fragment_id="core/base")
+
+    with pytest.raises(SyncError, match="pointer block does not exist"):
+        _read_pointer(tmp_path, binding)
+
+
+def test_budget_warning_reports_codex_truncation_risk() -> None:
+    assert _budget_warning("short") is None
+    warning = _budget_warning("x" * (AGENTS_MD_BUDGET_BYTES + 1))
+    assert warning is not None
+    assert str(AGENTS_MD_BUDGET_BYTES + 1) in warning
+    assert "silently truncates" in warning
+
+
+def test_provenance_comments_are_never_rendered(tmp_path: Path) -> None:
+    project_root = _make_reference_project(
+        tmp_path,
+        "provenance-strip",
+        stacks='["django"]',
+        reference_stacks="[]",
+        features='["code-review"]',
+    )
+
+    result = build_rendered_content(project_root=project_root)
+
+    assert "Source: http" not in result.content
+    assert "Source provenance" not in result.content
+
+
+def test_reference_files_deploy_with_marker_and_without_provenance(
+    tmp_path: Path,
+) -> None:
+    project_root = _make_reference_project(tmp_path, "reference-deployment")
+
+    results = sync_project_templates(project_root)
+    reference_path = project_root / ".ai-standards" / "references" / "stacks" / "python.md"
+    created = [result for result in results if result.destination_path == reference_path]
+    assert [result.status for result in created] == ["created"]
+    content = reference_path.read_text(encoding="utf-8")
+    assert MANAGED_TEMPLATE_MARKER_PREFIX in content
+    assert "Respect repository-local tooling and module layout" in content
+    assert "Source: http" not in content
+
+    rerun = sync_project_templates(project_root)
+    rerun_created = [
+        result for result in rerun if result.destination_path == reference_path
+    ]
+    assert [result.status for result in rerun_created] == ["up-to-date"]
+
+
+def test_reference_planning_reports_the_same_destinations(tmp_path: Path) -> None:
+    project_root = _make_reference_project(tmp_path, "reference-planning")
+
+    planned = plan_project_templates(project_root)
+    destinations = {result.destination_path.name for result in planned}
+    assert "python.md" in destinations
+
+
+def test_empty_reference_lists_render_identically_to_absent_keys(
+    tmp_path: Path,
+) -> None:
+    with_empty = _make_reference_project(tmp_path, "empty-lists", reference_stacks="[]")
+    without_keys = _make_reference_project(
+        tmp_path,
+        "absent-keys",
+    )
+    manifest_path = without_keys / "ai.project.toml"
+    manifest_path.write_text(
+        manifest_path.read_text(encoding="utf-8").replace(
+            'reference_stacks = ["python"]\n', ""
+        ),
+        encoding="utf-8",
+    )
+
+    with_keys = build_rendered_content(project_root=with_empty)
+    absent = build_rendered_content(project_root=without_keys)
+    assert with_keys.content == absent.content

@@ -60,13 +60,6 @@
 - Never return `None`, empty collections, or magic values to hide an error.
 - Use exception chaining when translating low-level failures.
 - Use `Optional[T]` only for legitimate absence of a value, not for error signaling.
-<!--
-Source provenance:
-- Promoted from the cockpit project-local rule "Response Language Style" (validated in
-  cockpit sessions; promotion accepted on 2026-08-28). The cockpit-specific clause about
-  the rule carrying into external projects stayed in cockpit's local override.
--->
-
 ## Response Language Style
 
 - In replies to the user, write natural Russian. Avoid anglicisms where a common Russian
@@ -188,12 +181,6 @@ The taxonomy and lifecycle are tool-independent: plain files under `docs/local/*
 - Use an explicit plan when the task involves architecture decisions, multiple dependent steps, migration risk, or non-trivial verification.
 - If new constraints, contradictions, or failed verification invalidate the current approach, re-plan before continuing.
 - Keep the planning overhead proportional to the task; do not force heavy process onto small local changes.
-<!--
-Source provenance:
-- Adopted on 2026-04-13 from an external workflow-orchestration rule set and a reviewed article about prompt tactics.
-- Adaptation goal: keep durable reasoning-quality rules, reject model-specific incentive and emotional nudges.
--->
-
 ## Reasoning Hygiene
 - For complex or ambiguous tasks, structure the work step by step instead of jumping straight to the answer.
 - Make assumptions, edge cases, and verification points explicit when they affect correctness.
@@ -336,12 +323,6 @@ project has not run `ai-sync sync-templates`; proceed with the rules above.
 Do not edit production code until module-contract discovery for the touched files has
 completed. Basic Memory may satisfy discovery only as an index; relevant canonical contracts
 must still be read from the repository before editing.
-<!--
-Source provenance:
-- Adopted on 2026-04-25 from a local workflow review of long chat risks.
-- Adaptation goal: keep durable context-drift safeguards without encoding tool-specific context window behavior or brittle message-count limits.
--->
-
 ## Session Hygiene
 - Warn the user when a long thread increases the risk of context drift, stale assumptions, goal substitution, or lost constraints.
 - Before continuing a long session, produce a compact handoff summary with the current goal, decisions, touched files, risks, constraints, and next slice.
@@ -366,12 +347,6 @@ Source provenance:
 - Include only current facts, accepted decisions, unresolved questions, verification status, and the recommended next bounded slice.
 - Separate confirmed project state from assumptions or inferred context.
 - Update durable memory only for decisions, progress, lessons, or working-memory notes that should survive the session, and keep canonical versus non-canonical status explicit.
-<!--
-Source provenance:
-- Adopted on 2026-04-25 from a local workflow review of token-based agent usage.
-- Adaptation goal: keep durable context-economy rules without encoding vendor-specific billing, model modes, or brittle numeric limits.
--->
-
 ## Agent Usage Hygiene
 - Treat usage economy as context discipline, not as permission to reduce engineering quality.
 - Prefer targeted discovery through search, diffs, logs, and focused file reads before loading broad context.
@@ -392,21 +367,6 @@ Source provenance:
 - Split work when the next change no longer fits a compact patch with targeted verification.
 - Use compact handoff summaries when continuing in a long thread would make the context harder to review.
 - Keep tool- or vendor-specific usage controls in local adapters or project overrides instead of this shared feature.
-<!--
-Source provenance:
-- Adopted on 2026-08-06 from a request for a natural-language "code review" trigger with a report
-  shape that stays identical across runs, tools, and models. The evidence and no-padding rules were
-  normalized from public AI code-review prompting guidance (OpenAI Codex, Cloudflare); only the
-  durable, tool-neutral parts were kept.
-- The report shape is specified once, by the deployed worked example; the reporting policy detail
-  lives in the deployed reporting reference (issue #22, M4). An example pins a format down more
-  reliably, and far more briefly, than a list of constraints describing that format.
-- The `Verification` and `Dependencies` sections, the evidence rule about reading the code rather
-  than the diff, and the small-fix policy were normalized from a hand-written per-repository review
-  workflow that had been in daily use alongside this feature.
-- Full rationale and rejected alternatives: docs/decisions/2026-08-06-add-code-review-feature.md
--->
-
 ## Code Review
 - Treat a bare, unqualified request such as "code review", "review this", "сделай ревью", or "проверь код" as a request to run this workflow. A request that already names its own scope, mode, or lens takes priority over this default.
 - Review the current diff, or the files the user names; do not expand into unrelated files.

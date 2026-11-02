@@ -64,3 +64,47 @@ django-service-layer = ["stacks/layered-architecture", "stacks/backend-layered-a
 django-drf = ["stacks/django-drf"]
 django-save-orchestration = ["stacks/django-save-orchestration"]
 sqlalchemy = ["stacks/sqlalchemy"]
+
+# Features and stacks that support reference disclosure mode: a manifest may
+# list them under reference_features / reference_stacks, which renders their
+# fragments as authored pointer blocks (fragments/<id>.pointer.md) and deploys
+# the full bodies as managed files under .ai-standards/references/. A name
+# must appear here before a manifest may put it into reference mode.
+[reference_disclosure]
+features = [
+  "code-review",
+  "basic-memory",
+  "project-memory",
+  "chroma",
+  "rule-engineering",
+  "skill-engineering",
+  "review-lenses",
+  "knowledge-capture",
+  "context-architecture",
+]
+stacks = [
+  "layered-architecture",
+  "backend-layered-architecture",
+  "frontend-layered-architecture",
+  "typescript",
+  "python",
+  "fastapi",
+  "react",
+  "nextjs",
+  "tanstack-query",
+  "postgres",
+  "vue",
+  "nuxt",
+  "vue-query",
+  "vite",
+  "fsd",
+  "java",
+  "spring",
+  "spring-data-jpa",
+  "java-spring",
+  "django",
+  "django-service-layer",
+  "django-drf",
+  "django-save-orchestration",
+  "sqlalchemy",
+]
