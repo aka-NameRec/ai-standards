@@ -76,12 +76,16 @@ entries, and behavioral scenario contracts. Branch
 
 ## What Remains
 
-- Scenario execution in `ai-standards-evals` (issue #18) — the release gate;
-  explicitly stopped before this step at the user's request.
-- Issue #27 comment with the design summary and the input-model decision.
-- `feature_meta` for the feature points at `2.10.0` (unreleased); adjust
-  during `bump-version` if the release number differs.
-- Merge into `main` only on explicit instruction; no push without approval.
+- Scenario execution in `ai-standards-evals` (issue #18) — change set
+  STD-CHANGE-0006, commit `811683e`: fixtures/scorers/runners for
+  CP-001…CP-010 and TRG-004 landed; first run against this branch (kilo,
+  glm-5.3-flash): CP-001/002/003/004/006/007/008/009/010 and TRG-004 (11/11
+  cases) PASS; CP-005 FAIL (REVIEW issued where the contract requires STOP
+  for the contradictory set — verdict-class underscoring, 2 of 3 runs).
+- Remaining release-gate work: ablation (with skill versus without),
+  CP-005 resolution through rule wording, merge into `main` by explicit
+  instruction, full regression suite on the candidate revision, and the
+  release mechanics (`bump-version`, release report) on a later order.
 
 ## Observations
 
