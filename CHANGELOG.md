@@ -4,7 +4,7 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [2.10.0] — 2026-11-08
 
 ### Added
 - **`cherry-pick-assessment` skill (issue #27, STD-CHANGE-0006; decision record `docs/decisions/2026-11-08-add-cherry-pick-assessment-skill.md`, worksheet `docs/artifacts/2026-11-08-cherry-pick-assessment-authoring.md`)**: a read-only pre-transfer assessment for selective cherry-picks between long-diverged branches. Input is selector-based — task ids, a merge request, a source branch, a range, explicit SHAs, or a mix; the skill resolves the selectors into an ordered SHA list, includes evidence-backed companion commits (fixes, revert pairs sharing the task id), presents the resolved list with the target HEAD, and analyzes only after the user confirms it. Verdicts PASS / REVIEW / STOP resolve to the most restrictive outcome, evidence is marked FACT / HYPOTHESIS / UNKNOWN, and the verdict binds to the confirmed set, its order, and the target HEAD — any change invalidates it. The skill never executes the transfer and never approves a release. Placed in reference disclosure mode: `AGENTS.md` renders an authored pointer block while the full invariant fragment deploys as `.ai-standards/references/features/cherry-pick-assessment.md` for every agent; the skill itself ships in all four adapter forms, feature-gated. Traced as `CPA-001`–`CPA-012` in `rule_map.toml` with scenario contracts `CP-001`–`CP-010` and trigger set `TRG-004` (EN/RU) in `docs/scenarios/`; behavioral execution lives in `ai-standards-evals` (issue #18, STD-CHANGE-0006).

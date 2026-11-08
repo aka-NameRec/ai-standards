@@ -39,8 +39,6 @@ module-contract-gate = "2.2.0"
 rule-engineering = "2.5.0"
 context-architecture = "2.5.0"
 skill-engineering = "2.5.0"
-# Unreleased: must match the version the next release receives; adjust
-# during `bump-version` if needed.
 cherry-pick-assessment = "2.10.0"
 
 [stacks]
