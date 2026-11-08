@@ -843,13 +843,22 @@ def test_code_review_reporting_reference_carries_the_moved_policies() -> None:
         "How It Was Done",
         "name what was not checked",
         "Drop `Dependencies` when the change is self-contained",
+        "a heading with a placeholder line",
+        "padding, not dropping",
         "Omit `Task` when no tracked reference is known",
         "tracker_url",
         "one report per",
         "fenced Markdown code block",
+        "plain chat Markdown instead of a fence is the failure mode",
         "resend the report",
     ):
         assert moved in reference, f"{moved!r} is missing from the reporting reference"
+
+    # The fenced destination invariant and the Dependencies-drop alignment
+    # live in the always-loaded fragment (RVW-024 anchor; issue #30).
+    assert "inside a fenced Markdown code block" in fragment
+    assert "an unfenced report is the failure mode" in fragment
+    assert "dropped for self-contained changes" in fragment
 
 
 def test_module_contract_gate_feature_can_be_rendered(tmp_path: Path) -> None:

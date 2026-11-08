@@ -39,6 +39,7 @@ the always-loaded rules.
 
 - Drop `Dependencies` when the change is self-contained; keep it only when
   another repository must change, and say which one and what it needs.
+- Dropping means the heading never appears in the report; a heading with a placeholder line («новые зависимости не вводятся» / "no new dependencies") is padding, not dropping — the failure mode this rule exists for.
 
 ## Task Reference
 
@@ -59,7 +60,9 @@ the always-loaded rules.
 ## Destination
 
 - Post the report in the chat inside a fenced Markdown code block by default;
-  save it to a file only when asked, defaulting to
+  the whole report — headers, findings, and prose — goes inside the fence,
+  and plain chat Markdown instead of a fence is the failure mode this rule
+  exists for. Save it to a file only when asked, defaulting to
   `docs/local/code-review/<YYYY-MM-DD>-<topic-slug>.md` when `project-memory`
   is enabled. Say which destination you used.
 

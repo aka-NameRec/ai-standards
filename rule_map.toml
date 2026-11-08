@@ -204,7 +204,7 @@ scenarios = []
 [rules.RVW-024]
 fragment = "process/code-review"
 section = "Report Shape"
-behavior = "The report is posted in chat inside a fenced Markdown block by default and saved to a file only when asked, naming the destination used."
+behavior = "The whole report lands in the chat inside a fenced Markdown code block by default — plain chat Markdown is the named failure mode — and is saved to a file only when asked, naming the destination used."
 scenarios = ["CR-010"]
 
 [rules.RVW-025]
