@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- **Report-format norms hardened against model formatting habits (issue #30)**: the fenced-destination invariant is now stated in the always-loaded `Code Review` fragment (`Report Shape`, the `RVW-024` anchor — previously the norm lived only in the deployed reporting reference), and the fallback order names `Dependencies` as dropped for self-contained changes, removing the fragment-vs-reference conflict behind the CR-011 placeholder-section failures. The reporting reference gains the drop anti-example (a heading with a placeholder line is padding, not dropping) and the whole-report-inside-the-fence wording with the named failure mode. Contract semantics unchanged: CR-010/CR-011 contracts and oracles untouched.
+
 ## [2.10.0] — 2026-11-08
 
 ### Added
