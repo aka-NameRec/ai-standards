@@ -3473,6 +3473,9 @@ def test_cherry_pick_assessment_skill_carries_issue_27_invariants() -> None:
     assert "## Verdict" in content
     assert "STOP > REVIEW > PASS" in content
     assert "`ALREADY_PRESENT`" in content
+    # A deterministic behavior flip against target assumptions is a STOP.
+    assert "deterministically changes behavior the target state relies on" in content
+    assert "a business decision does not" in content
     # Evidence discipline.
     assert "## Evidence Discipline" in content
     assert "**HYPOTHESIS**" in content

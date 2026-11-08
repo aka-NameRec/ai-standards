@@ -121,15 +121,22 @@ impact area is not established.
 ## Analysis F — Cumulative Effect
 
 Assess the whole confirmed set in its confirmed order: individually
-applicable commits may contradict each other. Check cross-repository
-dependencies as far as access allows; when a consumer repository is
-unavailable, name the unknown explicitly.
+applicable commits may contradict each other. A set is contradictory when it
+deterministically changes behavior the target state relies on — code paths
+reading the changed contracts, documented assumptions, or existing
+consumers; the flip is provable from the code, not a matter of taste. Check
+cross-repository dependencies as far as access allows; when a consumer
+repository is unavailable, name the unknown explicitly.
 
 ## Verdict
 
 - **STOP**: ambiguous transfer object (including unclarified ambiguous
   selectors); proven missing mandatory dependency; proven incompatibility;
-  contradictory set; attempted authority overrun.
+  contradictory set — including a set that deterministically flips behavior
+  the target state relies on, even when nothing crashes; attempted authority
+  overrun. REVIEW is reserved for conflicts whose existence or impact
+  remains uncertain after the analyses; a business decision does not
+  downgrade a provable set-level contradiction.
 - **REVIEW**: substantial probable dependency; unknown consumer of a critical
   contract; substantive conflict; insufficient verification of an important
   path; critical access limitation.
