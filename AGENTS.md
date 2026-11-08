@@ -312,6 +312,7 @@ must still be read from the repository before editing.
 - Before adding or materially changing a normative rule, read `.ai-standards/references/features/rule-engineering.md` and run its engineering flow: every rule is atomic, observable, uniquely scoped, and validated by at least one stated form.
 ## Context Architecture
 - Before adding or reviewing normative knowledge, or deciding where knowledge lives, read `.ai-standards/references/features/context-architecture.md` and answer its placement questions: always-loaded content stays a control plane, and the latest-loading sufficient layer wins.
+- Default every addition and amendment to the latest-loading layer that can carry it — skill, skill reference, deployed reference file, or retrieval; inline always-loaded placement requires a recorded reason no later-loading layer guarantees arrival.
 ## Cherry-pick Assessment
 - Before assessing a cherry-pick, read `.ai-standards/references/features/cherry-pick-assessment.md` and follow that workflow: selectors are resolved into a confirmed ordered SHA list before analysis, the assessment is read-only, and PASS admits to a controlled transfer, not a release.
 ## Python Stack

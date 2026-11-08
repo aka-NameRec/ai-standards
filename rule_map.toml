@@ -287,6 +287,18 @@ section = "Control Plane Invariant"
 behavior = "Always-loaded content is reduced only with a behavior-preserving comparison against the current state."
 scenarios = []
 
+[rules.CA-006]
+fragment = "process/context-architecture"
+section = "Progressive Disclosure Default"
+behavior = "Every addition to the standards is placed by default at the latest-loading layer able to carry it — skill, skill reference, deployed reference file, or retrieval — and the user's context budget is the protected resource."
+scenarios = []
+
+[rules.CA-007]
+fragment = "process/context-architecture"
+section = "Progressive Disclosure Default"
+behavior = "Inline always-loaded placement is an exception requiring the control-plane test and a recorded reason no later-loading layer guarantees the content arrives; convenience reasons such as a new rule, a convenient table, or an extra pointer hop do not qualify, and always-loaded growth within a change is a placement defect fixed in that same change."
+scenarios = []
+
 # Skill Engineering skill — the single skill-engineering domain (Phase 6).
 
 [rules.SE-001]

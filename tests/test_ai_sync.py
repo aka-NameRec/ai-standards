@@ -3528,6 +3528,8 @@ def test_context_architecture_fragment_keeps_its_rules() -> None:
     assert "always-loaded rules | universal invariants, routing rules, mandatory gates" in flat
     assert "Needed for almost every task?" in flat
     assert "behavior-preserving comparison against the current state" in flat
+    assert "user's context budget is the protected resource" in flat
+    assert '"the pointer adds a hop"' in flat
 
 
 def test_basic_memory_operations_reference_carries_the_moved_mechanics() -> None:
