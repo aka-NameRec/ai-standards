@@ -3364,6 +3364,132 @@ def test_autonomous_task_run_skill_carries_issue_24_invariants() -> None:
     assert "work autonomously until done" in content
 
 
+def test_cherry_pick_assessment_templates_registered_for_all_agents() -> None:
+    for agent in ("codex", "cursor", "claude", "kilo"):
+        entries = [
+            template
+            for template in AGENT_TEMPLATES[agent]
+            if template.feature == "cherry-pick-assessment"
+        ]
+        assert len(entries) == 1, (
+            f"{agent}: exactly one cherry-pick-assessment template expected"
+        )
+        assert entries[0].source_relative_path.startswith(
+            "templates/cherry-pick-assessment/"
+        )
+        destination = entries[0].destination_relative_path
+        assert destination.startswith(".agents/") or destination.startswith(
+            (".codex/", ".cursor/", ".claude/")
+        )
+
+
+def test_cherry_pick_assessment_feature_renders_pointer_block(tmp_path: Path) -> None:
+    """Reference mode (issue #29) keeps the always-loaded surface minimal."""
+    project_root = tmp_path / "demo-project"
+    project_root.mkdir()
+    (project_root / "docs" / "ai").mkdir(parents=True)
+    manifest = (
+        MANIFEST_RELEASE_BLOCK
+        + 'fragments = ["core/base"]\n'
+        + 'features = ["cherry-pick-assessment"]\n'
+        + 'stacks = ["python"]\n'
+        + 'reference_features = ["cherry-pick-assessment"]\n'
+        + 'local_overrides = ["docs/ai/project-rules.md"]\n'
+        + "\n[metadata]\n"
+        + 'project_name = "demo-project"\n'
+    )
+    (project_root / "ai.project.toml").write_text(manifest, encoding="utf-8")
+    (project_root / "docs" / "ai" / "project-rules.md").write_text(
+        "# Project-Specific AI Rules\n\n- Demo override.\n",
+        encoding="utf-8",
+    )
+
+    result = build_rendered_content(project_root=project_root)
+
+    # The pointer block replaces the full fragment inline; the full rules stay
+    # behind the deployed reference file.
+    pointer_line = (
+        "read `.ai-standards/references/features/cherry-pick-assessment.md`"
+    )
+    assert pointer_line in result.content
+    assert "confirmed ordered SHA list" in result.content
+    assert "read-only" in result.content
+    assert "PASS admits to a controlled transfer, not a release" in result.content
+    assert "## Analysis B" not in result.content
+    assert "Selector-based input" not in result.content
+
+
+def test_cherry_pick_assessment_fragment_resolves_to_its_feature() -> None:
+    registry = _load_registry(REPO_ROOT)
+    assert registry.features["cherry-pick-assessment"] == [
+        "process/cherry-pick-assessment"
+    ]
+    fragment = (
+        REPO_ROOT / "fragments" / "process" / "cherry-pick-assessment.md"
+    ).read_text(encoding="utf-8")
+    flat = " ".join(fragment.split())
+    assert "presents the resolved list with the target HEAD" in flat
+    assert "silent truncation or widening" in flat
+    assert "safe isolated throwaway tree" in flat
+    assert "any change to those invalidates it" in flat
+
+
+def test_cherry_pick_assessment_skill_carries_issue_27_invariants() -> None:
+    raw = (Path(__file__).resolve().parents[1] / "templates" / "cherry-pick-assessment" / "cherry-pick-assessment.SKILL.md").read_text(encoding="utf-8")
+    # Wrapped lines must not hide the normative phrases from the assertions.
+    content = " ".join(raw.split())
+    # Selector input and two-phase resolution with user confirmation.
+    assert "## Input: Selectors, Resolution, Confirmation" in content
+    assert "the skill resolves it into an" in content
+    assert "does not have to enumerate hashes" in content
+    assert "proceeds with the analysis only after the user confirms this" in content
+    assert "The verdict binds to the confirmed list and the target HEAD" in content
+    # Candidate-set completeness and ambiguity discipline.
+    assert "silent truncation is forbidden" in content
+    assert "not a best-guess interpretation" in content
+    assert "If the set or the target state" in content
+    # Explicit SHA verification.
+    assert "Every explicit SHA is verified before use" in content
+    # Read-only boundaries: allowed and forbidden actions.
+    assert "## Allowed Actions" in content
+    assert "isolated throwaway tree" in content
+    assert "refuse to simulate and record the limitation" in content
+    assert "## Forbidden Actions" in content
+    assert "no database schema changes" in content
+    assert "On STOP, do not proceed to" in content
+    # Analyses A–F.
+    for heading in (
+        "## Analysis A — History And Identity",
+        "## Analysis B — Completeness And Dependencies",
+        "## Analysis C — Compatibility",
+        "## Analysis D — Applicability",
+        "## Analysis E — Testability",
+        "## Analysis F — Cumulative Effect",
+    ):
+        assert heading in content
+    assert "Classify dependencies as confirmed, probable, or unverified" in content
+    assert "Absence of Git conflicts says nothing about completeness" in content
+    # Verdict rules and precedence.
+    assert "## Verdict" in content
+    assert "STOP > REVIEW > PASS" in content
+    assert "`ALREADY_PRESENT`" in content
+    # Evidence discipline.
+    assert "## Evidence Discipline" in content
+    assert "**HYPOTHESIS**" in content
+    assert "**UNKNOWN**" in content
+    # Validity binding and invalidation.
+    assert "## Stopping And Validity" in content
+    assert "re-resolve and re-assess; never reuse a stale verdict" in content
+    # Mandatory report carries the resolution record.
+    assert "## Mandatory Report" in content
+    assert "the resolution record — which selectors" in content
+    # Portable triggers: Russian and English activation phrases.
+    assert "«оцени перенос коммитов»" in content
+    assert "«проверь cherry-pick до выполнения»" in content
+    assert "assess cherry-pick safety" in content
+    assert "do not use for regular code review" in content
+
+
 def test_context_architecture_feature_can_be_rendered(tmp_path: Path) -> None:
     project_root = tmp_path / "demo-project"
     project_root.mkdir()

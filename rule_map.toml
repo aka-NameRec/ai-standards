@@ -20,6 +20,7 @@
 # skill-engineering skill; BM-* rules of the basic-memory fragment;
 # PM-* rules of the project-memory fragment;
 # ATR-* rules of the autonomous-task-run skill;
+# CPA-* rules of the cherry-pick-assessment skill (issue #27);
 # RD-* rules of the reference disclosure mode (issue #29);
 # CR-### scenario IDs for code-review scenarios.
 
@@ -437,3 +438,77 @@ source = "docs/decisions/2026-11-02-add-agents-md-progressive-disclosure.md"
 section = "Decision"
 behavior = "On work unrelated to any pointer-block trigger, the agent completes the task from the always-loaded core without reading deployed reference files and without blocking on the absent full text."
 scenarios = ["RD-110"]
+
+# CPA-* rules of the cherry-pick-assessment skill (issue #27). The skill is
+# read-only pre-transfer assessment; the fragment states the invariants.
+[rules.CPA-001]
+source = "templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md"
+section = "Input: Selectors, Resolution, Confirmation"
+behavior = "The user states the transfer intent by selectors — task ids, a merge request, a source branch, a range, explicit SHAs, or a mix — with the source repository and target branch named, and the skill resolves the selectors into an exact ordered SHA list instead of requiring hand-enumerated hashes."
+scenarios = ["CP-009"]
+
+[rules.CPA-002]
+source = "templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md"
+section = "Input: Selectors, Resolution, Confirmation"
+behavior = "Every explicit SHA is verified before use — it must exist in the source history with its subject echoed back — protecting against typos and hashes pasted from a different repository."
+scenarios = []
+
+[rules.CPA-003]
+source = "templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md"
+section = "Input: Selectors, Resolution, Confirmation"
+behavior = "Commits joined to the selected ones by the project's task-id conventions — fixes, revert pairs, explicit follow-ups — join the candidate set; resolution may only widen the set with evidence-backed companions and silent truncation is forbidden."
+scenarios = ["CP-009"]
+
+[rules.CPA-004]
+source = "templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md"
+section = "Input: Selectors, Resolution, Confirmation"
+behavior = "The skill presents the resolved ordered list — SHA, subject, topological order, target HEAD — and proceeds with the analysis only after the user confirms it; the verdict binds to the confirmed list and the target HEAD."
+scenarios = ["CP-009", "CP-008"]
+
+[rules.CPA-005]
+source = "templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md"
+section = "Input: Selectors, Resolution, Confirmation"
+behavior = "An ambiguous resolution — a task id matching unrelated commits, an ambiguous merge-base, a merge commit without a clear primary parent line — that the user does not clarify is a STOP, not a best-guess interpretation; if the set or the target state cannot be established, STOP."
+scenarios = ["CP-010", "CP-006"]
+
+[rules.CPA-006]
+source = "templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md"
+section = "Allowed Actions"
+behavior = "The assessment reads Git data, sources, tasks, tests, and documentation and runs safe read-only checks; trial application happens only in an isolated throwaway tree, and when isolation is impossible the simulation is refused with the limitation recorded."
+scenarios = ["CP-001"]
+
+[rules.CPA-007]
+source = "templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md"
+section = "Forbidden Actions"
+behavior = "The assessment never performs a recorded cherry-pick, resolves conflicts into the target, pushes, merges, rebases, resets, changes database schemas or external systems, or approves production, and on STOP it does not proceed to execution."
+scenarios = []
+
+[rules.CPA-008]
+source = "templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md"
+section = "Analysis B — Completeness And Dependencies"
+behavior = "Dependencies are classified as confirmed, probable, or unverified; a proven missing mandatory dependency is a STOP, a substantial probable one is a REVIEW, and absence of Git conflicts says nothing about completeness."
+scenarios = ["CP-002", "CP-004"]
+
+[rules.CPA-009]
+source = "templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md"
+section = "Analysis F — Cumulative Effect"
+behavior = "The whole confirmed set is assessed in its confirmed order because individually applicable commits may contradict each other, and unavailable consumer repositories are named as unknowns."
+scenarios = ["CP-005", "CP-004"]
+
+[rules.CPA-010]
+source = "templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md"
+section = "Verdict"
+behavior = "Competing grounds resolve to the most restrictive outcome STOP > REVIEW > PASS, with optional reason codes such as ALREADY_PRESENT, and PASS admits the set to a controlled transfer only — never a release."
+scenarios = ["CP-003"]
+
+[rules.CPA-011]
+source = "templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md"
+section = "Evidence Discipline"
+behavior = "Every material statement is marked FACT, HYPOTHESIS, or UNKNOWN; unexecuted tests are never presented as passed, unknowns are never hidden, and abstract risk phrasing never substitutes concrete evidence."
+scenarios = ["CP-007"]
+
+[rules.CPA-012]
+source = "templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md"
+section = "Stopping And Validity"
+behavior = "Any change to the target HEAD, the confirmed set, or its order invalidates the prior verdict — re-resolve and re-assess, never reuse a stale verdict."
+scenarios = ["CP-008"]

@@ -18,6 +18,7 @@ knowledge-capture = ["process/knowledge-capture"]
 rule-engineering = ["process/rule-engineering"]
 context-architecture = ["process/context-architecture"]
 skill-engineering = ["process/rule-engineering"]
+cherry-pick-assessment = ["process/cherry-pick-assessment"]
 
 # Version of the ai-standards release that introduced each feature. The
 # update-ai-standards skill uses these values to announce what is new for a
@@ -38,6 +39,9 @@ module-contract-gate = "2.2.0"
 rule-engineering = "2.5.0"
 context-architecture = "2.5.0"
 skill-engineering = "2.5.0"
+# Unreleased: must match the version the next release receives; adjust
+# during `bump-version` if needed.
+cherry-pick-assessment = "2.10.0"
 
 [stacks]
 layered-architecture = ["stacks/layered-architecture"]
@@ -81,6 +85,7 @@ features = [
   "review-lenses",
   "knowledge-capture",
   "context-architecture",
+  "cherry-pick-assessment",
 ]
 stacks = [
   "layered-architecture",

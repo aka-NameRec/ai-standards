@@ -196,6 +196,14 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="codex",
+            source_relative_path="templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md",
+            destination_relative_path=(
+                ".codex/skills/cherry-pick-assessment/cherry-pick-assessment/SKILL.md"
+            ),
+            feature="cherry-pick-assessment",
+        ),
+        AgentTemplate(
+            agent="codex",
             source_relative_path="templates/standards-update/update-ai-standards.SKILL.md",
             destination_relative_path=".codex/skills/standards-update/update-ai-standards/SKILL.md",
             feature=None,
@@ -243,6 +251,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
             source_relative_path="templates/autonomous-task-run/autonomous-task-run.cursor.mdc",
             destination_relative_path=".cursor/rules/autonomous-task-run.mdc",
             feature="autonomy-boundaries",
+        ),
+        AgentTemplate(
+            agent="cursor",
+            source_relative_path="templates/cherry-pick-assessment/cherry-pick-assessment.cursor.mdc",
+            destination_relative_path=".cursor/rules/cherry-pick-assessment.mdc",
+            feature="cherry-pick-assessment",
         ),
         AgentTemplate(
             agent="cursor",
@@ -296,6 +310,12 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
         ),
         AgentTemplate(
             agent="claude",
+            source_relative_path="templates/cherry-pick-assessment/cherry-pick-assessment.claude.md",
+            destination_relative_path=".claude/commands/cherry-pick-assessment.md",
+            feature="cherry-pick-assessment",
+        ),
+        AgentTemplate(
+            agent="claude",
             source_relative_path="templates/standards-update/update-ai-standards.claude.md",
             destination_relative_path=".claude/commands/update-ai-standards.md",
             feature=None,
@@ -345,6 +365,14 @@ AGENT_TEMPLATES: dict[str, tuple[AgentTemplate, ...]] = {
                 ".agents/skills/autonomy-boundaries/autonomous-task-run/SKILL.md"
             ),
             feature="autonomy-boundaries",
+        ),
+        AgentTemplate(
+            agent="kilo",
+            source_relative_path="templates/cherry-pick-assessment/cherry-pick-assessment.SKILL.md",
+            destination_relative_path=(
+                ".agents/skills/cherry-pick-assessment/cherry-pick-assessment/SKILL.md"
+            ),
+            feature="cherry-pick-assessment",
         ),
         AgentTemplate(
             agent="kilo",

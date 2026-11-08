@@ -25,6 +25,7 @@ features = [
   "rule-engineering",
   "context-architecture",
   "skill-engineering",
+  "cherry-pick-assessment",
 ]
 reference_features = [
   "code-review",
@@ -35,6 +36,7 @@ reference_features = [
   "skill-engineering",
   "knowledge-capture",
   "context-architecture",
+  "cherry-pick-assessment",
 ]
 
 stacks = [
